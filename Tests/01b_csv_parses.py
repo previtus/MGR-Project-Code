@@ -21,8 +21,11 @@ print "to"
 print Segment[1][0]
 print Segment[1][2]
 
-url1 = ["http://maps.googleapis.com/maps/api/streetview?size=600x400&location=",Segment[0][0],",",Segment[0][2],"&heading=151.78&key="]
-url2 = ["http://maps.googleapis.com/maps/api/streetview?size=600x400&location=",Segment[1][0],",",Segment[1][2],"&heading=151.78&key="]
+api = open('../apicode.txt', 'r').read()
+#print api
+
+url1 = ["http://maps.googleapis.com/maps/api/streetview?size=600x400&location=",Segment[0][0],",",Segment[0][2],"&heading=151.78&key=", api]
+url2 = ["http://maps.googleapis.com/maps/api/streetview?size=600x400&location=",Segment[1][0],",",Segment[1][2],"&heading=151.78&key=", api]
 
 print "".join(url1)
 print "".join(url2)
@@ -30,3 +33,4 @@ print "".join(url2)
 import urllib
 urllib.urlretrieve("".join(url1), "A.jpg")
 urllib.urlretrieve("".join(url2), "B.jpg")
+
