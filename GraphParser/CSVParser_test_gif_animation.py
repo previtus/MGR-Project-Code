@@ -19,8 +19,8 @@ print "loaded nodes: ", len(Nodes)
 print("--- %s seconds ---" % round(time.time() - start_time, 2))
 print '\n'
 
-FromEdgeID = 75 # 2 -> will start with 002.jpg
-ToEdgeID = 101 # 14 -> will end with 013.jpg
+FromEdgeID = 158 # 2 -> will start with 002.jpg
+ToEdgeID = 351 # 14 -> will end with 013.jpg
 #NumEdgesToProcess
 
 i = FromEdgeID
@@ -34,7 +34,7 @@ for edge in Edges[FromEdgeID:ToEdgeID]:
 
     segment = GraphEdgeSegment(FromId, ToId, Nodes)
     if verbose: segment.displaySegment()
-    url = segment.getGoogleViewUrl(300,200)
+    url = segment.getGoogleViewUrl(600,400)
     filename = "".join(["images/", format(i, '03'), ".jpg"])
 
     if verbose: print url, '\n', filename, '\n'

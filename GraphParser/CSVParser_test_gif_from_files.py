@@ -1,6 +1,6 @@
 # Set up_to_number to be as the last file's name.
 # Example 086.jpg -> 86
-up_to_number = 86
+up_to_number = 100
 filenames = []
 
 for i in range(0, up_to_number+1):
