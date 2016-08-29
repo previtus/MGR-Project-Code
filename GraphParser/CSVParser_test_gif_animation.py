@@ -21,13 +21,15 @@ print Nodes[:1]
 print("--- %s seconds ---" % round(time.time() - start_time, 2))
 print '\n'
 
-NumEdgesToProcess = 100
+FromEdgeID = 29 # 2 -> will start with 002.jpg
+ToEdgeID = 87 # 14 -> will end with 013.jpg
+#NumEdgesToProcess
 
-i = 0
+i = FromEdgeID
 filenames = []
 verbose = False
 
-for edge in Edges[:NumEdgesToProcess]:
+for edge in Edges[FromEdgeID:ToEdgeID]:
     FromId = int(edge[0])
     ToId = int(edge[1])
     Popularity = edge[4]
