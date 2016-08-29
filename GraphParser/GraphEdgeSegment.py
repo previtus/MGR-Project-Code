@@ -31,16 +31,16 @@ class GraphEdgeSegment:
     def getBearingString(self):
         return bearing_between_two_points(self.Start, self.End)
 
-    def getGoogleViewUrl(self):
+    def getGoogleViewUrl(self,resx,resy):
         'Google View url from the start of this segment'
         # http://maps.googleapis.com/maps/api/
         # streetview?size=600x400&location=<lat>,<long>&heading=<angle from north>&key=<api>
         lat = self.Start[0]
         lon = self.Start[1]
         bearing = round(self.getBearingString(), 2)
-        url_start = "http://maps.googleapis.com/maps/api/streetview?size=600x400&location="
+        url_start = "http://maps.googleapis.com/maps/api/streetview?size="
         api = getApi()
         
-        full_url = [url_start, str(lat), ",", str(lon), "&heading=", str(bearing), "&key=", api]
+        full_url = [url_start, str(resx), "x", str(resy), "&location=", str(lat), ",", str(lon), "&heading=", str(bearing), "&key=", api]
 
         return "".join(full_url)
