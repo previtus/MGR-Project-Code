@@ -5,9 +5,10 @@ class GraphEdgeSegment:
     'Common base class for all employees'
     tmp = 0
     
-    def __init__(self, FromId, ToId, Nodes):
+    def __init__(self, FromId, ToId, Nodes, SegmentId):
         self.FromId = FromId
         self.ToId = ToId
+        self.SegmentId = SegmentId
 
         # Latitude,Latitude projected,Longitude,Longitude projected,Elevation
         #self.Start = map(float, Nodes[FromId])
@@ -24,7 +25,7 @@ class GraphEdgeSegment:
         GraphEdgeSegment.tmp += 1
    
     def displaySegment(self):
-        print "From: ", self.FromId,  ", To: ", self.ToId
+        print "SegmentId: ", self.SegmentId, "From: ", self.FromId,  ", To: ", self.ToId
         print "Start: ", self.Start
         print "End: ", self.End
 
