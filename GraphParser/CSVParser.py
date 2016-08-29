@@ -2,7 +2,8 @@ import csv
 import time
 from Loaders import *
 from Functions import *
-
+from GraphEdgeSegment import *
+api = open('../apicode.txt', 'r').read()
 
 start_time = time.time()
 
@@ -19,38 +20,6 @@ print '\n'
 
 NumEdgesToProcess = 4
 
-
-class GraphEdgeSegment:
-    'Common base class for all employees'
-    tmp = 0
-    
-    def __init__(self, FromId, ToId, Nodes):
-        self.FromId = FromId
-        self.ToId = ToId
-
-        # Latitude,Latitude projected,Longitude,Longitude projected,Elevation
-        #self.Start = map(float, Nodes[FromId])
-        #self.End = map(float, Nodes[ToId])
-        self.Start = ( float(Nodes[FromId][0]), float(Nodes[FromId][2]) )
-        self.End = ( float(Nodes[ToId][0]), float(Nodes[ToId][2]) )
-
-        self.ProjectedStart = ( float(Nodes[FromId][1]), float(Nodes[FromId][3]) )
-        self.ProjectedEnd = ( float(Nodes[ToId][1]), float(Nodes[ToId][3]) )
-        
-        self.ElevationStart = float(Nodes[FromId][4])
-        self.ElevationEnd = float(Nodes[ToId][4])
-        
-        GraphEdgeSegment.tmp += 1
-   
-    def displaySegment(self):
-        print "From: ", self.FromId,  ", To: ", self.ToId
-        print "Start: ", self.Start
-        print "End: ", self.End
-
-    def getBearingString(self):
-        return bearing_between_two_points(self.Start, self.End)
-
-
 for edge in Edges[:NumEdgesToProcess]:
     FromId = int(edge[0])
     ToId = int(edge[1])
@@ -58,6 +27,6 @@ for edge in Edges[:NumEdgesToProcess]:
 
     segment = GraphEdgeSegment(FromId, ToId, Nodes)
     segment.displaySegment()
-    print segment.getBearingString()
+    print segment.getGoogleViewUrl()
 
     print ''#edge

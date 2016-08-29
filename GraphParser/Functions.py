@@ -1,5 +1,9 @@
 from math import *
 
+def getApi():
+    api = open('../apicode.txt', 'r').read()
+    return api
+
 def bearing_between_two_points(start, end):
     '''
     Calculates the initial bearing between two geographical locations.
