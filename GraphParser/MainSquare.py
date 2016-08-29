@@ -1,7 +1,8 @@
 from LoadData import *
 from GenListOfUrls import *
 from PrepSegments import *
-
+from DownloadUrlFilenameMap import *
+from GenerateGIFAnimation import *
 
 # 1 data prep
 [Edges, Nodes] = LoadData()
@@ -11,6 +12,7 @@ Segments = PrepSegments(Edges, Nodes)
 FilenameMap = GenListOfUrls(Segments)
 
 # 3 download from urls
-print FilenameMap
+DownloadUrlFilenameMap(FilenameMap)
 
 # 4 process images (gif animation / whatever)
+GenerateGIFAnimation(FilenameMap, 'animation_from_main.gif')
