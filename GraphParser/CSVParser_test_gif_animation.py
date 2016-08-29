@@ -21,6 +21,7 @@ print Nodes[:1]
 print("--- %s seconds ---" % round(time.time() - start_time, 2))
 print '\n'
 
+NumEdgesToProcess = 100
 
 i = 0
 filenames = []
@@ -33,6 +34,8 @@ for edge in Edges[:NumEdgesToProcess]:
 
     segment = GraphEdgeSegment(FromId, ToId, Nodes)
     if verbose: segment.displaySegment()
+    url = segment.getGoogleViewUrl(300,200)
+    filename = "".join(["images/", format(i, '03'), ".jpg"])
 
     if verbose: print url, '\n', filename, '\n'
     print filename
