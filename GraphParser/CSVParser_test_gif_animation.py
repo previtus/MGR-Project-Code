@@ -14,15 +14,13 @@ Edges = open_with_python_csv_list(r'../../graph/edges_.csv')
 Nodes = open_with_python_csv_list(r'../../graph/nodes_.csv')
 
 print "loaded edges: ", len(Edges)
-print Edges[:1]
 print "loaded nodes: ", len(Nodes)
-print Nodes[:1]
 
 print("--- %s seconds ---" % round(time.time() - start_time, 2))
 print '\n'
 
-FromEdgeID = 29 # 2 -> will start with 002.jpg
-ToEdgeID = 87 # 14 -> will end with 013.jpg
+FromEdgeID = 75 # 2 -> will start with 002.jpg
+ToEdgeID = 101 # 14 -> will end with 013.jpg
 #NumEdgesToProcess
 
 i = FromEdgeID
