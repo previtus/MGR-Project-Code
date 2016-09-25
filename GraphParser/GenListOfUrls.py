@@ -1,7 +1,12 @@
+# GenListOfUrls.py
 from GraphEdgeSegment import *
 from Defaults import *
 
 def GenListOfUrls(Segments):
+    '''
+    Iterates over the segment list and returns a list of urls needed for download
+    Outputs list of tripples in [ (<url>, <filename>, <edge id>), ... ]
+    '''
     
     FilenameMap = []
     verbose = False
@@ -15,6 +20,6 @@ def GenListOfUrls(Segments):
         if verbose: print url, '\n', filename, '\n'
         #print filename
         
-        FilenameMap.append((url,filename))
+        FilenameMap.append((url,filename,segment.SegmentId))
 
     return FilenameMap

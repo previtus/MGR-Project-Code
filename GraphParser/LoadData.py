@@ -1,12 +1,20 @@
+# LoadData.py
 import time
 from Loaders import *
 from Functions import *
 
 def LoadData():
-    api = getApi();
+    '''
+    Load all egdes and nodes of graph.
+    Edges from csv with structure:
+        From Id,To Id,Road type,Surface,Relative popularity
+    Nodes from csv with structure:
+        Latitude,Latitude projected,Longitude,Longitude projected,Elevation
+    '''
 
     start_time = time.time()
 
+    # function from Loaders.py
     Edges = open_with_python_csv_list(r'../../graph/edges_.csv')
     Nodes = open_with_python_csv_list(r'../../graph/nodes_.csv')
 

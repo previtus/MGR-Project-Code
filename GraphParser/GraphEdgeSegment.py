@@ -1,8 +1,12 @@
+# GraphEdgeSegment.py
 from Functions import *
 
-
 class GraphEdgeSegment:
-    'Common base class for all employees'
+    '''
+    Common base class for segment
+    Variables: FromId, ToId, SegmentId
+    Functions: getBearingString(), getGoogleViewUrl()
+    '''
     tmp = 0
     
     def __init__(self, FromId, ToId, Nodes, SegmentId):

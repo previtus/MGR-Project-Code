@@ -1,7 +1,13 @@
+# PrepSegments.py
 from GraphEdgeSegment import *
 from Defaults import *
 
 def PrepSegments(Edges, Nodes):
+    '''
+    Creates datastructure of Segments from list of edges and list of nodes.
+    Segment is object made from edge with connected nodes and necessary functions.
+    Returns list of segments Segments[SegmentId] -> Segment
+    '''
 
     Segments = []
     

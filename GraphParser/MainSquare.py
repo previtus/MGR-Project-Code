@@ -3,6 +3,7 @@ from GenListOfUrls import *
 from PrepSegments import *
 from DownloadUrlFilenameMap import *
 from GenerateGIFAnimation import *
+from Defaults import *
 
 # 1 data prep
 [Edges, Nodes] = LoadData()
@@ -15,4 +16,5 @@ FilenameMap = GenListOfUrls(Segments)
 DownloadUrlFilenameMap(FilenameMap)
 
 # 4 process images (gif animation / whatever)
-GenerateGIFAnimation(FilenameMap, 'animation_from_main.gif')
+gifname = "".join(['animation_from_main_',str(FromEdgeID),'-',str(ToEdgeID),'.gif'])
+GenerateGIFAnimation(FilenameMap, gifname)

@@ -1,9 +1,10 @@
+# GenerateGIFAnimation.py
 import imageio
 
 def GenerateGIFAnimation(FilenameMap, GIFFileName):
     '''
     Create GIF animation from files mentioned in FilenameMap.
-    List of tuples in [ (<url>, <filename>), ... ]
+    List of tripples in [ (<url>, <filename>, <segment id>), ... ]
     uses only the <filename> section
     '''
     

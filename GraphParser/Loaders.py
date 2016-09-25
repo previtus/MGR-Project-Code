@@ -1,6 +1,10 @@
+# Loaders.py
+
 '''
+Collection of loaders
 http://softwarerecs.stackexchange.com/questions/7463/fastest-python-library-to-read-a-csv-file
 '''
+
 import pandas
 import numpy
 import csv
