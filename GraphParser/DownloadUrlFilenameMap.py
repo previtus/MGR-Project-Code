@@ -1,8 +1,10 @@
 # DownloadUrlFilenameMap.py
 import socket
 import urllib
+import hashlib
+import os
 from DecoratorRetry import retry
-from Defaults import DOWNLOAD_TIMEOUT
+from Defaults import *
 from Functions import segmentIDtoListID
 
 # fail > @retry(Exception, tries=2, delay=1, backoff=0)
@@ -10,7 +12,16 @@ from Functions import segmentIDtoListID
 
 @retry(Exception, tries=4, delay=3, backoff=2)
 def urlretrieve_with_retry(url, filename):
+    ''' Saves (image) file and returns (<filename_string>, <object of httplib.HTTPMessage>) '''
     return urllib.urlretrieve(url, filename)
+
+def md5(fname):
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
 
 def DownloadUrlFilenameMap(FilenameMap, Segments):
     '''
@@ -31,17 +42,27 @@ def DownloadUrlFilenameMap(FilenameMap, Segments):
         segment_id = fileTuple[2]
         segment_list_id = segmentIDtoListID(segment_id)
 
-        print filename
-
-        Segments[segment_list_id].HasLoadedImage = [True]
+        isLoaded = [True]
+        md5_code = ""
         
         try:
-            urlretrieve_with_retry(url, filename)
-        except:
-            Segments[segment_list_id].HasLoadedImage = [False]
-            FailedSegmentImageDownloads.append(segment_id)
-            print "Failed to finally save the file."
+            image_header = urlretrieve_with_retry(url, filename)
+            md5_code = md5(image_header[0])
             
+            if (md5_code == FILE_NOT_FOUND_CHECKSUM):
+                isLoaded = [False]
+                print "No photographic information on the spot."
+                os.remove(image_header[0])
+                FailedSegmentImageDownloads.append([segment_id,404])
+            
+        except Exception, e:
+            print "exception: ", str(e)
+            isLoaded = [False]
+            FailedSegmentImageDownloads.append([segment_id,0])
+            print "Failed to finally save the file."
+
+        Segments[segment_list_id].HasLoadedImage = isLoaded
+        print filename, md5_code, isLoaded
     
     return [FailedSegmentImageDownloads]
 
