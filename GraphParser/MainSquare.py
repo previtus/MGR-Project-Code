@@ -26,4 +26,4 @@ for Segment in Segments[0:5]:
 
 # 4 process images (gif animation / whatever)
 gifname = "".join(['animation_from_main_',str(FromEdgeID),'-',str(ToEdgeID),'.gif'])
-#GenerateGIFAnimation(FilenameMap, gifname)
+GenerateGIFAnimation(Segments, gifname)
