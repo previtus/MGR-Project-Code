@@ -1,5 +1,6 @@
 # GraphEdgeSegment.py
 from Functions import *
+from Defaults import NUMBER_OF_ZEROS_PADDING
 
 class GraphEdgeSegment:
     '''
@@ -13,6 +14,7 @@ class GraphEdgeSegment:
         self.FromId = FromId
         self.ToId = ToId
         self.SegmentId = SegmentId
+        self.HasLoadedImage = [False]
 
         # Latitude,Latitude projected,Longitude,Longitude projected,Elevation
         #self.Start = map(float, Nodes[FromId])
@@ -29,9 +31,12 @@ class GraphEdgeSegment:
         GraphEdgeSegment.tmp += 1
    
     def displaySegment(self):
-        print "SegmentId: ", self.SegmentId, "From: ", self.FromId,  ", To: ", self.ToId
+        print "SegmentId: ", self.SegmentId, "From: ", self.FromId,  ", To: ", self.ToId, ", Images: ", self.HasLoadedImage
         print "Start: ", self.Start
         print "End: ", self.End
+
+    def displaySegmentShort(self):
+        print "SegmentId: ", self.SegmentId, "From: ", self.FromId,  ", To: ", self.ToId, ", Images: ", self.HasLoadedImage
 
     def getBearingString(self):
         return bearing_between_two_points(self.Start, self.End)
@@ -49,3 +54,10 @@ class GraphEdgeSegment:
         full_url = [url_start, str(resx), "x", str(resy), "&location=", str(lat), ",", str(lon), "&heading=", str(bearing), "&key=", api]
 
         return "".join(full_url)
+
+    def getImageFilename(self):
+        'Google View url from the start of this segment'
+        filename = "".join(["images/", format(self.SegmentId, NUMBER_OF_ZEROS_PADDING), ".jpg"])
+        return filename
+
+    

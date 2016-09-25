@@ -15,7 +15,7 @@ def GenListOfUrls(Segments):
         
         if verbose: segment.displaySegment()
         url = segment.getGoogleViewUrl(PIXELS_X,PIXELS_Y)
-        filename = "".join(["images/", format(segment.SegmentId, NUMBER_OF_ZEROS_PADDING), ".jpg"])
+        filename = segment.getImageFilename()
 
         if verbose: print url, '\n', filename, '\n'
         #print filename
