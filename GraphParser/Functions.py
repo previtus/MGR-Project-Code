@@ -1,4 +1,6 @@
+# Functions.py
 from math import *
+from Defaults import FromEdgeID
 
 def getApi():
     api = open('../apicode.txt', 'r').read()
@@ -25,3 +27,9 @@ def bearing_between_two_points(start, end):
     bearing_from_north = (bearing + 360) % 360
 
     return bearing_from_north
+
+def segmentIDtoListID(semgentId):
+    '''
+    segment id might be 1000 if we start there, but the list is indexing from 0
+    '''
+    return semgentId-FromEdgeID

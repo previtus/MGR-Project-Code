@@ -56,7 +56,7 @@ class GraphEdgeSegment:
         return "".join(full_url)
 
     def getImageFilename(self):
-        'Google View url from the start of this segment'
+        'Unified filename generation'
         filename = "".join(["images/", format(self.SegmentId, NUMBER_OF_ZEROS_PADDING), ".jpg"])
         return filename
 
