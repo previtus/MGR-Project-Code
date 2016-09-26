@@ -50,15 +50,22 @@ def DownloadUrlFilenameMap(FilenameMap, Segments):
             md5_code = md5(image_header[0])
             
             if (md5_code == FILE_NOT_FOUND_CHECKSUM):
+                # HANDLE PHOTO NOT FOUND / INVALID SEGMENT
                 isLoaded = [False]
                 print "No photographic information on the spot."
                 os.remove(image_header[0])
                 FailedSegmentImageDownloads.append([segment_id,404])
+                # remove invalid segments?
+                # better have dictionary dict[ID] => obj
+                ## not del Segments[segment_id]
             
         except Exception, e:
+            # HANDLE FAIL OF DOWNLOADING PHOTO / INVALID SEGMENT
             print "exception: ", str(e)
             isLoaded = [False]
             FailedSegmentImageDownloads.append([segment_id,0])
+            # remove invalid segments?
+
             print "Failed to finally save the file."
 
         Segments[segment_list_id].HasLoadedImage = isLoaded
