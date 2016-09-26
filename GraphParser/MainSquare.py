@@ -8,7 +8,9 @@ from PreprocessData.Defaults import *
 import pickle
 
 # 1 data prep
-[Edges, Nodes] = LoadData()
+EdgesFile = r'../../graph/edges_.csv'
+NodesFile = r'../../graph/nodes_.csv'
+[Edges, Nodes] = LoadData(EdgesFile, NodesFile)
 Segments = PrepSegments(Edges, Nodes)
 
 # 2 list of urls

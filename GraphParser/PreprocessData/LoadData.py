@@ -3,7 +3,7 @@ import time
 from Loaders import *
 from Functions import *
 
-def LoadData():
+def LoadData(EdgesFile, NodesFile):
     '''
     Load all egdes and nodes of graph.
     Edges from csv with structure:
@@ -15,8 +15,8 @@ def LoadData():
     start_time = time.time()
 
     # function from Loaders.py
-    Edges = open_with_python_csv_list(r'../../graph/edges_.csv')
-    Nodes = open_with_python_csv_list(r'../../graph/nodes_.csv')
+    Edges = open_with_python_csv_list(EdgesFile)
+    Nodes = open_with_python_csv_list(NodesFile)
 
     print "loaded edges: ", len(Edges)
     print "loaded nodes: ", len(Nodes)
