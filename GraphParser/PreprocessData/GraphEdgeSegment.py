@@ -57,7 +57,7 @@ class GraphEdgeSegment:
 
     def getImageFilename(self):
         'Unified filename generation'
-        filename = "".join(["images/", format(self.SegmentId, NUMBER_OF_ZEROS_PADDING), ".jpg"])
+        filename = "".join(["Data/images/", format(self.SegmentId, NUMBER_OF_ZEROS_PADDING), ".jpg"])
         return filename
 
     
