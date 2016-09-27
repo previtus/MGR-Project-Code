@@ -5,8 +5,8 @@ Collection of loaders
 http://softwarerecs.stackexchange.com/questions/7463/fastest-python-library-to-read-a-csv-file
 '''
 
-import pandas
-import numpy
+# import pandas
+# import numpy
 import csv
 
 csv_delimiter = ','
@@ -46,11 +46,11 @@ def open_with_python_csv_list(filename):
         data = list(csvreader)    
     return data
 
+'''
 # 26.6s
 def open_with_numpy_loadtxt(filename):
-    '''
-    http://stackoverflow.com/questions/4315506/load-csv-into-2d-matrix-with-numpy-for-plotting
-    '''
+    # http://stackoverflow.com/questions/4315506/load-csv-into-2d-matrix-with-numpy-for-plotting
+
     data = numpy.loadtxt(open(filename,'rb'),delimiter=csv_delimiter,skiprows=0)
     return data
 
@@ -59,3 +59,4 @@ def open_with_pandas_read_csv(filename):
     df = pandas.read_csv(filename, sep=csv_delimiter)
     data = df.values
     return data    
+'''
