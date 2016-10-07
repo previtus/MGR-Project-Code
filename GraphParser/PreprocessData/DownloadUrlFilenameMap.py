@@ -10,7 +10,7 @@ from Functions import segmentIDtoListID
 # fail > @retry(Exception, tries=2, delay=1, backoff=0)
 # ok > @retry(Exception, tries=4, delay=3, backoff=2)
 
-@retry(Exception, tries=4, delay=3, backoff=2)
+@retry(Exception, tries=5, delay=0.3, backoff=1)
 def urlretrieve_with_retry(url, filename):
     ''' Saves (image) file and returns (<filename_string>, <object of httplib.HTTPMessage>) '''
     return urllib.urlretrieve(url, filename)

@@ -4,6 +4,8 @@ from Loaders import *
 from Functions import *
 
 def LoadData(EdgesFile, NodesFile):
+    verbose = False
+    
     '''
     Load all egdes and nodes of graph.
     Edges from csv with structure:
@@ -18,9 +20,10 @@ def LoadData(EdgesFile, NodesFile):
     Edges = open_with_python_csv_list(EdgesFile)
     Nodes = open_with_python_csv_list(NodesFile)
 
-    print "loaded edges: ", len(Edges)
-    print "loaded nodes: ", len(Nodes)
+    if verbose:
+        print "loaded edges: ", len(Edges)
+        print "loaded nodes: ", len(Nodes)
 
-    print("--- %s seconds ---" % round(time.time() - start_time, 2))
-    print '\n'
+        print("--- %s seconds ---" % round(time.time() - start_time, 2))
+        print '\n'
     return [Edges, Nodes]
