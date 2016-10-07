@@ -1,5 +1,8 @@
 # Functions.py
 from math import *
+
+import sys
+sys.path.append('..')
 from Defaults import FromEdgeID
 
 def getApi():

@@ -1,6 +1,8 @@
 # GraphEdgeSegment.py
 from Functions import *
-from Defaults import NUMBER_OF_ZEROS_PADDING
+import sys
+sys.path.append('..')
+from Defaults import *
 
 class GraphEdgeSegment:
     '''
@@ -14,7 +16,11 @@ class GraphEdgeSegment:
         self.FromId = FromId
         self.ToId = ToId
         self.SegmentId = SegmentId
+
+        # Array of boolean flags if the images have been downloaded (1 or more)
         self.HasLoadedImage = [False]
+        # Error code encountered while downloading
+        self.ErrorMessage = ERROR_MESSAGE_NO_ERROR # = -1
 
         # Latitude,Latitude projected,Longitude,Longitude projected,Elevation
         #self.Start = map(float, Nodes[FromId])

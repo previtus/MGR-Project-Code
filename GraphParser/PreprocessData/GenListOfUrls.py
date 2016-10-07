@@ -1,5 +1,7 @@
 # GenListOfUrls.py
 from GraphEdgeSegment import *
+import sys
+sys.path.append('..')
 from Defaults import *
 
 def GenListOfUrls(Segments):

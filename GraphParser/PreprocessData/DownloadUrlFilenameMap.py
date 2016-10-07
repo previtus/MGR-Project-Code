@@ -1,10 +1,13 @@
 # DownloadUrlFilenameMap.py
+import sys
+sys.path.append('..')
+from Defaults import *
+
 import socket
 import urllib
 import hashlib
 import os
 from DecoratorRetry import retry
-from Defaults import *
 from Functions import segmentIDtoListID
 
 # fail > @retry(Exception, tries=2, delay=1, backoff=0)
@@ -42,6 +45,7 @@ def DownloadUrlFilenameMap(FilenameMap, Segments):
         segment_id = fileTuple[2]
         segment_list_id = segmentIDtoListID(segment_id)
 
+        Segments[segment_list_id].ErrorMessage = ERROR_MESSAGE_NO_ERROR
         isLoaded = [True]
         md5_code = ""
         
@@ -54,17 +58,20 @@ def DownloadUrlFilenameMap(FilenameMap, Segments):
                 isLoaded = [False]
                 print "No photographic information on the spot."
                 os.remove(image_header[0])
-                FailedSegmentImageDownloads.append([segment_id,404])
+                FailedSegmentImageDownloads.append([segment_id]) 
                 # remove invalid segments?
                 # better have dictionary dict[ID] => obj
                 ## not del Segments[segment_id]
+                Segments[segment_list_id].ErrorMessage = ERROR_MESSAGE_NOT_FOUND #404
             
         except Exception, e:
             # HANDLE FAIL OF DOWNLOADING PHOTO / INVALID SEGMENT
             print "exception: ", str(e)
             isLoaded = [False]
-            FailedSegmentImageDownloads.append([segment_id,0])
+            FailedSegmentImageDownloads.append([segment_id])
             # remove invalid segments?
+            Segments[segment_list_id].ErrorMessage = ERROR_MESSAGE_FAILED_MANY_TIMES #101
+
 
             print "Failed to finally save the file."
 
