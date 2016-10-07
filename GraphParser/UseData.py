@@ -11,8 +11,12 @@ if not(os.path.isfile(DATASTRUCTUREFILE)):
     PreprocessDataF(EDGESFILES, NODESFILES, DATASTRUCTUREFILE)
 
 Segments = LoadDataFile(DATASTRUCTUREFILE)
+
+if (HasSomeErrorneousData(Segments, ERROR_MESSAGE_FAILED_MANY_TIMES)):
+    print "Data had some errors, filling in the blanks!"
+    Segments = FixDataFile_FailedDownloads(DATASTRUCTUREFILE, ERROR_MESSAGE_FAILED_MANY_TIMES)
+
 #gifname = "".join(['animation_from_main_',str(FromEdgeID),'-',str(ToEdgeID),'.gif'])
 #GenerateGIFAnimation(Segments, gifname)
 
 
-FixDataFile_FailedDownloads('SegmentsData_withSomeFails1.dump', ERROR_MESSAGE_FAILED_MANY_TIMES)

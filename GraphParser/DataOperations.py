@@ -25,10 +25,25 @@ def LoadDataFile(name):
     print "Loaded |", len(Segments), "| segments."
     return Segments
 
+def HasSomeErrorneousData(Segments, ERROR_TYPE):
+    '''
+    Check for errors. Example:
+    if (HasSomeErrorneousData(Segments,E)):
+        Segments = FixDataFile_FailedDownloads(_,E)
+    '''
+    for segment in Segments:
+        if segment.ErrorMessage == ERROR_TYPE:
+            return True
+    return False
+
+# todo version with directly Segments:
+# > FixDataFile_FailedDownloads(___, ERROR_TYPE):
+
 def FixDataFile_FailedDownloads(name, ERROR_TYPE):
     '''
     Loads, fixes and saves the structure of Segments. Looks at those
     with particular error messages ERROR_TYPE and redownloads images.
+    Returns fixed Segments while it also saves them.
     
     Error codes in Default.py:
         - ERROR_MESSAGE_NOT_FOUND = 404
@@ -67,4 +82,5 @@ def FixDataFile_FailedDownloads(name, ERROR_TYPE):
     
     # save
     SaveDataFile(name, Segments)
-    
+
+    return Segments
