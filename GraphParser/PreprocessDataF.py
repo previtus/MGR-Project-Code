@@ -1,14 +1,15 @@
-# PreprocessData.py
+# PreprocessDataF.py
 
 from PreprocessData.LoadData import *
 from PreprocessData.GenListOfUrls import *
 from PreprocessData.PrepSegments import *
 from PreprocessData.DownloadUrlFilenameMap import *
 from Defaults import *
+from DataOperations import *
 
 import pickle
 
-def PreprocessData(EdgesFile, NodesFile, OutputFile):
+def PreprocessDataF(EdgesFile, NodesFile, OutputFile):
     # 1 data prep
     [Edges, Nodes] = LoadData(EdgesFile, NodesFile)
     Segments = PrepSegments(Edges, Nodes)
@@ -20,9 +21,8 @@ def PreprocessData(EdgesFile, NodesFile, OutputFile):
     FailedDownloads = DownloadUrlFilenameMap(FilenameMap, Segments)
 
     # 4 save datastructure
-    with open(OutputFile, 'wb') as f:
-        pickle.dump(Segments, f)
+    SaveDataFile(OutputFile, Segments)
     
     return FailedDownloads
 
-#PreprocessData(EDGESFILES, NODESFILES, DATASTRUCTUREFILE)
+#PreprocessDataF(EDGESFILES, NODESFILES, DATASTRUCTUREFILE)

@@ -1,17 +1,15 @@
 # UseData.py
 from GenerateGIFAnimation import *
 from Defaults import *
-from preprocessdata import *
+from PreprocessDataF import *
+from DataOperations import *
 
-import pickle
 import os
 
 if not(os.path.isfile(DATASTRUCTUREFILE)):
     print "Data file was not found, downloading it!"
-    PreprocessData(EDGESFILES, NODESFILES, DATASTRUCTUREFILE)
+    PreprocessDataF(EDGESFILES, NODESFILES, DATASTRUCTUREFILE)
 
-with open(DATASTRUCTUREFILE) as f:
-    Segments = pickle.load(f)
-    
-    gifname = "".join(['animation_from_main_',str(FromEdgeID),'-',str(ToEdgeID),'.gif'])
-    GenerateGIFAnimation(Segments, gifname)
+Segments = LoadDataFile(DATASTRUCTUREFILE)
+#gifname = "".join(['animation_from_main_',str(FromEdgeID),'-',str(ToEdgeID),'.gif'])
+#GenerateGIFAnimation(Segments, gifname)
