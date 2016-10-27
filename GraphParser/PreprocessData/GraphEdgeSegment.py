@@ -17,6 +17,8 @@ class GraphEdgeSegment:
         self.ToId = ToId
         self.SegmentId = SegmentId
 
+        self.Score = 0
+
         # Array of boolean flags if the images have been downloaded (1 or more)
         self.HasLoadedImage = [False]
         # Error code encountered while downloading
@@ -66,4 +68,6 @@ class GraphEdgeSegment:
         filename = "".join(["Data/images/", format(self.SegmentId, NUMBER_OF_ZEROS_PADDING), ".jpg"])
         return filename
 
-    
+    def isValidSegment(self):
+        # while working with one image only, the validity flag is if we got it
+        return self.HasLoadedImage[0]

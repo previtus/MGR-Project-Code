@@ -4,6 +4,8 @@ from PreprocessData.LoadData import *
 from PreprocessData.GenListOfUrls import *
 from PreprocessData.PrepSegments import *
 from PreprocessData.DownloadUrlFilenameMap import *
+from PreprocessData.ScoreData import *
+
 from Defaults import *
 from DataOperations import *
 
@@ -19,6 +21,9 @@ def PreprocessDataF(EdgesFile, NodesFile, OutputFile):
 
     # 3 download from urls
     FailedDownloads = DownloadUrlFilenameMap(FilenameMap, Segments)
+
+    # (temporary) enrich data with score
+    ScoreData(Segments)
 
     # 4 save datastructure
     SaveDataFile(OutputFile, Segments)
