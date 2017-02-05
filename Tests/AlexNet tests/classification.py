@@ -37,13 +37,15 @@ def classification( image_list, output_file, topN, model_handler ):
 
 		# we quite dont need the probabilities
 		#probabilities = values[indices]
-		probabilities = []
 
 		#print indices
-		#print probabilities
+		
+		classifications.append([image_number] + indices.tolist())
 
-		#classifications.append([image_number, indices.tolist(), probabilities.tolist()])
-		classifications.append([image_number, indices, probabilities, img_path])
+        #print classifications
 
-	#print classifications
+        thefile = open(output_file, 'w')
+        for item in classifications:
+                thefile.write("%s\n" % " ".join(map(str,item)))
+        
 	return classifications
