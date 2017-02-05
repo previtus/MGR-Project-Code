@@ -16,7 +16,9 @@ def classification( image_list, output_file, topN, model_handler ):
 	for img_path in image_list:
 		#print img_path
 		# in the original form the image file is named for example:
-		# 	ILSVRC2010_val_00000009.JPEG
+		#	ILSVRC2010_val_00000001.JPEG
+		#	...
+		#	ILSVRC2010_val_00050000.JPEG
 		# subset -13, -5
 		# print img_path[-13:-5] # 00000605 -> 605
 		image_number = int(img_path[-13:-5])
@@ -41,7 +43,7 @@ def classification( image_list, output_file, topN, model_handler ):
 		#print probabilities
 
 		#classifications.append([image_number, indices.tolist(), probabilities.tolist()])
-		classifications.append([image_number, indices, probabilities])
+		classifications.append([image_number, indices, probabilities, img_path])
 
 	#print classifications
 	return classifications
