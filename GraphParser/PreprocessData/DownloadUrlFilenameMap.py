@@ -35,6 +35,12 @@ def DownloadUrlFilenameMap(FilenameMap, Segments):
     Returns list of failed downloads
     '''
 
+    # Check for the target directory
+    filename = FilenameMap[0][1]
+    directory = os.path.dirname(filename)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
     # timeout in seconds
     socket.setdefaulttimeout(DOWNLOAD_TIMEOUT)
     FailedSegmentImageDownloads = []

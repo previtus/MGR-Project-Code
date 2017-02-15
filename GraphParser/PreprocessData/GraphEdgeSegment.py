@@ -68,6 +68,9 @@ class GraphEdgeSegment:
         filename = "".join(["Data/images/", format(self.SegmentId, NUMBER_OF_ZEROS_PADDING), ".jpg"])
         return filename
 
+    def getScore(self):
+        return self.Score
+
     def isValidSegment(self):
         # while working with one image only, the validity flag is if we got it
         return self.HasLoadedImage[0]
