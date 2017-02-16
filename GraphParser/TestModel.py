@@ -28,12 +28,12 @@ labels_from_model = model.predict(validation_images, batch_size=32, verbose=0)
 # 5 COMPARE
 
 # numpy save and load:
-np.save(open('labels_from_segments.npy', 'w'), labels_from_segments)
-np.save(open('labels_from_model.npy', 'w'), labels_from_model)
+np.save(open('1200downloaded/labels_from_segments.npy', 'w'), labels_from_segments)
+np.save(open('1200downloaded/labels_from_model.npy', 'w'), labels_from_model)
 '''
 
-labels_from_segments = np.load(open('labels_from_segments.npy'))
-labels_from_model = np.load(open('labels_from_model.npy'))
+labels_from_segments = np.load(open('1200downloaded/labels_from_segments.npy'))
+labels_from_model = np.load(open('1200downloaded/labels_from_model.npy'))
 
 labels_from_model = labels_from_model[:,0]
 # coversion float64 > float32

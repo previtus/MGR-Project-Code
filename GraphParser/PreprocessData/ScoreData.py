@@ -24,6 +24,7 @@ def ScoreData(Segments):
             image_name = Segment.getImageFilename()
 
             thresholt = 10000
+            thresholt = 50000
             green = [0,255,0]
             greens = 0
             im = Image.open(image_name)
@@ -34,7 +35,7 @@ def ScoreData(Segments):
                     greens += 1
 
             score = float(greens) / num_pixels
-            #print image_name, ", green pixels: ", greens, "/", num_pixels, ", score: ", score
+            print image_name, ", green pixels: ", greens, "/", num_pixels, ", score: ", score
 
             Segment.Score = score
 

@@ -41,7 +41,8 @@ model.compile(loss='mean_squared_error',
 # SDG
 # ...
 
-# TODO: Přidat možnost že když dokonverguje a moc se nemění, aby se zastavilo ---- !
+# TODO: Pridat moznost ze kdyz dokonverguje a moc se nemeni, aby se zastavilo ---- !
+# ps> callback ModelCheckpoint = Save the model after every epoch.
 
 plot(model, to_file='model.png', show_shapes=True)
 

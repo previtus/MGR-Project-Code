@@ -10,6 +10,8 @@ if not(os.path.isfile(DATASTRUCTUREFILE)):
     print "Data file was not found, downloading it!"
     PreprocessDataF(EDGESFILES, NODESFILES, DATASTRUCTUREFILE)
 
+# TODO: Allow for random downloading - specifying that I want N=1000 valid segments, but they should be taken randomly (uniformly from the 0-1165640
+
 Segments = LoadDataFile(DATASTRUCTUREFILE)
 
 if (HasSomeErrorneousData(Segments, ERROR_MESSAGE_FAILED_MANY_TIMES)):

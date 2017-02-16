@@ -58,7 +58,7 @@ class GraphEdgeSegment:
         bearing = round(self.getBearingString(), 2)
         url_start = "http://maps.googleapis.com/maps/api/streetview?size="
         api = getApi()
-        
+
         full_url = [url_start, str(resx), "x", str(resy), "&location=", str(lat), ",", str(lon), "&heading=", str(bearing), "&key=", api]
 
         return "".join(full_url)
