@@ -51,3 +51,7 @@ def preprocess_image_batch(image_paths, img_size=None, crop_size=None, color_mod
         out.append(img_batch)
     else:
         return img_batch
+
+def saveArrayToCSV(array,filename):
+    a = np.asarray(array)
+    np.savetxt(filename, a, delimiter=",")
