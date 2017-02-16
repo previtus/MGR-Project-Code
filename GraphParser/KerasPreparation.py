@@ -58,7 +58,7 @@ def Prepare_DataLabels(path_to_segments_file, img_width, img_height,validation_s
     if (PIXELS_X != img_width) or (PIXELS_Y != img_height):
         print "Downloaded images are of (PIXELS_X, PIXELS_Y):",PIXELS_X, PIXELS_Y, ", while we want (img_width, img_height)", img_width, img_height
 
-    Segments = LoadDataFile(path_to_segments_file)
+    Segments = LoadDataFile(path_to_segments_file, only_valid=True)
     list_of_images, labels = LoadDataFromSegments(Segments)
 
     # If the path to images is specific, modify it from simple "Data/images/" with putting path_to_images before it.
@@ -113,5 +113,5 @@ def Prepare_DataLabels_generators(path_to_segments_file, img_width, img_height,v
     return [train_generator, validation_generator]
 
 
-[x, y, x_val, y_val] = Prepare_DataLabels(DATASTRUCTUREFILE,300,300,path_to_images=None)
-[train_generator, validation_generator] = Prepare_DataLabels_generators(DATASTRUCTUREFILE,222,222)
+#[x, y, x_val, y_val] = Prepare_DataLabels(DATASTRUCTUREFILE,300,300,path_to_images=None)
+#[train_generator, validation_generator] = Prepare_DataLabels_generators(DATASTRUCTUREFILE,222,222)
