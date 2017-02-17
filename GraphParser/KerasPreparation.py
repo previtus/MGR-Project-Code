@@ -34,6 +34,7 @@ def LoadDataFromSegments(Segments):
     labels = []
 
     for Segment in Segments:
+        # We disregard those with no image or with score -1 (unknown attractivity)
         if Segment.isValidSegment():
             list_of_images.append(Segment.getImageFilename())
             labels.append(Segment.getScore())

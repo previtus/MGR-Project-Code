@@ -96,6 +96,12 @@ class GraphEdgeSegment:
     def getScore(self):
         return self.Score
 
-    def isValidSegment(self):
+    def hasLoadedImage(self):
         # while working with one image only, the validity flag is if we got it
         return self.HasLoadedImage[0]
+
+    def hasUnknownScore(self):
+        return (self.getScore() == -1)
+
+    def isValidSegment(self):
+        return self.hasLoadedImage() and not self.hasUnknownScore()

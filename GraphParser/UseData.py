@@ -13,6 +13,7 @@ if not(os.path.isfile(DATASTRUCTUREFILE)):
 # TODO: Allow for random downloading - specifying that I want N=1000 valid segments, but they should be taken randomly (uniformly from the 0-1165640
 
 Segments = LoadDataFile(DATASTRUCTUREFILE)
+StatisticsSegments(Segments)
 
 if (HasSomeErrorneousData(Segments, ERROR_MESSAGE_FAILED_MANY_TIMES)):
     print "Data had some errors, filling in the blanks!"

@@ -38,4 +38,4 @@ def PreprocessDataF(EdgesFile, NodesFile, OutputFile):
     
     return FailedDownloads
 
-PreprocessDataF(EDGESFILES, NODESFILES, DATASTRUCTUREFILE)
+#PreprocessDataF(EDGESFILES, NODESFILES, DATASTRUCTUREFILE)

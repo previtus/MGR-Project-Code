@@ -20,7 +20,7 @@ def ScoreData(Segments):
     # inital temporary implemtation - score by the number of "green" pixels
     for Segment in Segments:
         # only "valid" segments
-        if Segment.isValidSegment():
+        if Segment.hasLoadedImage():
             image_name = Segment.getImageFilename()
 
             thresholt = 10000
@@ -29,7 +29,7 @@ def ScoreData(Segments):
             greens = 0
             im = Image.open(image_name)
             num_pixels = len(im.getdata())
-                             
+
             for pixel in im.getdata():
                 if distanceColors(list(pixel), green) < thresholt:
                     greens += 1
