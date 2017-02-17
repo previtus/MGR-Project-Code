@@ -4,6 +4,7 @@ from keras.layers import Activation, Dropout, Flatten, Dense
 from keras.utils.visualize_util import plot
 import keras
 from KerasPreparation import *
+from VisualizeHistory import *
 
 img_width, img_height = 150, 150
 
@@ -46,22 +47,22 @@ model.compile(loss='mean_squared_error',
 
 plot(model, to_file='model.png', show_shapes=True)
 
-segments_file = '1200downloaded/SegmentsData.dump'
-images_add = '1200downloaded/'
+segments_file = '1100downloaded_vII/SegmentsData.dump'
+images_add = '1100downloaded_vII/'
 #[x, y, x_val, y_val] = Prepare_DataLabels(segments_file,300,300,path_to_images=images_add)
 [train_generator, validation_generator] = Prepare_DataLabels_generators(segments_file,150,150,path_to_images=images_add)
 
 # s write_images=True zlobi
-log1 = keras.callbacks.TensorBoard(log_dir='/home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/1200downloaded', histogram_freq=1, write_graph=True, write_images=False)
-log2 = keras.callbacks.CSVLogger('/home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/1200downloaded/logCSV.csv', separator=',', append=False)
+log1 = keras.callbacks.TensorBoard(log_dir='/home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/1100downloaded_vII', histogram_freq=1, write_graph=True, write_images=False)
+log2 = keras.callbacks.CSVLogger('/home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/1100downloaded_vII/logCSV.csv', separator=',', append=False)
 logcalls = [log1, log2]
 #logcalls = []
 
-nb_train_samples = 2000
-nb_validation_samples = 400
-nb_epoch = 50
+nb_train_samples = 150
+nb_validation_samples = 50
+nb_epoch = 30
 
-model.fit_generator(
+hi = model.fit_generator(
         train_generator,
         samples_per_epoch=nb_train_samples,
         nb_epoch=nb_epoch,
@@ -69,6 +70,6 @@ model.fit_generator(
         nb_val_samples=nb_validation_samples,
     callbacks=logcalls)
 
-model.save('pokusCNN_s1000_e50.h5')
+model.save('pokusCNN_V2_s1000_e5.h5')
 
-# History = model.fit(...)
+saveHistory(hi.history, '1100downloaded_vII/tmp_saved_history.npy')
