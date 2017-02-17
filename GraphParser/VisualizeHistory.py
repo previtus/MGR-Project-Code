@@ -13,14 +13,6 @@ visualize_history(loadHistory('tmp_saved_history.npy'))
 def visualize_history(hi):
     # list all data in history
     print(hi.keys())
-    # summarize history for accuracy
-    plt.plot(hi['acc'])
-    plt.plot(hi['val_acc'])
-    plt.title('model accuracy')
-    plt.ylabel('accuracy')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-    plt.show()
     # summarize history for loss
     plt.plot(hi['loss'])
     plt.plot(hi['val_loss'])
@@ -38,3 +30,4 @@ def loadHistory(filename):
     loaded = np.load(open(filename))
     return loaded[()]['S']
 
+#visualize_history(loadHistory('1100downloaded_vII/tmp_saved_history.npy'))
