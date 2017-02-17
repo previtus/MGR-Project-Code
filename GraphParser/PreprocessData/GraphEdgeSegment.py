@@ -104,4 +104,4 @@ class GraphEdgeSegment:
         return (self.getScore() == -1)
 
     def isValidSegment(self):
-        return self.hasLoadedImage() and not self.hasUnknownScore()
+        return (self.hasLoadedImage()) and (not self.hasUnknownScore())

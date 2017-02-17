@@ -45,12 +45,13 @@ model.compile(loss='mean_squared_error',
 # TODO: Pridat moznost ze kdyz dokonverguje a moc se nemeni, aby se zastavilo ---- !
 # ps> callback ModelCheckpoint = Save the model after every epoch.
 
-plot(model, to_file='model.png', show_shapes=True)
+#plot(model, to_file='model.png', show_shapes=True)
 
 segments_file = '1100downloaded_vII/SegmentsData.dump'
 images_add = '1100downloaded_vII/'
 #[x, y, x_val, y_val] = Prepare_DataLabels(segments_file,300,300,path_to_images=images_add)
 [train_generator, validation_generator] = Prepare_DataLabels_generators(segments_file,150,150,path_to_images=images_add)
+
 
 # s write_images=True zlobi
 log1 = keras.callbacks.TensorBoard(log_dir='/home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/1100downloaded_vII', histogram_freq=1, write_graph=True, write_images=False)
@@ -58,9 +59,9 @@ log2 = keras.callbacks.CSVLogger('/home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphP
 logcalls = [log1, log2]
 #logcalls = []
 
-nb_train_samples = 150
-nb_validation_samples = 50
-nb_epoch = 30
+nb_train_samples = 2000
+nb_validation_samples = 400
+nb_epoch = 50
 
 hi = model.fit_generator(
         train_generator,
@@ -70,6 +71,6 @@ hi = model.fit_generator(
         nb_val_samples=nb_validation_samples,
     callbacks=logcalls)
 
-model.save('pokusCNN_V2_s1000_e5.h5')
+model.save('1100downloaded_vII/pokusCNN_V2_s1000_e5.h5')
 
 saveHistory(hi.history, '1100downloaded_vII/tmp_saved_history.npy')

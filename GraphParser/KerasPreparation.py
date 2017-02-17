@@ -3,6 +3,7 @@ from keras.preprocessing.image import ImageDataGenerator
 
 from Defaults import *
 from DataOperations import *
+from PreprocessData.SegmentsManipulators import *
 
 def split_data(x,y,validation_split=0.2):
     '''
@@ -59,8 +60,10 @@ def Prepare_DataLabels(path_to_segments_file, img_width, img_height,validation_s
     if (PIXELS_X != img_width) or (PIXELS_Y != img_height):
         print "Downloaded images are of (PIXELS_X, PIXELS_Y):",PIXELS_X, PIXELS_Y, ", while we want (img_width, img_height)", img_width, img_height
 
-    Segments = LoadDataFile(path_to_segments_file, only_valid=True)
-    list_of_images, labels = LoadDataFromSegments(Segments)
+    Segments = LoadDataFile(path_to_segments_file)
+    StatisticsSegments(Segments)
+    UsableTrainSubset = SubsetSegments(Segments, has_image=True, has_score=True)
+    list_of_images, labels = LoadDataFromSegments(UsableTrainSubset)
 
     # If the path to images is specific, modify it from simple "Data/images/" with putting path_to_images before it.
     if (path_to_images is not None):

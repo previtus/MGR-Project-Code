@@ -14,24 +14,13 @@ def SaveDataFile(name, Segments):
         pickle.dump(Segments, f)
         print "Saved |", len(Segments), "| segments."
 
-def LoadDataFile(name, only_valid=False):
+def LoadDataFile(name):
     '''
     Load Segments from the file <name>
     '''
     Segments = []
     with open(name) as f:
         Segments = pickle.load(f)
-
-    if (only_valid):
-        # Delete not valid Segments
-        ValidSegments = []
-        for Segment in Segments:
-            if not Segment.isValidSegment():
-                Segments.remove(Segment)
-
-            #if Segment.isValidSegment():
-                #ValidSegments.append(Segment)
-        #Segments = ValidSegments
 
     print "Loaded |", len(Segments), "| segments."
     return Segments

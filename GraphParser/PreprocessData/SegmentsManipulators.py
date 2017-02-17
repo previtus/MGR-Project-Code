@@ -9,16 +9,23 @@ def StatisticsSegments(Segments):
     num_attractivity_not_known = 0  # score == -1
     num_valid = 0 # aka has images AND has scores
 
+    num_attractivity_known = 0
+    num_found_images = 0
+
     for Segment in Segments:
         if Segment.hasUnknownScore():
             num_attractivity_not_known += 1
+        else:
+            num_attractivity_known += 1
+
         if not Segment.hasLoadedImage():
             num_not_found_images += 1
+        else:
+            num_found_images += 1
+
         if (not Segment.hasUnknownScore()) and (Segment.hasLoadedImage()):
             num_valid += 1
 
-    num_attractivity_known = num - num_attractivity_not_known  # score <> -1
-    num_found_images = num - num_not_found_images
 
     print "Segments Statistics:"
     print "From ", num, " loaded Segments, only ", num_found_images, "(", num_not_found_images,"don't) have images and only ", num_attractivity_known, " have score (",num_attractivity_not_known,"don't)."
