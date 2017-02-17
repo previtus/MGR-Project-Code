@@ -3,6 +3,7 @@ from GenerateGIFAnimation import *
 from Defaults import *
 from PreprocessDataF import *
 from DataOperations import *
+from PreprocessData.SegmentsManipulators import *
 
 import os
 
