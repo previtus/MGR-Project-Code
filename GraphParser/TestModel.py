@@ -1,6 +1,7 @@
 from DataOperations import *
 from KerasPreparation import *
 from keras.models import load_model
+from keras.utils.visualize_util import plot
 
 segments_filepath = '1200downloaded/SegmentsData.dump'
 model_filepath = '1200downloaded/pokusCNN_s1000_e50.h5'
@@ -11,6 +12,8 @@ Segments = LoadDataFile(segments_filepath, only_valid=True)
 
 # 2 load model and validation data from files
 model = load_model(model_filepath)
+plot(model, to_file='1200downloaded/model_pokusCNN_s1000_e50.png', show_shapes=True)
+
 
 # 3 labels_from_segments
 list_of_images, labels_from_segments = LoadDataFromSegments(Segments)

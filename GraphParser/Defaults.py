@@ -3,7 +3,7 @@
 ### PreprocessData part ###
 
 FromEdgeID = 0 # 2 -> will start with 002.jpg
-ToEdgeID = 1200 #15 # 14 -> will end with 013.jpg
+ToEdgeID = 1500 #15 # 14 -> will end with 013.jpg
 # out of 1165640! (there are 1165641 lines and the 1st one is just text)
 PIXELS_X = 150
 PIXELS_Y = 150
