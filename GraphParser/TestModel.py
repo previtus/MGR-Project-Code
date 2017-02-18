@@ -65,3 +65,6 @@ print "R^2 (coefficient of determination)_score: ", r2_score(labels_from_segment
 # SSIM is useful when comparing two images (better then mse for edits of some pixels)
 from skimage.measure import compare_ssim
 print "ssim (+1 similar, -1 dissimilar): ", compare_ssim(labels_from_segments,labels_from_model)
+
+from VisualizeHistory import *
+plot = visualize_history(loadHistory(Folder+'tmp_saved_history.npy'), show=False, save=True, save_path=Folder)

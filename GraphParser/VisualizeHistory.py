@@ -10,7 +10,7 @@ visualize_history(loadHistory('tmp_saved_history.npy'))
 
 '''
 
-def visualize_history(hi):
+def visualize_history(hi, show=True, save=False, save_path=''):
     # list all data in history
     print(hi.keys())
     # summarize history for loss
@@ -20,7 +20,12 @@ def visualize_history(hi):
     plt.ylabel('loss')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
-    plt.show()
+    if save:
+        plt.savefig(save_path+'figure_loss.png')
+    if show:
+        plt.show()
+
+    return plt
 
 def saveHistory(history_dict, filename):
     to_be_saved = data = {'S': history_dict}
