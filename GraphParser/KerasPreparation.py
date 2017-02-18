@@ -77,7 +77,8 @@ def Prepare_DataLabels(path_to_segments_file, img_width, img_height,validation_s
     print "Valid segments ",len(list_of_images),". Prepared dataset of", len(x) ,"train and", len(x_val), "validation images of size",img_width,"x",img_height,"."
     return [x, y, x_val, y_val]
 
-def Prepare_DataLabels_generators(path_to_segments_file, img_width, img_height,validation_split=0.2, path_to_images=None, valid_datagen_overwrite=None, train_datagen_overwrite=None):
+def Prepare_DataLabels_generators(path_to_segments_file, img_width, img_height,validation_split=0.2, path_to_images=None,
+    valid_datagen_overwrite=None, train_datagen_overwrite=None, shuffle_=True, batch_size_=32):
     '''
     Prepares generators of data for Keras in training and validation set.
 
@@ -106,16 +107,115 @@ def Prepare_DataLabels_generators(path_to_segments_file, img_width, img_height,v
 
     train_generator = train_datagen.flow(
         x, y,
-        batch_size=32,
+        batch_size=batch_size_,
+        shuffle=shuffle_
     )
 
     validation_generator = valid_datagen.flow(
         x_val, y_val,
-        batch_size=32,
+        batch_size=batch_size_,
+        shuffle=shuffle_
     )
 
     return [train_generator, validation_generator]
 
+def GenerateData(x,y, ImgDataGenerator, target_number_of_images,shuffle_=True):
+    '''
+    From already loaded dataset of images and their labels generates dataset of given size using ImgDataGenerator
 
-#[x, y, x_val, y_val] = Prepare_DataLabels(DATASTRUCTUREFILE,300,300,path_to_images=None)
-#[train_generator, validation_generator] = Prepare_DataLabels_generators(DATASTRUCTUREFILE,222,222)
+    :param x: images
+    :param y: their labels
+    :param ImgDataGenerator: Keras ImageDataGenerator object
+    :param target_number_of_images: how many resulting images we want
+    :return: the new dataset
+    '''
+
+    generator_flow = ImgDataGenerator.flow(
+        x, y,
+        batch_size=1,
+        shuffle=shuffle_
+        # DEBUG purposes> #save_to_dir='1100downloaded_vII/preview', save_prefix='cat', save_format='jpeg'
+    )
+
+    x_gen = []
+    y_gen = []
+    i = 0
+
+    for batch in generator_flow:
+        i += 1
+        img = batch[0][0]
+        label = batch[1]
+        x_gen.append(img)
+        y_gen.append(label)
+
+        #print len_(img), label
+        if i >= target_number_of_images:
+            break
+
+    x_gen = np.array(x_gen)
+    return [x_gen,y_gen]
+
+def Prepare_DataLabels_withGeneratedData(path_to_segments_file, img_width, img_height,validation_split=0.2,
+      path_to_images=None, valid_datagen_overwrite=None, train_datagen_overwrite=None, target_number_of_trainset = 2000, target_number_of_validset = None,
+                                         shuffle_=True):
+    '''
+    From existing dataset of images in Semgent data creates training and validation subsets (in ratio validation_split)
+    then uses Keras ImageDataGenerator to generate altered images of the given amount (target_number_of_trainset and target_number_of_validset)
+
+    Example of usage of the generators:
+        [x_gen, y_gen, x_val_gen, y_val_gen] = Prepare_DataLabels_withGeneratedData(DATASTRUCTUREFILE,150,150)
+        fit( ... )
+             ... is similar to: x_gen, y_gen, validation_data=(x_val_gen, y_val_gen as tuple)
+
+    :param path_to_segments_file: Path to where segments are saved (usually in Defaults.py)
+    :param img_width: wanted outputing resolution (no matter how we saved the actual data)
+    :param img_height:
+    :param validation_split:
+    :param path_to_images: additional path specification which we need before 'Data/images/---.jpg'
+    :param valid_datagen_overwrite: Custom ImageDataGenerator object for validation data
+    :param train_datagen_overwrite: Custom ImageDataGenerator object for training data
+    :param target_number_of_trainset: Size of the training set we want
+    :param target_number_of_validset: If left to None, defaults to (target_number_of_trainset*validation_split)
+    :return:
+    '''
+
+    if (target_number_of_validset is None):
+        target_number_of_validset = target_number_of_trainset*validation_split
+
+    # Get full sized images
+    [x, y, x_val, y_val] = Prepare_DataLabels(path_to_segments_file, img_width, img_height, validation_split,
+                                              path_to_images)
+
+    if (valid_datagen_overwrite is None):
+        valid_datagen = ImageDataGenerator(rescale=1. / 255)
+    else:
+        valid_datagen = valid_datagen_overwrite
+
+    if (train_datagen_overwrite is None):
+        train_datagen = ImageDataGenerator(
+            rescale=1. / 255,
+            shear_range=0.2,
+            zoom_range=0.2,
+            horizontal_flip=True)
+    else:
+        train_datagen = train_datagen_overwrite
+
+    [x_gen, y_gen] = GenerateData(x, y, train_datagen, target_number_of_trainset, shuffle_=shuffle_)
+    [x_val_gen, y_val_gen] = GenerateData(x_val, y_val, valid_datagen, target_number_of_validset, shuffle_=shuffle_)
+
+    print "Generated dataset of", len(x_gen) ,"train and", len(x_val_gen), "validation images of size",img_width,"x",img_height,"."
+    return [x_gen, y_gen, x_val_gen, y_val_gen]
+
+#Folder = '1100downloaded_vII/'
+#[x, y, x_val, y_val] = Prepare_DataLabels(Folder+DATASTRUCTUREFILE,150,150,path_to_images=Folder)
+#[train_generator, validation_generator] = Prepare_DataLabels_generators(Folder+DATASTRUCTUREFILE,150,150)
+#Prepare_DataLabels_withGeneratedData(Folder+DATASTRUCTUREFILE,150,150,path_to_images=Folder)
+
+#train_generator = ImageDataGenerator(rescale=1. / 255)
+#[x_gen, y_gen] = GenerateData(x, y, train_generator, 5)
+'''
+print x_gen
+print y_gen
+print type(x_gen)
+print type(y_gen)
+'''
