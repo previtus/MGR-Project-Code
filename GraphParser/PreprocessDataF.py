@@ -32,7 +32,8 @@ def PreprocessDataF(EdgesFile, NodesFile, OutputFile):
     # (temporary) enrich data with score
     if DataMethod == 'OLD':
         ScoreData(Segments)
-
+    else:
+        AdjustScore(Segments)
     # 4 save datastructure
     SaveDataFile(OutputFile, Segments)
     

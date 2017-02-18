@@ -3,6 +3,7 @@ from keras.layers import Convolution2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
 from keras.utils.visualize_util import plot
 import keras
+import time
 from KerasPreparation import *
 from VisualizeHistory import *
 
@@ -54,7 +55,8 @@ images_add = '1100downloaded_vII/'
 
 
 # s write_images=True zlobi
-log1 = keras.callbacks.TensorBoard(log_dir='/home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/1100downloaded_vII', histogram_freq=1, write_graph=True, write_images=False)
+now = time.strftime("%c")
+log1 = keras.callbacks.TensorBoard(log_dir='/home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/1100downloaded_vII/'+now, histogram_freq=1, write_graph=True, write_images=False)
 log2 = keras.callbacks.CSVLogger('/home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/1100downloaded_vII/logCSV.csv', separator=',', append=False)
 logcalls = [log1, log2]
 #logcalls = []

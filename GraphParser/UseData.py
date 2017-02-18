@@ -23,4 +23,3 @@ if (HasSomeErrorneousData(Segments, ERROR_MESSAGE_FAILED_MANY_TIMES)):
 #gifname = "".join(['animation_from_main_',str(FromEdgeID),'-',str(ToEdgeID),'.gif'])
 #GenerateGIFAnimation(Segments, gifname)
 
-

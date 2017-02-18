@@ -104,14 +104,6 @@ def Prepare_DataLabels_generators(path_to_segments_file, img_width, img_height,v
     else:
         train_datagen = train_datagen_overwrite
 
-    # label hack to fit -1,+1
-    def transform(val):
-        # val goes <0,100> we want <0,1> (when using sigmoid)
-        return (float(val)/100.0)
-    y = map(transform, y)
-    y_val = map(transform, y_val)
-
-
     train_generator = train_datagen.flow(
         x, y,
         batch_size=32,

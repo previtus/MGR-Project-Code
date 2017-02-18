@@ -39,4 +39,18 @@ def ScoreData(Segments):
 
             Segment.Score = score
 
+def AdjustScore(Segments):
+    '''
+    Adjust scores so the labels fit <0,1> range
+    :param Segments: Segments to be edited
+    '''
 
+    #
+    def transform(val):
+        # val goes <0,100> we want <0,1> (when using sigmoid)
+        return (float(val)/100.0)
+    #y = map(transform, y)
+
+    for Segment in Segments:
+        if not Segment.hasUnknownScore():
+            Segment.Score = transform(Segment.Score)

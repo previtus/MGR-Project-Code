@@ -3,24 +3,26 @@ from KerasPreparation import *
 from keras.models import load_model
 from keras.utils.visualize_util import plot
 
-segments_filepath = '1200downloaded/SegmentsData.dump'
-model_filepath = '1200downloaded/pokusCNN_s1000_e50.h5'
-path_to_images = '1200downloaded/'
+Folder = '1100downloaded_vII/'
+segments_filepath = Folder+'SegmentsData.dump'
+model_filepath = Folder+'pokusCNN_V2_s1000_e5.h5'
+path_to_images = Folder
 
 # 1 load valid Segments
-Segments = LoadDataFile(segments_filepath, only_valid=True)
+Segments = LoadDataFile(segments_filepath)
+UsableTrainSubset = SubsetSegments(Segments, has_image=True, has_score=True)
 
 # 2 load model and validation data from files
 model = load_model(model_filepath)
-plot(model, to_file='1200downloaded/model_pokusCNN_s1000_e50.png', show_shapes=True)
+plot(model, to_file=Folder+'pokusCNN_V2_s1000_e5.png', show_shapes=True)
 
-
+'''
 # 3 labels_from_segments
-list_of_images, labels_from_segments = LoadDataFromSegments(Segments)
+list_of_images, labels_from_segments = LoadDataFromSegments(UsableTrainSubset)
 if (path_to_images is not None):
     list_of_images = [(path_to_images + x) for x in list_of_images]
 
-'''
+
 # 4 labels_from_model
 img_width = 150
 img_height = 150
@@ -31,12 +33,12 @@ labels_from_model = model.predict(validation_images, batch_size=32, verbose=0)
 # 5 COMPARE
 
 # numpy save and load:
-np.save(open('1200downloaded/labels_from_segments.npy', 'w'), labels_from_segments)
-np.save(open('1200downloaded/labels_from_model.npy', 'w'), labels_from_model)
+np.save(open(Folder+'labels_from_segments.npy', 'w'), labels_from_segments)
+np.save(open(Folder+'labels_from_model.npy', 'w'), labels_from_model)
 '''
 
-labels_from_segments = np.load(open('1200downloaded/labels_from_segments.npy'))
-labels_from_model = np.load(open('1200downloaded/labels_from_model.npy'))
+labels_from_segments = np.load(open(Folder+'labels_from_segments.npy'))
+labels_from_model = np.load(open(Folder+'labels_from_model.npy'))
 
 labels_from_model = labels_from_model[:,0]
 # coversion float64 > float32
