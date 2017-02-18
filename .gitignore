@@ -9,3 +9,6 @@ Tests/AlexNet tests/classified.txt
 1200downloaded
 1100downloaded_vII
 Keras tests
+ModelImplementations/*/data
+ModelImplementations/*/results
+

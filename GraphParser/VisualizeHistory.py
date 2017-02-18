@@ -21,7 +21,7 @@ def visualize_history(hi, show=True, save=False, save_path=''):
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
     if save:
-        plt.savefig(save_path+'figure_loss.png')
+        plt.savefig(save_path+'loss.png')
     if show:
         plt.show()
 
