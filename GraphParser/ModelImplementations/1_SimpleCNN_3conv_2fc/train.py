@@ -64,9 +64,9 @@ log2 = keras.callbacks.CSVLogger(LocalFolder+'data/logCSV.csv', separator=',', a
 logcalls = [log1, log2]
 #logcalls = []
 
-nb_train_samples = 20
-nb_validation_samples = 4
-nb_epoch = 1
+nb_train_samples = 2000
+nb_validation_samples = 800
+nb_epoch = 50
 
 hi = model.fit_generator(
         train_generator,

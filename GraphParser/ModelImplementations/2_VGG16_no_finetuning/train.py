@@ -10,6 +10,7 @@ from keras.layers import Activation, Dropout, Flatten, Dense
 
 from VisualizeHistory import *
 from KerasPreparation import *
+import os.path
 
 # INPUTS
 LocalFolder = 'ModelImplementations/2_VGG16_no_finetuning/'
@@ -110,11 +111,12 @@ def train_top_model(x, y, x_val, y_val):
     model.save(target_folder + 'top_model_whole.h5')
 
     saveHistory(history.history, LocalFolder+'results/history.npy')
-    visualize_history(history.history,save=True, save_path=LocalFolder+'results/'+nb_epoch)
+    visualize_history(history.history,save=True, save_path=LocalFolder+'results/'+str(nb_epoch))
 
 
 #[x, y, x_val, y_val] = Prepare_DataLabels(path_to_segments_file,150,150,path_to_images=Folder)
-[x, y, x_val, y_val] = Prepare_DataLabels_withGeneratedData(path_to_segments_file,img_width, img_height,validation_split=0.25,path_to_images=Folder,shuffle_=False)
+[x, y, x_val, y_val] = Prepare_DataLabels_withGeneratedData(path_to_segments_file,img_width, img_height,validation_split=0.25,path_to_images=Folder,shuffle_=False,
+    target_number_of_trainset = 2000, target_number_of_validset = 800)
 # PS: This is not really effective. We generate 2000+500 imgs and hold them somewhere in memory.
 #     Better would be to make use of generators - and initiate them in both the same way in the two functions (with Shuffle=False)
 
@@ -130,5 +132,7 @@ print len_(x_val)
 print len_(y_val)
 '''
 
-#save_bottlebeck_features(x, y, x_val, y_val)
+if (not os.path.exists(target_folder+'features_train.npy')) or (not os.path.exists(target_folder+'features_validation.npy')):
+    save_bottlebeck_features(x, y, x_val, y_val)
+
 train_top_model(x, y, x_val, y_val)

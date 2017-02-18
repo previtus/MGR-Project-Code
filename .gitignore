@@ -9,8 +9,7 @@ Tests/AlexNet tests/classified.txt
 1200downloaded
 1100downloaded_vII
 Keras tests
-model.png
-loss.png
-*.[nN][pP][yY]
-*.[hH][5]
-*(backup)*
+GraphParser/ModelImplementations/1_SimpleCNN_3conv_2fc/data/*
+GraphParser/ModelImplementations/1_SimpleCNN_3conv_2fc/results/*
+GraphParser/ModelImplementations/2_VGG16_no_finetuning/data/*
+GraphParser/ModelImplementations/2_VGG16_no_finetuning/results/*

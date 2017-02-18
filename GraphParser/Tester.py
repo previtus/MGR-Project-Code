@@ -12,6 +12,7 @@ def TestModel(model, local_folder, path_to_images, output_model_img=True, output
     Segments = LoadDataFile(path_to_images + 'SegmentsData.dump')
     UsableTrainSubset = SubsetSegments(Segments, has_image=True, has_score=True)
 
+    # TODO> If we have labels_from_segments.npy + labels_from_model.npy load them, otherwise>
     '''
     # 3 labels_from_segments
     list_of_images, labels_from_segments = LoadDataFromSegments(UsableTrainSubset)
