@@ -8,14 +8,13 @@ def TestModel(model, local_folder, path_to_images, output_model_img=True, output
     if output_model_img:
         plot(model, to_file=local_folder + 'results/model.png', show_shapes=True)
 
-    # 1 load valid Segments
-    Segments = LoadDataFile(path_to_images + 'SegmentsData.dump')
-    UsableTrainSubset = SubsetSegments(Segments, has_image=True, has_score=True)
-
     # TODO> If we have labels_from_segments.npy + labels_from_model.npy load them, otherwise>
     if bake_files:
+        # 1 load valid Segments
+        Segments = LoadDataFile(path_to_images + 'SegmentsData.dump')
+
         # 3 labels_from_segments
-        list_of_images, labels_from_segments = LoadDataFromSegments(UsableTrainSubset)
+        list_of_images, labels_from_segments = LoadDataFromSegments(Segments, has_score=True)
         if (path_to_images is not None):
             list_of_images = [(path_to_images + x) for x in list_of_images]
 

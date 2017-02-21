@@ -8,16 +8,27 @@ def GenerateGIFAnimation(Segments, GIFFileName):
     
     frames = 0
     with imageio.get_writer(GIFFileName, mode='I') as writer:
+        # there
         for segment in Segments:
-            if (segment.HasLoadedImage[0]):
-                filename = segment.getImageFilename()
+            if (segment.HasLoadedImages[0]):
+                filename = segment.getImageFilename(0)
+                #for fileTuple in FilenameMap:
+                #filename = fileTuple[1]
+                image = imageio.imread(filename)
+                writer.append_data(image)
+                frames += 1
+        # and back
+        for segment in Segments:
+            if (segment.HasLoadedImages[1]):
+                filename = segment.getImageFilename(1)
                 #for fileTuple in FilenameMap:
                 #filename = fileTuple[1]
                 image = imageio.imread(filename)
                 writer.append_data(image)
                 frames += 1
 
-    print "Saved to animation.gif with <", frames, "> frames."
+
+    print "Saved to", GIFFileName, "with <", frames, "> frames."
 
 
     return []

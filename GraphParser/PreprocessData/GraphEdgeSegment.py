@@ -25,9 +25,11 @@ class GraphEdgeSegment:
         self.setScore(Score)
 
         # Array of boolean flags if the images have been downloaded (1 or more)
-        self.HasLoadedImage = [False]
+        self.HasLoadedImages = []
         # Error code encountered while downloading
-        self.ErrorMessages = [ERROR_MESSAGE_NO_ERROR]  # = -1
+        self.ErrorMessages = []  # = -1
+
+        self.number_of_images = 0
 
         self.Start = Start
         self.End = End
@@ -42,23 +44,55 @@ class GraphEdgeSegment:
         self.Score = self.ScoreAdjustment(s)
 
     def displaySegment(self):
-        print "SegmentId: ", self.SegmentId, ", Images: ", self.HasLoadedImage, ", Score: ", self.getScore()
+        print "SegmentId: ", self.SegmentId, ", Images: ", self.HasLoadedImages, ", Score: ", self.getScore()
         print "Start: ", self.Start
         print "End: ", self.End
 
     def displaySegmentShort(self):
-        print "SegmentId: ", self.SegmentId, ", Images: ", self.HasLoadedImage, ", Score: ", self.getScore()
+        print "SegmentId: ", self.SegmentId, ", Images: ", self.HasLoadedImages, ", Score: ", self.getScore()
 
-    def getBearingString(self):
-        return bearing_between_two_points(self.Start, self.End)
+    def getBearingString(self, Location, Direction):
+        return bearing_between_two_points(Location, Direction)
 
-    def getGoogleViewUrl(self,resx,resy):
+    def resetImageMemory(self, number_of_images):
+        self.number_of_images = number_of_images
+        for i in range(0,number_of_images):
+            self.HasLoadedImages.append(False)
+            self.ErrorMessages.append(ERROR_MESSAGE_NO_ERROR)
+
+    def getGoogleViewUrls(self,resx,resy):
+        '''
+        Generate urls for the Segment. Here we also reset the
+        :param resx: Resolution of images, X
+        :param resy: Resolution of images, Y
+        :return: returns list of urls and filenames to download
+        '''
+
+        urls = []
+        filenames = []
+
+        # Looking from START to END
+        urls.append( self.getGoogleViewUrl(self.Start, self.End, PIXELS_X,PIXELS_Y) )
+        filenames.append( self.getImageFilename(len(filenames)) )
+
+        # Looking from END to START
+        urls.append( self.getGoogleViewUrl(self.End, self.Start, PIXELS_X,PIXELS_Y) )
+        filenames.append( self.getImageFilename(len(filenames)) )
+
+        # And more to come <3
+
+        number_of_images = len(urls)
+        self.resetImageMemory(number_of_images)
+
+        return [urls, filenames]
+
+    def getGoogleViewUrl(self, Location, Direction, resx, resy):
         'Google View url from the start of this segment'
         # http://maps.googleapis.com/maps/api/
         # streetview?size=600x400&location=<lat>,<long>&heading=<angle from north>&key=<api>
-        lat = self.Start[0]
-        lon = self.Start[1]
-        bearing = round(self.getBearingString(), 2)
+        lat = Location[0]
+        lon = Location[1]
+        bearing = round(self.getBearingString(Location, Direction), 2)
         url_start = "http://maps.googleapis.com/maps/api/streetview?size="
         api = getApi()
 
@@ -66,24 +100,17 @@ class GraphEdgeSegment:
 
         return "".join(full_url)
 
-    def getImageFilename(self):
+    def getImageFilename(self, i_th_image):
         'Unified filename generation'
-        filename = "".join(["Data/images/", format(self.SegmentId, NUMBER_OF_ZEROS_PADDING), ".jpg"])
+        filename = "".join(["Data/images/", format(self.SegmentId, NUMBER_OF_ZEROS_PADDING), "_", str(i_th_image), ".jpg"])
         return filename
 
     def getScore(self):
         return self.Score
 
-    def hasLoadedImage(self):
-        # while working with one image only, the validity flag is if we got it
-        return self.HasLoadedImage[0]
-
     def hasLoadedImageI(self, i):
         # while working with one image only, the validity flag is if we got it
-        return self.HasLoadedImage[i]
+        return self.HasLoadedImages[i]
 
     def hasUnknownScore(self):
         return (self.getScore() == -1)
-
-    def isValidSegment(self):
-        return (self.hasLoadedImage()) and (not self.hasUnknownScore())

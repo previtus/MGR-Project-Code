@@ -25,7 +25,7 @@ def split_data(x,y,validation_split=0.2):
     #print "Split", len(x), "images into", len(x_test), "test and", len(x_val), "validation sets."
     return x_test,y_test,x_val, y_val
 
-def LoadDataFromSegments(Segments):
+def LoadDataFromSegments(Segments, has_score=True):
     '''
     Turns loaded segments into data we will need for keras.
     :param Segments: Loaded segments
@@ -35,10 +35,14 @@ def LoadDataFromSegments(Segments):
     labels = []
 
     for Segment in Segments:
-        # We disregard those with no image or with score -1 (unknown attractivity)
-        if Segment.isValidSegment():
-            list_of_images.append(Segment.getImageFilename())
-            labels.append(Segment.getScore())
+
+        # if we care for score
+        if (has_score and not Segment.hasUnknownScore()) or (has_score == None):
+            # but we always care for images
+            for i_th_image in range(0,Segment.number_of_images):
+                if Segment.hasLoadedImageI(i_th_image):
+                    list_of_images.append(Segment.getImageFilename(i_th_image))
+                    labels.append(Segment.getScore())
 
     return list_of_images, labels
 
@@ -62,8 +66,7 @@ def Prepare_DataLabels(path_to_segments_file, img_width, img_height,validation_s
 
     Segments = LoadDataFile(path_to_segments_file)
     StatisticsSegments(Segments)
-    UsableTrainSubset = SubsetSegments(Segments, has_image=True, has_score=True)
-    list_of_images, labels = LoadDataFromSegments(UsableTrainSubset)
+    list_of_images, labels = LoadDataFromSegments(Segments, has_score=True)
 
     # If the path to images is specific, modify it from simple "Data/images/" with putting path_to_images before it.
     if (path_to_images is not None):

@@ -16,15 +16,13 @@ def GenListOfUrls(Segments):
     for segment in Segments:
         
         if verbose: segment.displaySegment()
-        url = segment.getGoogleViewUrl(PIXELS_X,PIXELS_Y)
-        filename = segment.getImageFilename()
 
-        # Prepare for multiple images per Segment!
+        [urls, filenames] = segment.getGoogleViewUrls(PIXELS_X,PIXELS_Y)
 
+        for i_nth_image in range(0, len(urls)):
+            if verbose: print urls, '\n', filenames, '\n'
+            # print filename
 
-        if verbose: print url, '\n', filename, '\n'
-        #print filename
-        
-        FilenameMap.append((url,filename,segment.SegmentId))
+            FilenameMap.append((urls[i_nth_image], filenames[i_nth_image], segment.SegmentId, i_nth_image))
 
     return FilenameMap
