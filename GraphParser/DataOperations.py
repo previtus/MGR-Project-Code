@@ -84,3 +84,19 @@ def FixDataFile_FailedDownloads(name, ERROR_TYPE):
     SaveDataFile(name, Segments)
 
     return Segments
+
+'''
+try with this > import cPickle as pickle
+In all these cases, pickle and cPickle can fail you horribly.
+
+If you are looking to save an object (arbitrarily created), where you have attributes (either added in the object
+definition, or afterward)... your best bet is to use dill, which can serialize almost anything in python.
+ >> Try Dill ?? maybe
+
+def save_object(obj, filename):
+    with open(filename, 'wb') as output:
+        pickle.dump(obj, output, pickle.HIGHEST_PROTOCOL)
+
+# sample usage
+save_object(company1, 'company1.pkl')
+'''

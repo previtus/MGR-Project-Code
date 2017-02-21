@@ -119,7 +119,7 @@ def Prepare_DataLabels_generators(path_to_segments_file, img_width, img_height,v
 
     return [train_generator, validation_generator]
 
-def GenerateData(x,y, ImgDataGenerator, target_number_of_images,shuffle_=True):
+def GenerateData(x,y, ImgDataGenerator, target_number_of_images,shuffle_=True, seed_=None):
     '''
     From already loaded dataset of images and their labels generates dataset of given size using ImgDataGenerator
 
@@ -133,7 +133,8 @@ def GenerateData(x,y, ImgDataGenerator, target_number_of_images,shuffle_=True):
     generator_flow = ImgDataGenerator.flow(
         x, y,
         batch_size=1,
-        shuffle=shuffle_
+        shuffle=shuffle_,
+        seed=seed_
         # DEBUG purposes> #save_to_dir='1100downloaded_vII/preview', save_prefix='cat', save_format='jpeg'
     )
 
@@ -157,7 +158,7 @@ def GenerateData(x,y, ImgDataGenerator, target_number_of_images,shuffle_=True):
 
 def Prepare_DataLabels_withGeneratedData(path_to_segments_file, img_width, img_height,validation_split=0.2,
       path_to_images=None, valid_datagen_overwrite=None, train_datagen_overwrite=None, target_number_of_trainset = 2000, target_number_of_validset = None,
-                                         shuffle_=True):
+                                         shuffle_=True, seed_=None):
     '''
     From existing dataset of images in Semgent data creates training and validation subsets (in ratio validation_split)
     then uses Keras ImageDataGenerator to generate altered images of the given amount (target_number_of_trainset and target_number_of_validset)
@@ -196,12 +197,13 @@ def Prepare_DataLabels_withGeneratedData(path_to_segments_file, img_width, img_h
             rescale=1. / 255,
             shear_range=0.2,
             zoom_range=0.2,
-            horizontal_flip=True)
+            horizontal_flip=True
+        )
     else:
         train_datagen = train_datagen_overwrite
 
-    [x_gen, y_gen] = GenerateData(x, y, train_datagen, target_number_of_trainset, shuffle_=shuffle_)
-    [x_val_gen, y_val_gen] = GenerateData(x_val, y_val, valid_datagen, target_number_of_validset, shuffle_=shuffle_)
+    [x_gen, y_gen] = GenerateData(x, y, train_datagen, target_number_of_trainset, shuffle_=shuffle_, seed_=seed_)
+    [x_val_gen, y_val_gen] = GenerateData(x_val, y_val, valid_datagen, target_number_of_validset, shuffle_=shuffle_, seed_=seed_)
 
     print "Generated dataset of", len(x_gen) ,"train and", len(x_val_gen), "validation images of size",img_width,"x",img_height,"."
     return [x_gen, y_gen, x_val_gen, y_val_gen]

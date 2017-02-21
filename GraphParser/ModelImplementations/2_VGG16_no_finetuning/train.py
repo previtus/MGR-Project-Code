@@ -1,6 +1,10 @@
 # What happens here?
 # we follow: https://blog.keras.io/building-powerful-image-classification-models-using-very-little-data.html
 
+import sys
+sys.path.append('/home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/')
+
+
 import os
 import h5py
 from keras.preprocessing.image import ImageDataGenerator
@@ -11,6 +15,10 @@ from keras.layers import Activation, Dropout, Flatten, Dense
 from VisualizeHistory import *
 from KerasPreparation import *
 import os.path
+
+import keras
+import time
+
 
 # INPUTS
 LocalFolder = 'ModelImplementations/2_VGG16_no_finetuning/'
@@ -103,9 +111,14 @@ def train_top_model(x, y, x_val, y_val):
 
     model.compile(optimizer='rmsprop', loss='mean_squared_error', metrics=['mean_squared_logarithmic_error'])
 
+    now = time.strftime("%c")
+    log1 = keras.callbacks.TensorBoard(log_dir=LocalFolder + 'data/' + now, histogram_freq=1, write_graph=True, write_images=False)
+    log2 = keras.callbacks.CSVLogger(LocalFolder + 'data/logCSV.csv', separator=',', append=False)
+    logcalls = [log1, log2]
+
     history = model.fit(train_data, train_labels,
               nb_epoch=nb_epoch, batch_size=32,
-              validation_data=(validation_data, validation_labels))
+              validation_data=(validation_data, validation_labels), callbacks=logcalls)
 
     model.save_weights(target_folder + 'top_model_weights.h5')
     model.save(target_folder + 'top_model_whole.h5')
@@ -115,8 +128,7 @@ def train_top_model(x, y, x_val, y_val):
 
 
 #[x, y, x_val, y_val] = Prepare_DataLabels(path_to_segments_file,150,150,path_to_images=Folder)
-[x, y, x_val, y_val] = Prepare_DataLabels_withGeneratedData(path_to_segments_file,img_width, img_height,validation_split=0.25,path_to_images=Folder,shuffle_=False,
-    target_number_of_trainset = 2000, target_number_of_validset = 800)
+[x, y, x_val, y_val] = Prepare_DataLabels_withGeneratedData(path_to_segments_file,img_width, img_height,validation_split=0.25,path_to_images=Folder,shuffle_=False,seed_=42)
 # PS: This is not really effective. We generate 2000+500 imgs and hold them somewhere in memory.
 #     Better would be to make use of generators - and initiate them in both the same way in the two functions (with Shuffle=False)
 
@@ -132,7 +144,7 @@ print len_(x_val)
 print len_(y_val)
 '''
 
-if (not os.path.exists(target_folder+'features_train.npy')) or (not os.path.exists(target_folder+'features_validation.npy')):
-    save_bottlebeck_features(x, y, x_val, y_val)
+#if (not os.path.exists(target_folder+'features_train.npy')) or (not os.path.exists(target_folder+'features_validation.npy')):
 
+save_bottlebeck_features(x, y, x_val, y_val)
 train_top_model(x, y, x_val, y_val)

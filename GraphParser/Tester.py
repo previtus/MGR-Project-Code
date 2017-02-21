@@ -1,10 +1,10 @@
 from DataOperations import *
 from KerasPreparation import *
-from VisualizeHistory import *
+from VisualizeHistory import visualize_history, loadHistory
 from keras.utils.visualize_util import plot
 import numpy as np
 
-def TestModel(model, local_folder, path_to_images, output_model_img=True, output_history_plot=True):
+def TestModel(model, local_folder, path_to_images, output_model_img=True, output_history_plot=True, bake_files=False):
     if output_model_img:
         plot(model, to_file=local_folder + 'results/model.png', show_shapes=True)
 
@@ -13,26 +13,25 @@ def TestModel(model, local_folder, path_to_images, output_model_img=True, output
     UsableTrainSubset = SubsetSegments(Segments, has_image=True, has_score=True)
 
     # TODO> If we have labels_from_segments.npy + labels_from_model.npy load them, otherwise>
-    '''
-    # 3 labels_from_segments
-    list_of_images, labels_from_segments = LoadDataFromSegments(UsableTrainSubset)
-    if (path_to_images is not None):
-        list_of_images = [(path_to_images + x) for x in list_of_images]
+    if bake_files:
+        # 3 labels_from_segments
+        list_of_images, labels_from_segments = LoadDataFromSegments(UsableTrainSubset)
+        if (path_to_images is not None):
+            list_of_images = [(path_to_images + x) for x in list_of_images]
 
+        # 4 labels_from_model
+        img_width = 150
+        img_height = 150
+        validation_images = preprocess_image_batch(list_of_images, img_size=(PIXELS_X, PIXELS_Y), crop_size=(img_width, img_height), color_mode="rgb")
 
-    # 4 labels_from_model
-    img_width = 150
-    img_height = 150
-    validation_images = preprocess_image_batch(list_of_images, img_size=(PIXELS_X, PIXELS_Y), crop_size=(img_width, img_height), color_mode="rgb")
+        labels_from_model = model.predict(validation_images, batch_size=32, verbose=0)
 
-    labels_from_model = model.predict(validation_images, batch_size=32, verbose=0)
+        # 5 COMPARE
 
-    # 5 COMPARE
+        # numpy save and load:
+        np.save(open(local_folder + 'data/labels_from_segments.npy', 'w'), labels_from_segments)
+        np.save(open(local_folder + 'data/labels_from_model.npy', 'w'), labels_from_model)
 
-    # numpy save and load:
-    np.save(open(local_folder + 'data/labels_from_segments.npy', 'w'), labels_from_segments)
-    np.save(open(local_folder + 'data/labels_from_model.npy', 'w'), labels_from_model)
-    '''
 
     labels_from_segments = np.load(open(local_folder + 'data/labels_from_segments.npy'))
     labels_from_model = np.load(open(local_folder + 'data/labels_from_model.npy'))

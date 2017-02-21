@@ -1,3 +1,35 @@
+'''
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '../..'))
+ --- taky facha, ale je potiz, ze pak ty obrazky jsou cilene divne :E
+ --- mozna local_abs_dir = os.path.dirname(__file__) a od toho jet dal
+'''
+
+'''
+import sys
+sys.path.append('/home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/')
+import os
+cwd = os.getcwd()
+print cwd
+# IDLE /home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/ModelImplementations/1_SimpleCNN_3conv_2fc
+# __name__> __main__
+# __file__> /home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/ModelImplementations/1_SimpleCNN_3conv_2fc/train.py
+
+# PyCharm /home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser
+# __name__> __main__
+# __file__> /home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/ModelImplementations/1_SimpleCNN_3conv_2fc/train.py
+
+# MAYBE UNIFY WITH
+#os.chdir(path) ("change the current working directory to path")
+
+print __name__
+print __file__
+# V IDLE pak facha:
+#plot(model, to_file='results/model.png', show_shapes=True)
+exit()
+'''
+
 from keras.models import Sequential
 from keras.layers import Convolution2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
@@ -54,8 +86,8 @@ images_add = Folder
 plot(model, to_file=LocalFolder+'results/model.png', show_shapes=True)
 
 #[x, y, x_val, y_val] = Prepare_DataLabels(segments_file,300,300,path_to_images=images_add)
-[train_generator, validation_generator] = Prepare_DataLabels_generators(segments_file,150,150,path_to_images=images_add)
-
+#[train_generator, validation_generator] = Prepare_DataLabels_generators(segments_file,150,150,path_to_images=images_add)
+[x, y, x_val, y_val] = Prepare_DataLabels_withGeneratedData(segments_file,img_width, img_height,validation_split=0.25,path_to_images=Folder,shuffle_=False,seed_=42)
 
 # s write_images=True zlobi
 now = time.strftime("%c")
@@ -63,19 +95,24 @@ log1 = keras.callbacks.TensorBoard(log_dir=LocalFolder+'data/'+now, histogram_fr
 log2 = keras.callbacks.CSVLogger(LocalFolder+'data/logCSV.csv', separator=',', append=False)
 logcalls = [log1, log2]
 #logcalls = []
-
+'''
 nb_train_samples = 2000
 nb_validation_samples = 800
 nb_epoch = 50
-
 hi = model.fit_generator(
         train_generator,
         samples_per_epoch=nb_train_samples,
         nb_epoch=nb_epoch,
         validation_data=validation_generator,
         nb_val_samples=nb_validation_samples,
-    callbacks=logcalls)
+    )
+'''
+nb_epoch = 50
+history = model.fit(x, np.array(y),
+        nb_epoch=nb_epoch, batch_size=32,
+        validation_data=(x_val, np.array(y_val)),
+                    callbacks=logcalls)
 
 model.save(LocalFolder+'data/pokusCNN_V2_s1000_e5.h5')
 
-saveHistory(hi.history, LocalFolder+'results/history.npy')
+saveHistory(history.history, LocalFolder+'results/history.npy')
