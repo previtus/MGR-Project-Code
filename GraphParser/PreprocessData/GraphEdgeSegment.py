@@ -12,44 +12,17 @@ class GraphEdgeSegment:
     '''
     tmp = 0
 
-    def __init__(self, FromId, ToId, Nodes, SegmentId):
-        '''
-        Old initiation - we don't really need FromId or ToId to be saved...
-        '''
-        self.FromId = FromId
-        self.ToId = ToId
-        self.SegmentId = SegmentId
-
-        self.Score = 0
-
-        # Array of boolean flags if the images have been downloaded (1 or more)
-        self.HasLoadedImage = [False]
-        # Error code encountered while downloading
-        self.ErrorMessages = [ERROR_MESSAGE_NO_ERROR]  # = -1
-
-        # Latitude,Latitude projected,Longitude,Longitude projected,Elevation
-        # self.Start = map(float, Nodes[FromId])
-        # self.End = map(float, Nodes[ToId])
-        self.Start = (float(Nodes[FromId][0]), float(Nodes[FromId][2]))
-        self.End = (float(Nodes[ToId][0]), float(Nodes[ToId][2]))
-
-        self.ProjectedStart = (float(Nodes[FromId][1]), float(Nodes[FromId][3]))
-        self.ProjectedEnd = (float(Nodes[ToId][1]), float(Nodes[ToId][3]))
-
-        self.ElevationStart = float(Nodes[FromId][4])
-        self.ElevationEnd = float(Nodes[ToId][4])
-
-        GraphEdgeSegment.tmp += 1
-
     def __init__(self, Start, End, Score, SegmentId):
         '''
-        New initiation - from new dataset, where we might not even know node ids (we don't need them)
+        Initialize Segment with the data from an edge.
+        :param Start: start coordinates
+        :param End: end coordinates
+        :param Score: score, which is then transformed
+        :param SegmentId: segment unique id
         '''
-        self.FromId = -100
-        self.ToId = -100
         self.SegmentId = SegmentId
 
-        self.Score = Score
+        self.setScore(Score)
 
         # Array of boolean flags if the images have been downloaded (1 or more)
         self.HasLoadedImage = [False]
@@ -61,14 +34,19 @@ class GraphEdgeSegment:
 
         GraphEdgeSegment.tmp += 1
 
+    def ScoreAdjustment(self,val):
+        # val goes <0,100> we want <0,1> (when using sigmoid)
+        return (float(val)/100.0)
+
+    def setScore(self, s):
+        self.Score = self.ScoreAdjustment(s)
+
     def displaySegment(self):
-        #print "SegmentId: ", self.SegmentId, "From: ", self.FromId,  ", To: ", self.ToId, ", Images: ", self.HasLoadedImage
         print "SegmentId: ", self.SegmentId, ", Images: ", self.HasLoadedImage, ", Score: ", self.getScore()
         print "Start: ", self.Start
         print "End: ", self.End
 
     def displaySegmentShort(self):
-        #print "SegmentId: ", self.SegmentId, "From: ", self.FromId,  ", To: ", self.ToId, ", Images: ", self.HasLoadedImage
         print "SegmentId: ", self.SegmentId, ", Images: ", self.HasLoadedImage, ", Score: ", self.getScore()
 
     def getBearingString(self):

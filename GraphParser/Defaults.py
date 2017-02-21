@@ -1,4 +1,5 @@
-# Defaults.py
+# Defaults.pyNODESFILES_GEOJSON = r'../../graph_new_data/attractivity_previtus_data_1_nodes.geojson'
+
 
 ### PreprocessData part ###
 
@@ -17,10 +18,7 @@ FILE_NOT_FOUND_CHECKSUM = "b31c4837d780bd4ea95da73ba0e8a54b" #150x150
 # TODO: Check for file not found in different manner
 # probably: https://developers.google.com/maps/documentation/javascript/streetview#StreetViewService
 
-EDGESFILES = r'../../graph/edges_.csv'
-NODESFILES = r'../../graph/nodes_.csv'
 EDGESFILES_GEOJSON = r'../../graph_new_data/attractivity_previtus_data_1_edges.geojson'
-NODESFILES_GEOJSON = r'../../graph_new_data/attractivity_previtus_data_1_nodes.geojson'
 DATASTRUCTUREFILE = 'SegmentsData.dump'
 
 global ERROR_MESSAGE_NO_ERROR
