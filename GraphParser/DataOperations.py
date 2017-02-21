@@ -32,8 +32,9 @@ def HasSomeErrorneousData(Segments, ERROR_TYPE):
         Segments = FixDataFile_FailedDownloads(_,E)
     '''
     for segment in Segments:
-        if segment.ErrorMessages[0] == ERROR_TYPE:
-            return True
+        for i_th_image in range(0, segment.number_of_images):
+            if segment.ErrorMessages[i_th_image] == ERROR_TYPE:
+                return True
     return False
 
 # todo version with directly Segments:
@@ -64,10 +65,16 @@ def FixDataFile_FailedDownloads(name, ERROR_TYPE):
     # fix
     BrokenSegments = []
     for segment in Segments:
+        broken = False
         #print segment.ErrorMessage
-        if segment.ErrorMessages[0] == ERROR_TYPE:
-            #print segment.SegmentId
+        for i_th_image in range(0, segment.number_of_images):
+            if segment.ErrorMessages[i_th_image] == ERROR_TYPE:
+                broken = True
+                #print segment.SegmentId
+        if broken:
             BrokenSegments.append(segment)
+
+    # Redownload the whole segment in such case...
             
     #print "BrokenSegments: ", BrokenSegments
     print "Fixing |", len(BrokenSegments), "| Segments."

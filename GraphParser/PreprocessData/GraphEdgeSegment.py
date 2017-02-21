@@ -44,7 +44,7 @@ class GraphEdgeSegment:
         self.Score = self.ScoreAdjustment(s)
 
     def displaySegment(self):
-        print "SegmentId: ", self.SegmentId, ", Images: ", self.HasLoadedImages, ", Score: ", self.getScore()
+        print "SegmentId: ", self.SegmentId, ", Images: ", self.HasLoadedImages, ", Errors: ", self.ErrorMessages, ", Score: ", self.getScore()
         print "Start: ", self.Start
         print "End: ", self.End
 
@@ -55,6 +55,8 @@ class GraphEdgeSegment:
         return bearing_between_two_points(Location, Direction, degrees_offset)
 
     def resetImageMemory(self, number_of_images):
+        self.HasLoadedImages = []
+        self.ErrorMessages = []
         self.number_of_images = number_of_images
         for i in range(0,number_of_images):
             self.HasLoadedImages.append(False)
