@@ -25,6 +25,24 @@ def LoadDataFile(name):
     print "Loaded |", len(Segments), "| segments."
     return Segments
 
+def MarkSegmentsWithImagesOfMD5(Segments, MD5, MARKERR):
+    counter = 0
+    for segment in Segments:
+        for i_th_image in range(0, segment.number_of_images):
+            image_url = segment.getImageFilename(i_th_image)
+            # load img
+            img = 0
+
+            # md5 img
+            md5_img = md5(img)
+
+            # compare and mark segment errorneous
+            if md5_img == MD5:
+                segment.ErrorMessages[i_th_image] = MARKERR
+                counter += 1
+    print "Marked with error", MARKERR, " - ", counter, "images."
+
+
 def HasSomeErrorneousData(Segments, ERROR_TYPE):
     '''
     Check for errors. Example:

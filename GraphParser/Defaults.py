@@ -17,6 +17,8 @@ DOWNLOAD_TIMEOUT = 0.7
 #FILE_NOT_FOUND_CHECKSUM = "b31c4837d780bd4ea95da73ba0e8a54b" #150x150
 FILE_NOT_FOUND_CHECKSUM = "79d895a10e5947aa682b79cf0cfdcda1" #640x640
 
+QUOTA_EXCEEDED_CHECKSUM="b2328ec7ff935944a85723daddf0e8b7" # I suspect...
+
 # TODO: Check for file not found in different manner
 # probably: https://developers.google.com/maps/documentation/javascript/streetview#StreetViewService
 
@@ -29,6 +31,7 @@ global ERROR_MESSAGE_FAILED_MANY_TIMES
 ERROR_MESSAGE_NO_ERROR = -1
 ERROR_MESSAGE_NOT_FOUND = 404
 ERROR_MESSAGE_FAILED_MANY_TIMES = 101
+ERROR_MESSAGE_QUOTA = 333
 
 
 ### Learning part ###

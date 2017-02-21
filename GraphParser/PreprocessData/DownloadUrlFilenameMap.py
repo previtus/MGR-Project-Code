@@ -70,7 +70,15 @@ def DownloadUrlFilenameMap(FilenameMap, Segments):
                 # better have dictionary dict[ID] => obj
                 ## not del Segments[segment_id]
                 Segments[segment_list_id].ErrorMessages[i_nth_image] = ERROR_MESSAGE_NOT_FOUND #404
-            
+            elif (md5_code == QUOTA_EXCEEDED_CHECKSUM):
+                # SUSPECTED QUOTA REACHED
+                isLoaded = False
+                print "Daily download quota (25,000) exceeded."
+                os.remove(image_header[0])
+                FailedSegmentImageDownloads.append([segment_id, i_nth_image])
+                Segments[segment_list_id].ErrorMessages[i_nth_image] = ERROR_MESSAGE_QUOTA #333
+
+
         except Exception, e:
             # HANDLE FAIL OF DOWNLOADING PHOTO / INVALID SEGMENT
             print "exception: ", str(e)
