@@ -51,8 +51,8 @@ class GraphEdgeSegment:
     def displaySegmentShort(self):
         print "SegmentId: ", self.SegmentId, ", Images: ", self.HasLoadedImages, ", Score: ", self.getScore()
 
-    def getBearingString(self, Location, Direction):
-        return bearing_between_two_points(Location, Direction)
+    def getBearingString(self, Location, Direction, degrees_offset=0.0):
+        return bearing_between_two_points(Location, Direction, degrees_offset)
 
     def resetImageMemory(self, number_of_images):
         self.number_of_images = number_of_images
@@ -72,12 +72,27 @@ class GraphEdgeSegment:
         filenames = []
 
         # Looking from START to END
-        urls.append( self.getGoogleViewUrl(self.Start, self.End, PIXELS_X,PIXELS_Y) )
-        filenames.append( self.getImageFilename(len(filenames)) )
+        # 1 IMG
+        urls.append(self.getGoogleViewUrl(self.Start, self.End, PIXELS_X, PIXELS_Y))
+        filenames.append(self.getImageFilename(len(filenames)))
 
         # Looking from END to START
+        # 1 IMG
         urls.append( self.getGoogleViewUrl(self.End, self.Start, PIXELS_X,PIXELS_Y) )
         filenames.append( self.getImageFilename(len(filenames)) )
+
+        # Turning around the spot on for the two end points:
+        # 4 IMG
+        # 120 degrees - no overlap
+        urls.append(self.getGoogleViewUrl(self.Start, self.End, PIXELS_X, PIXELS_Y, degrees_offset=120.0))
+        filenames.append(self.getImageFilename(len(filenames)))
+        urls.append(self.getGoogleViewUrl(self.Start, self.End, PIXELS_X, PIXELS_Y, degrees_offset=240.0))
+        filenames.append(self.getImageFilename(len(filenames)))
+
+        urls.append( self.getGoogleViewUrl(self.End, self.Start, PIXELS_X,PIXELS_Y, degrees_offset=120.0))
+        filenames.append(self.getImageFilename(len(filenames)))
+        urls.append( self.getGoogleViewUrl(self.End, self.Start, PIXELS_X,PIXELS_Y, degrees_offset=240.0))
+        filenames.append(self.getImageFilename(len(filenames)))
 
         # And more to come <3
 
@@ -86,13 +101,13 @@ class GraphEdgeSegment:
 
         return [urls, filenames]
 
-    def getGoogleViewUrl(self, Location, Direction, resx, resy):
+    def getGoogleViewUrl(self, Location, Direction, resx, resy, degrees_offset=0.0):
         'Google View url from the start of this segment'
         # http://maps.googleapis.com/maps/api/
         # streetview?size=600x400&location=<lat>,<long>&heading=<angle from north>&key=<api>
         lat = Location[0]
         lon = Location[1]
-        bearing = round(self.getBearingString(Location, Direction), 2)
+        bearing = round(self.getBearingString(Location, Direction, degrees_offset), 2)
         url_start = "http://maps.googleapis.com/maps/api/streetview?size="
         api = getApi()
 

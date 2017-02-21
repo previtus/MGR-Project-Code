@@ -9,7 +9,7 @@ def getApi():
     api = open('../apicode.txt', 'r').read()
     return api
 
-def bearing_between_two_points(start, end):
+def bearing_between_two_points(start, end, degrees_offset=0.0):
     '''
     Calculates the initial bearing between two geographical locations.
     see: http://www.movable-type.co.uk/scripts/latlong.html
@@ -27,6 +27,9 @@ def bearing_between_two_points(start, end):
     y = cos(lat1) * sin(lat2) - ( sin(lat1) * cos(lat2) * cos(dLong) )
     
     bearing = degrees( atan2(x,y) )
+
+    bearing = bearing + degrees_offset
+
     bearing_from_north = (bearing + 360) % 360
 
     return bearing_from_north

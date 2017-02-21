@@ -4,7 +4,7 @@
 ### PreprocessData part ###
 
 FromEdgeID = 0 # 2 -> will start with 002.jpg
-ToEdgeID = 10 #15 # 14 -> will end with 013.jpg
+ToEdgeID = 3 #15 # 14 -> will end with 013.jpg
 # 1st dataset: out of 1165640! (there are 1165641 lines and the 1st one is just text)
 # 2nd dataset: out of 5556 edges
 PIXELS_X = 150
