@@ -4,17 +4,19 @@
 ### PreprocessData part ###
 
 FromEdgeID = 0 # 2 -> will start with 002.jpg
-ToEdgeID = 3 #15 # 14 -> will end with 013.jpg
+ToEdgeID = 5556 #15 # 14 -> will end with 013.jpg
 # 1st dataset: out of 1165640! (there are 1165641 lines and the 1st one is just text)
 # 2nd dataset: out of 5556 edges
-PIXELS_X = 150
-PIXELS_Y = 150
+PIXELS_X = 640
+PIXELS_Y = 640
 NUMBER_OF_ZEROS_PADDING = '03'
 
 DOWNLOAD_TIMEOUT = 0.7
 
-FILE_NOT_FOUND_CHECKSUM = "460cd333e543a08a47cb4b986de5942b" #300x300
-FILE_NOT_FOUND_CHECKSUM = "b31c4837d780bd4ea95da73ba0e8a54b" #150x150
+#FILE_NOT_FOUND_CHECKSUM = "460cd333e543a08a47cb4b986de5942b" #300x300
+#FILE_NOT_FOUND_CHECKSUM = "b31c4837d780bd4ea95da73ba0e8a54b" #150x150
+FILE_NOT_FOUND_CHECKSUM = "79d895a10e5947aa682b79cf0cfdcda1" #640x640
+
 # TODO: Check for file not found in different manner
 # probably: https://developers.google.com/maps/documentation/javascript/streetview#StreetViewService
 
