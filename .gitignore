@@ -13,3 +13,7 @@ GraphParser/ModelImplementations/1_SimpleCNN_3conv_2fc/data/*
 GraphParser/ModelImplementations/1_SimpleCNN_3conv_2fc/results/*
 GraphParser/ModelImplementations/2_VGG16_no_finetuning/data/*
 GraphParser/ModelImplementations/2_VGG16_no_finetuning/results/*
+GraphParser/ModelImplementations/2_VGG16_no_finetuning/(runs)/*
+GraphParser/ModelImplementations/2_VGG16_no_finetuning/now1/*
+*(backup)*
+WHOLE_MODEL_VGG16_WITH_CUSTOM_TOP.png
