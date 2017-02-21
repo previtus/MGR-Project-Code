@@ -78,6 +78,7 @@ class GraphEdgeSegment:
         urls.append(self.getGoogleViewUrl(self.Start, self.End, PIXELS_X, PIXELS_Y))
         filenames.append(self.getImageFilename(len(filenames)))
 
+        '''
         # Turning around the spot on for the two end points:
         # Smart turns: START->END turn till 180 'right'
         split_into = 5.0 # will create (split_into-1) images
@@ -87,12 +88,19 @@ class GraphEdgeSegment:
             urls.append(self.getGoogleViewUrl(self.Start, self.End, PIXELS_X, PIXELS_Y, degrees_offset=summ))
             filenames.append(self.getImageFilename(len(filenames)))
             summ += degrees_turn
+        '''
+
+        urls.append(self.getGoogleViewUrl(self.Start, self.End, PIXELS_X, PIXELS_Y, degrees_offset=120.0))
+        filenames.append(self.getImageFilename(len(filenames)))
+        urls.append(self.getGoogleViewUrl(self.Start, self.End, PIXELS_X, PIXELS_Y, degrees_offset=240.0))
+        filenames.append(self.getImageFilename(len(filenames)))
 
         # Looking from END to START
         # 1 IMG
         urls.append( self.getGoogleViewUrl(self.End, self.Start, PIXELS_X,PIXELS_Y) )
         filenames.append( self.getImageFilename(len(filenames)) )
 
+        '''
         # Smart turns: END->START turn till 180 'right'
         summ = degrees_turn
         while (summ < 180.0):
@@ -102,6 +110,12 @@ class GraphEdgeSegment:
 
         # COUNT = 2 + 2*(split_into-1) = 2 + 2*4 = 10 per one segment
         # 10 times the data? sounds pretty good
+        '''
+
+        urls.append( self.getGoogleViewUrl(self.End, self.Start, PIXELS_X,PIXELS_Y, degrees_offset=120.0))
+        filenames.append(self.getImageFilename(len(filenames)))
+        urls.append( self.getGoogleViewUrl(self.End, self.Start, PIXELS_X,PIXELS_Y, degrees_offset=240.0))
+        filenames.append(self.getImageFilename(len(filenames)))
 
         # And more to come <3
 

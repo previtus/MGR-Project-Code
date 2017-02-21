@@ -9,7 +9,7 @@ ToEdgeID = 5556 #15 # 14 -> will end with 013.jpg
 # 2nd dataset: out of 5556 edges
 PIXELS_X = 640
 PIXELS_Y = 640
-NUMBER_OF_ZEROS_PADDING = '03'
+NUMBER_OF_ZEROS_PADDING = '04'
 
 DOWNLOAD_TIMEOUT = 0.7
 
