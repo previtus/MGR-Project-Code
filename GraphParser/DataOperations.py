@@ -32,7 +32,7 @@ def HasSomeErrorneousData(Segments, ERROR_TYPE):
         Segments = FixDataFile_FailedDownloads(_,E)
     '''
     for segment in Segments:
-        if segment.ErrorMessage == ERROR_TYPE:
+        if segment.ErrorMessages[0] == ERROR_TYPE:
             return True
     return False
 
@@ -65,7 +65,7 @@ def FixDataFile_FailedDownloads(name, ERROR_TYPE):
     BrokenSegments = []
     for segment in Segments:
         #print segment.ErrorMessage
-        if segment.ErrorMessage == ERROR_TYPE:
+        if segment.ErrorMessages[0] == ERROR_TYPE:
             #print segment.SegmentId
             BrokenSegments.append(segment)
             

@@ -19,6 +19,9 @@ def GenListOfUrls(Segments):
         url = segment.getGoogleViewUrl(PIXELS_X,PIXELS_Y)
         filename = segment.getImageFilename()
 
+        # Prepare for multiple images per Segment!
+
+
         if verbose: print url, '\n', filename, '\n'
         #print filename
         

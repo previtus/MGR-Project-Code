@@ -51,7 +51,7 @@ def DownloadUrlFilenameMap(FilenameMap, Segments):
         segment_id = fileTuple[2]
         segment_list_id = segmentIDtoListID(segment_id)
 
-        Segments[segment_list_id].ErrorMessage = ERROR_MESSAGE_NO_ERROR
+        Segments[segment_list_id].ErrorMessages = [ERROR_MESSAGE_NO_ERROR]
         isLoaded = [True]
         md5_code = ""
         
@@ -68,7 +68,7 @@ def DownloadUrlFilenameMap(FilenameMap, Segments):
                 # remove invalid segments?
                 # better have dictionary dict[ID] => obj
                 ## not del Segments[segment_id]
-                Segments[segment_list_id].ErrorMessage = ERROR_MESSAGE_NOT_FOUND #404
+                Segments[segment_list_id].ErrorMessages = [ERROR_MESSAGE_NOT_FOUND] #404
             
         except Exception, e:
             # HANDLE FAIL OF DOWNLOADING PHOTO / INVALID SEGMENT
@@ -76,7 +76,7 @@ def DownloadUrlFilenameMap(FilenameMap, Segments):
             isLoaded = [False]
             FailedSegmentImageDownloads.append([segment_id])
             # remove invalid segments?
-            Segments[segment_list_id].ErrorMessage = ERROR_MESSAGE_FAILED_MANY_TIMES #101
+            Segments[segment_list_id].ErrorMessages = [ERROR_MESSAGE_FAILED_MANY_TIMES] #101
 
 
             print "Failed to finally save the file."

@@ -25,7 +25,7 @@ class GraphEdgeSegment:
         # Array of boolean flags if the images have been downloaded (1 or more)
         self.HasLoadedImage = [False]
         # Error code encountered while downloading
-        self.ErrorMessage = ERROR_MESSAGE_NO_ERROR  # = -1
+        self.ErrorMessages = [ERROR_MESSAGE_NO_ERROR]  # = -1
 
         # Latitude,Latitude projected,Longitude,Longitude projected,Elevation
         # self.Start = map(float, Nodes[FromId])
@@ -54,7 +54,7 @@ class GraphEdgeSegment:
         # Array of boolean flags if the images have been downloaded (1 or more)
         self.HasLoadedImage = [False]
         # Error code encountered while downloading
-        self.ErrorMessage = ERROR_MESSAGE_NO_ERROR  # = -1
+        self.ErrorMessages = [ERROR_MESSAGE_NO_ERROR]  # = -1
 
         self.Start = Start
         self.End = End
@@ -99,6 +99,10 @@ class GraphEdgeSegment:
     def hasLoadedImage(self):
         # while working with one image only, the validity flag is if we got it
         return self.HasLoadedImage[0]
+
+    def hasLoadedImageI(self, i):
+        # while working with one image only, the validity flag is if we got it
+        return self.HasLoadedImage[i]
 
     def hasUnknownScore(self):
         return (self.getScore() == -1)
