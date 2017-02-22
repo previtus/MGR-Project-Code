@@ -14,6 +14,10 @@ if not(os.path.isfile(DATASTRUCTUREFILE)):
 Segments = LoadDataFile(DATASTRUCTUREFILE)
 StatisticsSegments(Segments)
 
+if (HasSomeErrorneousData(Segments, ERROR_MESSAGE_QUOTA)):
+    print "Surpassed quota last lime! Redownloading."
+    Segments = FixDataFile_FailedDownloads(DATASTRUCTUREFILE, ERROR_MESSAGE_QUOTA)
+
 if (HasSomeErrorneousData(Segments, ERROR_MESSAGE_FAILED_MANY_TIMES)):
     print "Data had some errors, filling in the blanks!"
     Segments = FixDataFile_FailedDownloads(DATASTRUCTUREFILE, ERROR_MESSAGE_FAILED_MANY_TIMES)

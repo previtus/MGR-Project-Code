@@ -3,7 +3,6 @@ import pickle
 from PreprocessData.GenListOfUrls import *
 from PreprocessData.DownloadUrlFilenameMap import *
 
-
 ''' todo: return false/true and take into account fails  '''
 
 def SaveDataFile(name, Segments):
@@ -26,22 +25,37 @@ def LoadDataFile(name):
     return Segments
 
 def MarkSegmentsWithImagesOfMD5(Segments, MD5, MARKERR):
+    '''
+    Used to manually mark bad segments after they are downloaded (using the rest of the set and not having to
+    re-download it all).
+    Ps: all of the known errors we mark directly while downloading in DownloadUrlFilenameMap
+
+    Example call:
+    # manual marking and saving
+    #Segments = MarkSegmentsWithImagesOfMD5(Segments, QUOTA_EXCEEDED_CHECKSUM, ERROR_MESSAGE_QUOTA)
+    #SaveDataFile(DATASTRUCTUREFILE, Segments)
+
+    :param Segments: Input segments (remember to save them after! and possibly back them up before)
+    :param MD5: we are looking for certain md5 of the image - for example "b2328ec7ff935944a85723daddf0e8b7" was quota
+    :param MARKERR: we want to mark the *bad* segments - we will thus force all the photos related to one Segment to redownload
+    :return: Edited Segments, remember to save them.
+    '''
     counter = 0
     for segment in Segments:
         for i_th_image in range(0, segment.number_of_images):
-            image_url = segment.getImageFilename(i_th_image)
-            # load img
-            img = 0
+            if segment.hasLoadedImageI(i_th_image):
+                image_url = segment.getImageFilename(i_th_image)
 
-            # md5 img
-            md5_img = md5(img)
+                # md5 img
+                md5_img = md5(image_url)
+                # print md5_img
 
-            # compare and mark segment errorneous
-            if md5_img == MD5:
-                segment.ErrorMessages[i_th_image] = MARKERR
-                counter += 1
-    print "Marked with error", MARKERR, " - ", counter, "images."
-
+                # compare and mark segment errorneous
+                if md5_img == MD5:
+                    segment.ErrorMessages[i_th_image] = MARKERR
+                    counter += 1
+    print "Marked with error <", MARKERR, "> - ", counter, "images."
+    return Segments
 
 def HasSomeErrorneousData(Segments, ERROR_TYPE):
     '''
@@ -76,9 +90,9 @@ def FixDataFile_FailedDownloads(name, ERROR_TYPE):
     # bakname = "".join([name, ".bak"])
     # SaveDataFile(bakname, Segments)
 
-    '''print "BEFORE:"
+    print "BEFORE:"
     for segment in Segments:
-        segment.displaySegment()'''
+        segment.displaySegment()
 
     # fix
     BrokenSegments = []
@@ -100,9 +114,9 @@ def FixDataFile_FailedDownloads(name, ERROR_TYPE):
     #print "FilenameMapOfBroken: ", FilenameMapOfBroken
     F = DownloadUrlFilenameMap(FilenameMapOfBroken, Segments)
     
-    '''print "AFTER:"
+    print "AFTER:"
     for segment in Segments:
-        segment.displaySegment()'''
+        segment.displaySegment()
 
     
     # save
