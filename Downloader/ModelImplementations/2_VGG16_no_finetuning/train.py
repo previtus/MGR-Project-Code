@@ -2,7 +2,7 @@
 # we follow: https://blog.keras.io/building-powerful-image-classification-models-using-very-little-data.html
 
 import sys
-sys.path.append('/home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/')
+sys.path.append('/home/ekmek/TEMP_SPACE/MGR-Project-Code/Downloader/')
 
 
 import os

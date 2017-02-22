@@ -69,8 +69,8 @@ def loadHistory(filename):
 
 #visualize_history(loadHistory('1100downloaded_vII/tmp_saved_history.npy'))
 
-#h1 = loadHistory('/home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/ModelImplementations/1_SimpleCNN_3conv_2fc/results/history.npy')
-#h2 = loadHistory('/home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/ModelImplementations/2_VGG16_no_finetuning/(runs)/now2/results/history.npy')
-#h3 = loadHistory('/home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/ModelImplementations/2_VGG16_no_finetuning/results/history_finetune.npy')
+#h1 = loadHistory('/home/ekmek/TEMP_SPACE/MGR-Project-Code/Downloader/ModelImplementations/1_SimpleCNN_3conv_2fc/results/history.npy')
+#h2 = loadHistory('/home/ekmek/TEMP_SPACE/MGR-Project-Code/Downloader/ModelImplementations/2_VGG16_no_finetuning/(runs)/now2/results/history.npy')
+#h3 = loadHistory('/home/ekmek/TEMP_SPACE/MGR-Project-Code/Downloader/ModelImplementations/2_VGG16_no_finetuning/results/history_finetune.npy')
 #visualize_histories([h1, h2, h3], ['simple', 'vgg', 'finetune'],save=True)
 

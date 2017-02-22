@@ -8,17 +8,17 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '../..'))
 
 '''
 import sys
-sys.path.append('/home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/')
+sys.path.append('/home/ekmek/TEMP_SPACE/MGR-Project-Code/Downloader/')
 import os
 cwd = os.getcwd()
 print cwd
-# IDLE /home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/ModelImplementations/1_SimpleCNN_3conv_2fc
+# IDLE /home/ekmek/TEMP_SPACE/MGR-Project-Code/Downloader/ModelImplementations/1_SimpleCNN_3conv_2fc
 # __name__> __main__
-# __file__> /home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/ModelImplementations/1_SimpleCNN_3conv_2fc/train.py
+# __file__> /home/ekmek/TEMP_SPACE/MGR-Project-Code/Downloader/ModelImplementations/1_SimpleCNN_3conv_2fc/train.py
 
-# PyCharm /home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser
+# PyCharm /home/ekmek/TEMP_SPACE/MGR-Project-Code/Downloader
 # __name__> __main__
-# __file__> /home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/ModelImplementations/1_SimpleCNN_3conv_2fc/train.py
+# __file__> /home/ekmek/TEMP_SPACE/MGR-Project-Code/Downloader/ModelImplementations/1_SimpleCNN_3conv_2fc/train.py
 
 # MAYBE UNIFY WITH
 #os.chdir(path) ("change the current working directory to path")

@@ -20,7 +20,7 @@ img_width, img_height = 150, 150
 
 nb_epoch = 50
 
-path_to_custom_top = '/home/ekmek/TEMP_SPACE/MGR-Project-Code/GraphParser/ModelImplementations/2_VGG16_no_finetuning/now1/data/top_model_weights.h5'
+path_to_custom_top = '/home/ekmek/TEMP_SPACE/MGR-Project-Code/Downloader/ModelImplementations/2_VGG16_no_finetuning/now1/data/top_model_weights.h5'
 model = load_vgg16_model_with_custom_top(path_to_custom_top)
 
 
