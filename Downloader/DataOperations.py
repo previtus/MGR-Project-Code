@@ -2,6 +2,7 @@
 import pickle
 from PreprocessData.GenListOfUrls import *
 from PreprocessData.DownloadUrlFilenameMap import *
+from PreprocessData.GraphEdgeSegment import *
 
 ''' todo: return false/true and take into account fails  '''
 
@@ -18,7 +19,7 @@ def LoadDataFile(name):
     Load Segments from the file <name>
     '''
     Segments = []
-    with open(name) as f:
+    with open(name,'rb') as f:
         Segments = pickle.load(f)
 
     print "Loaded |", len(Segments), "| segments."
