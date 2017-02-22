@@ -143,7 +143,7 @@ class GraphEdgeSegment:
 
     def getImageFilename(self, i_th_image):
         'Unified filename generation'
-        filename = "".join(["Data/images/", format(self.SegmentId, NUMBER_OF_ZEROS_PADDING), "_", str(i_th_image), ".jpg"])
+        filename = "".join(["images/", format(self.SegmentId, NUMBER_OF_ZEROS_PADDING), "_", str(i_th_image), ".jpg"])
         return filename
 
     def getScore(self):

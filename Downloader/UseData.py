@@ -1,10 +1,9 @@
 # UseData.py
-from GenerateGIFAnimation import *
-from Defaults import *
-from PreprocessDataF import *
-from DataOperations import *
-from PreprocessData.SegmentsManipulators import *
-
+from Downloader.GenerateGIFAnimation import *
+from Downloader.Defaults import *
+from Downloader.PreprocessDataF import *
+from Downloader.DataOperations import *
+from Downloader.PreprocessData.SegmentsManipulators import *
 import os
 
 if not(os.path.isfile(DATASTRUCTUREFILE)):
@@ -24,4 +23,3 @@ if (HasSomeErrorneousData(Segments, ERROR_MESSAGE_FAILED_MANY_TIMES)):
 
 #gifname = "".join(['animation_from_main_',str(FromEdgeID),'-',str(ToEdgeID),'.gif'])
 #GenerateGIFAnimation(Segments, gifname)
-

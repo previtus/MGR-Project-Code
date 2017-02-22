@@ -1,7 +1,7 @@
 # DownloadUrlFilenameMap.py
 import sys
 sys.path.append('..')
-from Defaults import *
+from Downloader.Defaults import *
 
 import socket
 import urllib

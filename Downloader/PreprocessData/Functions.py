@@ -3,7 +3,7 @@ from math import *
 
 import sys
 sys.path.append('..')
-from Defaults import FromEdgeID
+from Downloader.Defaults import FromEdgeID
 
 def getApi():
     api = open('../apicode.txt', 'r').read()

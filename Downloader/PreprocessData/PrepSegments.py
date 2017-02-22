@@ -2,7 +2,7 @@
 from GraphEdgeSegment import *
 import sys
 sys.path.append('..')
-from Defaults import *
+from Downloader.Defaults import *
 
 def PrepSegments(EdgesGEOJSON):
     '''
