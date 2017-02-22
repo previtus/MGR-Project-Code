@@ -41,7 +41,10 @@ class GraphEdgeSegment:
         return (float(val)/100.0)
 
     def setScore(self, s):
-        self.Score = self.ScoreAdjustment(s)
+        if s <> -1:
+            self.Score = self.ScoreAdjustment(s)
+        else:
+            self.Score = s
 
     def displaySegment(self):
         print "SegmentId: ", self.SegmentId, ", Images: ", self.HasLoadedImages, ", Errors: ", self.ErrorMessages, ", Score: ", self.getScore()
@@ -151,4 +154,4 @@ class GraphEdgeSegment:
         return self.HasLoadedImages[i]
 
     def hasUnknownScore(self):
-        return (self.getScore() == -1)
+        return (self.getScore() < 0) # negative score means unknown (-1 in source was /100)
