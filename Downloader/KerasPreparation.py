@@ -25,10 +25,11 @@ def split_data(x,y,validation_split=0.2):
     #print "Split", len(x), "images into", len(x_test), "test and", len(x_val), "validation sets."
     return x_test,y_test,x_val, y_val
 
-def LoadDataFromSegments(Segments, has_score=True):
+def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
     '''
     Turns loaded segments into data we will need for keras.
     :param Segments: Loaded segments
+    :param path_to_images: additional path specification which we need before 'images/---.jpg'
     :return: Returns list of urls of images and their labels (score in the Segment)
     '''
     list_of_images = []
@@ -44,9 +45,35 @@ def LoadDataFromSegments(Segments, has_score=True):
                     list_of_images.append(Segment.getImageFilename(i_th_image))
                     labels.append(Segment.getScore())
 
+    # If the path to images is specific, modify it from simple "Data/images/" with putting path_to_images before it.
+    if (path_to_images is not None):
+        # for example to ['images/000.jpg', ...] it will add "DifferentPath/" -> ['DifferentPath/images/000.jpg', ...]
+        list_of_images = [(path_to_images+x) for x in list_of_images]
+
     return list_of_images, labels
 
-def Prepare_DataLabels(path_to_segments_file, img_width, img_height,validation_split=0.2, path_to_images=None):
+def LoadActualImages(list_of_images):
+    x = preprocess_image_batch(list_of_images)
+    return x
+
+
+#### NOT USED
+
+def Prepare_DataLabels_nosplit(Segments, img_width, img_height, path_to_images=None):
+
+    # Open Segments and check images and scores
+    if (PIXELS_X != img_width) or (PIXELS_Y != img_height):
+        print "Downloaded images are of (PIXELS_X, PIXELS_Y):",PIXELS_X, PIXELS_Y, ", while we want (img_width, img_height)", img_width, img_height
+
+    StatisticsSegments(Segments)
+    list_of_images, y = LoadDataFromSegments(Segments, has_score=True, path_to_images=path_to_images)
+
+    # TODO: figure out a way of seleting correct sizes. Ideally we want to download biggest images possible and them crop bits out of them.
+    x = preprocess_image_batch(list_of_images, img_size=(PIXELS_X, PIXELS_Y), crop_size=(img_width, img_height))
+    n = len(list_of_images)
+    return [x, y, n]
+
+def Prepare_DataLabels(Segments, img_width, img_height,validation_split=0.2, path_to_images=None):
     '''
     Prepares data for Keras into inputs in x (images which will be fed into CNN) and their particular labels in y
     (labels which will be compared with outputs on CNN later). Also produces validation set.
@@ -55,32 +82,16 @@ def Prepare_DataLabels(path_to_segments_file, img_width, img_height,validation_s
     :param img_width: wanted outputing resolution (no matter how we saved the actual data)
     :param img_height:
     :param validation_split:
-    :param path_to_images: additional path specification which we need before 'Data/images/---.jpg'
+    :param path_to_images: additional path specification which we need before 'images/---.jpg'
     :return: Returns the data suitable for Keras - in x sized by (num_of_data,3,w,h) and in y sized by (num_of_data)
     '''
+    [x, y, n] = Prepare_DataLabels_nosplit(Segments, img_width, img_height, path_to_images=path_to_images)
+    x, y, x_val, y_val = split_data(x, y, validation_split)
 
-
-    # Open Segments and check images and scores
-    if (PIXELS_X != img_width) or (PIXELS_Y != img_height):
-        print "Downloaded images are of (PIXELS_X, PIXELS_Y):",PIXELS_X, PIXELS_Y, ", while we want (img_width, img_height)", img_width, img_height
-
-    Segments = LoadDataFile(path_to_segments_file)
-    StatisticsSegments(Segments)
-    list_of_images, labels = LoadDataFromSegments(Segments, has_score=True)
-
-    # If the path to images is specific, modify it from simple "Data/images/" with putting path_to_images before it.
-    if (path_to_images is not None):
-        # for example to ['Data/images/000.jpg', ...] it will add "DifferentPath/" -> ['DifferentPath/Data/images/000.jpg', ...]
-        list_of_images = [(path_to_images+x) for x in list_of_images]
-
-    # TODO: figure out a way of seleting correct sizes. Ideally we want to download biggest images possible and them crop bits out of them.
-    x = preprocess_image_batch(list_of_images, img_size=(PIXELS_X, PIXELS_Y), crop_size=(img_width, img_height), color_mode="rgb")
-    x, y, x_val, y_val = split_data(x, labels, validation_split)
-
-    print "Valid segments ",len(list_of_images),". Prepared dataset of", len(x) ,"train and", len(x_val), "validation images of size",img_width,"x",img_height,"."
+    print "Valid segments ",n,". Prepared dataset of", len(x) ,"train and", len(x_val), "validation images of size",img_width,"x",img_height,"."
     return [x, y, x_val, y_val]
 
-def Prepare_DataLabels_generators(path_to_segments_file, img_width, img_height,validation_split=0.2, path_to_images=None,
+def Prepare_DataLabels_generators(Segments, img_width, img_height,validation_split=0.2, path_to_images=None,
     valid_datagen_overwrite=None, train_datagen_overwrite=None, shuffle_=True, batch_size_=32):
     '''
     Prepares generators of data for Keras in training and validation set.
@@ -92,7 +103,7 @@ def Prepare_DataLabels_generators(path_to_segments_file, img_width, img_height,v
     '''
 
     # Get full sized images
-    [x, y, x_val, y_val] = Prepare_DataLabels(path_to_segments_file, img_width, img_height,validation_split, path_to_images)
+    [x, y, x_val, y_val] = Prepare_DataLabels(Segments, img_width, img_height,validation_split, path_to_images)
 
     if (valid_datagen_overwrite is None):
         valid_datagen = ImageDataGenerator(rescale=1. / 255)
@@ -159,7 +170,7 @@ def GenerateData(x,y, ImgDataGenerator, target_number_of_images,shuffle_=True, s
     x_gen = np.array(x_gen)
     return [x_gen,y_gen]
 
-def Prepare_DataLabels_withGeneratedData(path_to_segments_file, img_width, img_height,validation_split=0.2,
+def Prepare_DataLabels_withGeneratedData(Segments, img_width, img_height,validation_split=0.2,
       path_to_images=None, valid_datagen_overwrite=None, train_datagen_overwrite=None, target_number_of_trainset = 2000, target_number_of_validset = None,
                                          shuffle_=True, seed_=None):
     '''
@@ -187,7 +198,7 @@ def Prepare_DataLabels_withGeneratedData(path_to_segments_file, img_width, img_h
         target_number_of_validset = target_number_of_trainset*validation_split
 
     # Get full sized images
-    [x, y, x_val, y_val] = Prepare_DataLabels(path_to_segments_file, img_width, img_height, validation_split,
+    [x, y, x_val, y_val] = Prepare_DataLabels(Segments, img_width, img_height, validation_split,
                                               path_to_images)
 
     if (valid_datagen_overwrite is None):
