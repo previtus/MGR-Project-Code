@@ -78,8 +78,11 @@ model.compile(loss='mean_squared_error',
 # TODO: Pridat moznost ze kdyz dokonverguje a moc se nemeni, aby se zastavilo ---- !
 # ps> callback ModelCheckpoint = Save the model after every epoch.
 
-LocalFolder = 'ModelImplementations/1_SimpleCNN_3conv_2fc/'
-Folder = '1100downloaded_vII/'
+import os
+print os.getcwd()
+
+LocalFolder = ''
+Folder = '../../1100downloaded_vII/'
 segments_file = Folder+'SegmentsData.dump'
 images_add = Folder
 

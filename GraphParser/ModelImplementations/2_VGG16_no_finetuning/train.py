@@ -19,6 +19,8 @@ import os.path
 import keras
 import time
 
+import os
+print os.getcwd()
 
 # INPUTS
 LocalFolder = 'ModelImplementations/2_VGG16_no_finetuning/'
