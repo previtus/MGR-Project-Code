@@ -90,9 +90,9 @@ def FixDataFile_FailedDownloads(name, ERROR_TYPE):
     # bakname = "".join([name, ".bak"])
     # SaveDataFile(bakname, Segments)
 
-    print "BEFORE:"
+    '''print "BEFORE:"
     for segment in Segments:
-        segment.displaySegment()
+        segment.displaySegment()'''
 
     # fix
     BrokenSegments = []
@@ -114,9 +114,9 @@ def FixDataFile_FailedDownloads(name, ERROR_TYPE):
     #print "FilenameMapOfBroken: ", FilenameMapOfBroken
     F = DownloadUrlFilenameMap(FilenameMapOfBroken, Segments)
     
-    print "AFTER:"
+    '''print "AFTER:"
     for segment in Segments:
-        segment.displaySegment()
+        segment.displaySegment()'''
 
     
     # save
