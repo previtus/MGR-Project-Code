@@ -3,17 +3,17 @@
 *.[pP][yY][cC]
 *.[dD][uU][mM][pP]
 apicode.txt
-GraphParser/SegmentsData.dump
+Downloader/SegmentsData.dump
 Tests/AlexNet tests/classified.txt
 .idea
-1200downloaded
-1100downloaded_vII
+1200downloaded*
+1100downloaded_vII*
 Keras tests
-GraphParser/ModelImplementations/1_SimpleCNN_3conv_2fc/data/*
-GraphParser/ModelImplementations/1_SimpleCNN_3conv_2fc/results/*
-GraphParser/ModelImplementations/2_VGG16_no_finetuning/data/*
-GraphParser/ModelImplementations/2_VGG16_no_finetuning/results/*
-GraphParser/ModelImplementations/2_VGG16_no_finetuning/(runs)/*
-GraphParser/ModelImplementations/2_VGG16_no_finetuning/now1/*
+Downloader/ModelImplementations/1_SimpleCNN_3conv_2fc/data/*
+Downloader/ModelImplementations/1_SimpleCNN_3conv_2fc/results/*
+Downloader/ModelImplementations/2_VGG16_no_finetuning/data/*
+Downloader/ModelImplementations/2_VGG16_no_finetuning/results/*
+Downloader/ModelImplementations/2_VGG16_no_finetuning/(runs)/*
+Downloader/ModelImplementations/2_VGG16_no_finetuning/now1/*
 *(backup)*
 WHOLE_MODEL_VGG16_WITH_CUSTOM_TOP.png
