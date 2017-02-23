@@ -22,26 +22,29 @@ class Dataset:
 
     '''
 
-    segments_filename = ''
-    segments_dir = ''
-    __Segments = []
     __list_of_images = []
     __labels = []
     img_width = -1
     img_height = -1
     num_of_images = 0
 
-    def __init__(self, path_to_segments_file, img_width, img_height):
-        self.segments_filename = path_to_segments_file
-        self.segments_dir = os.path.dirname(path_to_segments_file)+'/'
+    def __init__(self):
+        return None
+
+    def init_from_lists(self, list_of_images, labels, img_width, img_height):
         self.img_width = img_width
         self.img_height = img_height
-
-        # load Segments for internal use here
-        self.__Segments = DataOperations.LoadDataFile(self.segments_filename)
-        self.__list_of_images, self.__labels = KerasPreparation.LoadDataFromSegments(self.__Segments, has_score=True, path_to_images=self.segments_dir)
-
+        self.__list_of_images = list_of_images
+        self.__labels = labels
         self.num_of_images = len(self.__list_of_images)
+
+    def init_from_segments(self, path_to_segments_file, img_width, img_height):
+        # Segments are not used apart from initialization
+        Segments = DataOperations.LoadDataFile(path_to_segments_file)
+        segments_dir = os.path.dirname(path_to_segments_file) + '/'
+        __list_of_images, __labels = KerasPreparation.LoadDataFromSegments(Segments, has_score=True, path_to_images=segments_dir)
+
+        self.init_from_lists(__list_of_images, __labels, img_width, img_height)
 
     # Data access: ---------------------------------------------------------------------------------------------
 
@@ -83,12 +86,21 @@ class Dataset:
         DatasetVizualizators.plotX_sortValues(self.__labels, 'Distribution of score (sorted)')
         DatasetVizualizators.show()
 
+    def DebugGetDatasetArrays(self):
+        return [self.__list_of_images, self.__labels]
 
 #path = '/home/ekmek/TEMP_SPACE/MGR-Project-Code/Data/StreetViewData/TestData/SegmentsData.dump'
 #path = '/home/ekmek/TEMP_SPACE/MGR-Project-Code/Downloader/SegmentsData.dump'
 path = '../Downloader/SegmentsData.dump'
-
-testDataset = Dataset(path, 640, 640)
+testDataset = Dataset()
+testDataset.init_from_segments(path, 640, 640)
 testDataset.statistics()
-# cetnosti 12 6 6
-testDataset.plotHistogram()
+
+[list_of_images, labels] = testDataset.DebugGetDatasetArrays()
+
+testDataset2 = Dataset()
+testDataset2.init_from_lists(list_of_images, labels, 640, 640)
+testDataset2.statistics()
+
+#testDataset.plotHistogram()
+testDataset2.plotHistogram()
