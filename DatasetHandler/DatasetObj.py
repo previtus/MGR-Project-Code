@@ -1,7 +1,9 @@
 import Downloader.DataOperations as DataOperations
 import Downloader.KerasPreparation as KerasPreparation
 import os
-import numpy
+import copy
+import numpy as np
+import DatasetVizualizators
 
 class Dataset:
     '''
@@ -61,20 +63,32 @@ class Dataset:
 
     def statistics(self):
         print "Dataset of", self.num_of_images, " scored images of", self.img_width, "x", self.img_height, "resolution."
-        min = numpy.amin(self.__labels)
-        max = numpy.amax(self.__labels)
-        mean = numpy.mean(self.__labels)
-        q1 = numpy.percentile(self.__labels, 25)
-        q3 = numpy.percentile(self.__labels, 75)
+        min = np.amin(self.__labels)
+        max = np.amax(self.__labels)
+        mean = np.mean(self.__labels)
+        q1 = np.percentile(self.__labels, 25)
+        q3 = np.percentile(self.__labels, 75)
         print min, "|---[", q1, "{", mean, "}", q3, "]---|", max
         print "min |---[ 25perc { mean } 75perc ]---| max"
 
+        print self.__labels
+        x = copy.copy(self.__labels)
+        x.sort(reverse=True)
+        print x
+        print len(x)
+
+    def plotHistogram(self):
+        DatasetVizualizators.plotHistogram(self.__labels, 'Score distribution histogram')
+        DatasetVizualizators.plotWhisker(self.__labels, 'Whisker box plot')
+        DatasetVizualizators.plotX_sortValues(self.__labels, 'Distribution of score (sorted)')
+        DatasetVizualizators.show()
+
 
 #path = '/home/ekmek/TEMP_SPACE/MGR-Project-Code/Data/StreetViewData/TestData/SegmentsData.dump'
-path = '/home/ekmek/TEMP_SPACE/MGR-Project-Code/Downloader/SegmentsData.dump'
+#path = '/home/ekmek/TEMP_SPACE/MGR-Project-Code/Downloader/SegmentsData.dump'
 path = '../Downloader/SegmentsData.dump'
 
 testDataset = Dataset(path, 640, 640)
 testDataset.statistics()
-
-testDataset.getDataLabels_split()
+# cetnosti 12 6 6
+testDataset.plotHistogram()
