@@ -2,6 +2,7 @@ import Downloader.DataOperations as DataOperations
 import Downloader.KerasPreparation as KerasPreparation
 import os
 import copy
+import shutil
 import numpy as np
 import DatasetVizualizators
 
@@ -86,6 +87,32 @@ class Dataset:
         DatasetVizualizators.plotX_sortValues(self.__labels, 'Distribution of score (sorted)')
         DatasetVizualizators.show()
 
+    def DumpFilesIntoDirectory_withScores(self, target_directory = ''):
+        '''
+        Simple way of visualizing which images are considered "attractive" (with high score) and which are not
+        :param target_directory: target directory, for example target_directory = '../debugViewOfDataset/'
+        :return: returns list of new names of files, with the order unchanged
+        '''
+        # Copy images from their original location to a new directory while naming them:
+        # Score_<OriginalName.jpg>
+        if not os.path.exists(target_directory):
+            os.makedirs(target_directory)
+
+        new_names = []
+        for i in range(0, self.num_of_images):
+            name = self.__list_of_images[i]
+            score = self.__labels[i]
+
+            #head, tail = os.path.split(name)
+
+            filename = target_directory + "{0:.2f}".format(score) + '_' + os.path.basename(name)
+
+            #print name, score, filename
+            new_names.append(filename)
+
+            shutil.copy2(name, filename)
+        return new_names
+
     def DebugGetDatasetArrays(self):
         return [self.__list_of_images, self.__labels]
 
@@ -103,4 +130,11 @@ testDataset2.init_from_lists(list_of_images, labels, 640, 640)
 testDataset2.statistics()
 
 #testDataset.plotHistogram()
-testDataset2.plotHistogram()
+#testDataset2.plotHistogram()
+
+# pretty wild:
+newnames = testDataset2.DumpFilesIntoDirectory_withScores(target_directory = '../debugViewOfDataset/')
+
+testDataset3 = Dataset()
+testDataset3.init_from_lists(newnames, labels, 640, 640)
+testDataset3.statistics()
