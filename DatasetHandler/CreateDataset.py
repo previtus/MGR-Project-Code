@@ -1,42 +1,31 @@
 from DatasetObj import Dataset
-import time
-from Downloader.ImageHelpers import len_
-import numpy as np
+import random
 
-#path = '/home/ekmek/TEMP_SPACE/MGR-Project-Code/Data/StreetViewData/TestData/SegmentsData.dump'
-#path = '/home/ekmek/TEMP_SPACE/MGR-Project-Code/Downloader/SegmentsData.dump'
-path = '../Data/StreetViewData/8376_valid_images_640x640_120deg_turns_from_all_segments/SegmentsData.dump'
-testDataset = Dataset()
-testDataset.init_from_segments(path, 640, 640)
-testDataset.statistics()
-#testDataset.plotHistogram(save_to_pdf=True)
+def load_subset_8376_valid_images_640x640_120deg_turns_from_all_segments(desired_number, seed=42):
+    '''
+    :param desired_number: size of generated subset (for example 1000 out of the 8376)
+    :param seed: random seed to allow for equal results every time
+    :return:
+    '''
+    path = '../Data/StreetViewData/8376_valid_images_640x640_120deg_turns_from_all_segments/SegmentsData.dump'
+    dataset = Dataset()
+    dataset.init_from_segments(path, 640, 640)
 
-n = 100
-[list_of_images, labels] = testDataset.DebugGetDatasetArrays()
-#list_of_images = list_of_images[0:n]
-#labels = labels[0:n]
+    if seed is not None:
+        random.seed(seed)
 
-testDataset_smaller = testDataset.spawnUniformSubset(1000)
-testDataset_smaller.plotHistogram()
+    subset = dataset.spawnUniformSubset(desired_number)
 
+    return subset
 
-#import matplotlib.pyplot as plt
-#plt.plot(indices)
+def load_8376_valid_images_640x640_120deg_turns_from_all_segments():
+    path = '../Data/StreetViewData/8376_valid_images_640x640_120deg_turns_from_all_segments/SegmentsData.dump'
+    dataset = Dataset()
+    dataset.init_from_segments(path, 640, 640)
+    return dataset
 
-'''
-count, bins, ignored = plt.hist(indices, 1000, normed=True)
-plt.plot(bins, np.ones_like(bins), linewidth=2, color='r')
-'''
-
-#plt.show()
-
-#img_size=(299, 299)
-#[x, y, x_val, y_val] = testDataset.getDataLabels_split(resize=img_size)
-#start = time.time()
-#[x, y, x_val, y_val] = testDataset.getDataLabels_split()
-#end = time.time()
-#print "Took", (end - start), "sec to load."
-#print len_(x)
-#print len_(y)
-#print len_(x_val)
-#print len_(y_val)
+def load_3342_calid_images_299x299():
+    path = '../Data/StreetViewData/3342_calid_images_299x299/SegmentsData.dump'
+    dataset = Dataset()
+    dataset.init_from_segments(path, 299, 299)
+    return dataset
