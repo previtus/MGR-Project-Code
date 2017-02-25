@@ -1,0 +1,4 @@
+
+From  1000  loaded Segments (with 6000 potential images), only  6000  have images ( 0 don't) and only  3342  have score ( 2658 don't).
+The data set which we can use for training (aka has images AND has scores) is  3342
+
