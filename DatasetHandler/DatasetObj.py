@@ -84,8 +84,8 @@ class Dataset:
 
     def plotHistogram(self, save_to_pdf=False):
         DatasetVizualizators.plotHistogram(self.__labels, 'Score distribution histogram')
-        DatasetVizualizators.plotWhisker(self.__labels, 'Whisker box plot')
-        DatasetVizualizators.plotX_sortValues(self.__labels, 'Distribution of score (sorted)')
+        #DatasetVizualizators.plotWhisker(self.__labels, 'Whisker box plot')
+        #DatasetVizualizators.plotX_sortValues(self.__labels, 'Distribution of score (sorted)')
         if save_to_pdf:
             DatasetVizualizators.saveAllPlotsToPDF()
         DatasetVizualizators.show()
@@ -120,6 +120,26 @@ class Dataset:
         return [self.__list_of_images, self.__labels]
 
     def sampleUniform(self, desired_number):
+        # this is without repetition
         indices = random.sample(xrange(self.num_of_images), desired_number)
 
+        #print indices
+        return indices
+
+    def spawnUniformSubset(self, desired_number):
+        '''
+        Spawn a subset from dataset uniform distribution over the original data.
+
+        :param desired_number: size of the desired dataset
+        :return: the resulting new dataset
+        '''
+        indices = self.sampleUniform(desired_number)
+
+        sel_imgs = [self.__list_of_images[i] for i in indices]
+        sel_labels = [self.__labels[i] for i in indices]
+
+        newDataset = Dataset()
+        newDataset.init_from_lists(sel_imgs, sel_labels, self.img_width, self.img_height)
+
+        return newDataset
 
