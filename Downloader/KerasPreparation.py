@@ -52,8 +52,8 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
 
     return list_of_images, labels
 
-def LoadActualImages(list_of_images):
-    x = preprocess_image_batch(list_of_images)
+def LoadActualImages(list_of_images, resize=None):
+    x = preprocess_image_batch(list_of_images, img_size=resize)
     return x
 
 

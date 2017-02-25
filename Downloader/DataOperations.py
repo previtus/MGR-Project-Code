@@ -112,6 +112,8 @@ def FixDataFile_FailedDownloads(name, ERROR_TYPE):
     #print "BrokenSegments: ", BrokenSegments
     print "Fixing |", len(BrokenSegments), "| Segments."
     FilenameMapOfBroken = GenListOfUrls(BrokenSegments)
+    print "Equals to |", len(FilenameMapOfBroken), "| Images."
+
     #print "FilenameMapOfBroken: ", FilenameMapOfBroken
     F = DownloadUrlFilenameMap(FilenameMapOfBroken, Segments)
     
