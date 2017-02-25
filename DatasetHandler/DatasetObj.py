@@ -5,6 +5,7 @@ import copy
 import shutil
 import numpy as np
 import DatasetVizualizators
+import random
 
 class Dataset:
     '''
@@ -49,15 +50,15 @@ class Dataset:
 
     # Data access: ---------------------------------------------------------------------------------------------
 
-    def getDataLabels(self):
+    def getDataLabels(self, resize=None):
         # ([x],[y]) as image data and labels
-        x = KerasPreparation.LoadActualImages(self.__list_of_images)
+        x = KerasPreparation.LoadActualImages(self.__list_of_images, resize=resize)
         y = self.__labels
         return [x, y]
 
-    def getDataLabels_split(self, validation_split=0.2):
+    def getDataLabels_split(self, resize=None, validation_split=0.2):
         # ([x],[y]) as image data and labels
-        x = KerasPreparation.LoadActualImages(self.__list_of_images)
+        x = KerasPreparation.LoadActualImages(self.__list_of_images, resize=resize)
         y = self.__labels
 
         x, y, x_val, y_val = KerasPreparation.split_data(x, y, validation_split)
@@ -75,16 +76,18 @@ class Dataset:
         print min, "|---[", q1, "{", mean, "}", q3, "]---|", max
         print "min |---[ 25perc { mean } 75perc ]---| max"
 
-        print self.__labels
-        x = copy.copy(self.__labels)
-        x.sort(reverse=True)
-        print x
-        print len(x)
+        #print self.__labels
+        #x = copy.copy(self.__labels)
+        #x.sort(reverse=True)
+        #print x
+        #print len(x)
 
-    def plotHistogram(self):
+    def plotHistogram(self, save_to_pdf=False):
         DatasetVizualizators.plotHistogram(self.__labels, 'Score distribution histogram')
         DatasetVizualizators.plotWhisker(self.__labels, 'Whisker box plot')
         DatasetVizualizators.plotX_sortValues(self.__labels, 'Distribution of score (sorted)')
+        if save_to_pdf:
+            DatasetVizualizators.saveAllPlotsToPDF()
         DatasetVizualizators.show()
 
     def DumpFilesIntoDirectory_withScores(self, target_directory = ''):
@@ -116,25 +119,7 @@ class Dataset:
     def DebugGetDatasetArrays(self):
         return [self.__list_of_images, self.__labels]
 
-#path = '/home/ekmek/TEMP_SPACE/MGR-Project-Code/Data/StreetViewData/TestData/SegmentsData.dump'
-#path = '/home/ekmek/TEMP_SPACE/MGR-Project-Code/Downloader/SegmentsData.dump'
-path = '../Downloader/SegmentsData.dump'
-testDataset = Dataset()
-testDataset.init_from_segments(path, 640, 640)
-testDataset.statistics()
+    def sampleUniform(self, desired_number):
+        indices = random.sample(xrange(self.num_of_images), desired_number)
 
-[list_of_images, labels] = testDataset.DebugGetDatasetArrays()
 
-testDataset2 = Dataset()
-testDataset2.init_from_lists(list_of_images, labels, 640, 640)
-testDataset2.statistics()
-
-#testDataset.plotHistogram()
-#testDataset2.plotHistogram()
-
-# pretty wild:
-newnames = testDataset2.DumpFilesIntoDirectory_withScores(target_directory = '../debugViewOfDataset/')
-
-testDataset3 = Dataset()
-testDataset3.init_from_lists(newnames, labels, 640, 640)
-testDataset3.statistics()

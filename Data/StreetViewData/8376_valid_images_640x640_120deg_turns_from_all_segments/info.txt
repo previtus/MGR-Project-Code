@@ -1,0 +1,5 @@
+Segments Statistics:
+From  5556  loaded Segments (with 33336 potential images), only  30060  have images ( 3276 don't) and only  8376  have score ( 24960 don't).
+The data set which we can use for training (aka has images AND has scores) is  8376
+
+ps: 30061 items
