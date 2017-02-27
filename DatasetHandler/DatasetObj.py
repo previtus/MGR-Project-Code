@@ -91,6 +91,25 @@ class Dataset:
             DatasetVizualizators.saveAllPlotsToPDF()
         DatasetVizualizators.show()
 
+    def MapScoreToImages(self, into_bins=100):
+        '''
+        Gets a dict which give to a index from 0-100 a list of images of such score (score goes in range 0-1, so *100 in this case)
+        :return:
+        '''
+        into_bins -= 1
+        # Empty dict
+        dict = {key: [] for key in range(0,into_bins+1)}
+
+        for i in range(0, self.num_of_images):
+            name = self.__list_of_images[i]
+            score = float(self.__labels[i])
+            score_label = int(round(score, 2)*100)
+
+            score_label = int(score_label*into_bins/100)
+
+            dict[score_label].append(name)
+        return dict
+
     def DumpFilesIntoDirectory_withScores(self, target_directory = ''):
         '''
         Simple way of visualizing which images are considered "attractive" (with high score) and which are not

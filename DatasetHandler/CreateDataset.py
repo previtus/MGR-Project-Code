@@ -1,4 +1,5 @@
 from DatasetObj import Dataset
+from DatasetVizualizators import GenerateAverageImagesFromDictionary
 import random
 
 ABS_PATH_TO_PRJ = '/home/ekmek/Project II/MGR-Project-Code/'
@@ -56,6 +57,21 @@ def load_3342_valid_images_299x299(desired_number=None, seed=None):
     subset = dataset.spawnUniformSubset(desired_number)
     return subset
 
-#d = load_8376_resized_299x299()
+d = load_8376_valid_images_640x640_120deg_turns_from_all_segments()
+#dict = d.MapScoreToImages()
+#GenerateAverageImagesFromDictionary(dict,save_to_dir=True,output_folder=ABS_PATH_TO_PRJ+'debugVizAvgDatasetEntry/')
+#into_bins = 10
+#dict2 = d.MapScoreToImages(into_bins=into_bins)
+#print len(dict2)
+#print len(dict2[0]), '...', len(dict2[9])
+#GenerateAverageImagesFromDictionary(dict2,save_to_dir=True,output_folder=ABS_PATH_TO_PRJ+'debugVizAvgDatasetEntry/'+str(into_bins)+'_bins/')
+
+#into_bins = 4
+#dict3 = d.MapScoreToImages(into_bins=into_bins)
+#GenerateAverageImagesFromDictionary(dict3,save_to_dir=True,output_folder=ABS_PATH_TO_PRJ+'debugVizAvgDatasetEntry/'+str(into_bins)+'_bins/')
+
 #d.statistics()
 #d.plotHistogram()
+
+#path = '/home/ekmek/Project II/MGR-Project-Code/debugVizAvgDatasetEntry/__score-img_pairs/'
+#d.DumpFilesIntoDirectory_withScores(target_directory=path)

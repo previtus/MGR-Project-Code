@@ -1,4 +1,7 @@
 import numpy as np
+import os, PIL
+from PIL import Image
+
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 import matplotlib.ticker as ticker
@@ -19,6 +22,33 @@ def xkcd():
 
 def show():
     plt.show()
+
+def GenerateAverageImagesFromDictionary(dict, save_to_dir=None, output_folder=None):
+    '''
+    Gets a dictionary of d[score_label_value] pointing to an array of images
+    :param dict:
+    :return: Up to 100 averaged images
+    '''
+    dict_of_images = {}
+
+    for i in range(0,len(dict)):
+        imlist = dict[i]
+        N = len(imlist)
+        if N > 0:
+            w, h = Image.open(imlist[0]).size
+            arr = np.zeros((h, w, 3), np.float)
+            for im in imlist:
+                imarr = np.array(Image.open(im), dtype=np.float)
+                arr = arr + imarr / N
+            arr = np.array(np.round(arr), dtype=np.uint8)
+            dict_of_images[i] = arr
+
+            if save_to_dir is not None:
+                out=Image.fromarray(arr,mode="RGB")
+                out.save(output_folder+str(i).zfill(3)+"_avgFrom_"+str(N)+".png")
+                #out.show()
+
+    return dict_of_images
 
 def plotX_sortValues(dont_touch_this_x, title=''):
     x = copy.copy(dont_touch_this_x)
@@ -59,8 +89,6 @@ def plotHistogram(x, title='', num_bins=100, x_min=0.0, x_max=1.0):
     # Tweak spacing to prevent clipping of ylabel
 
     axes.set_title(title)
-
-
 
 def plotWhisker(data, title='', y_min=0.0, y_max=1.0, legend_on=True):
     plt.figure(figsize=(5, 8))
