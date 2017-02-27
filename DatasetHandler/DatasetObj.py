@@ -58,7 +58,7 @@ class Dataset:
 
     def getDataLabels_split(self, resize=None, validation_split=0.2):
         # ([x],[y]) as image data and labels
-        x = KerasPreparation.LoadActualImages(self.__list_of_images, resize=resize)
+        x = KerasPreparation.LoadActualImages(self.__list_of_images, resize=resize, dim_ordering=Downloader.Defaults.KERAS_SETTING_DIMENSIONS) # th or tf
         y = self.__labels
 
         x, y, x_val, y_val = KerasPreparation.split_data(x, y, validation_split)

@@ -38,6 +38,9 @@ ERROR_MESSAGE_NOT_FOUND = 404
 ERROR_MESSAGE_FAILED_MANY_TIMES = 101
 ERROR_MESSAGE_QUOTA = 333
 
+# KERAS SETTING
+# tf example (40, 299, 299, 3)
+KERAS_SETTING_DIMENSIONS = 'th'
 
 ### Learning part ###
 # Number of epochs?, etc...
