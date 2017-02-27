@@ -27,7 +27,7 @@ def visualize_history(hi, show=True, save=False, save_path=''):
 
     return plt
 
-def visualize_histories(histories, names, show=True, save=False, save_path=''):
+def visualize_histories(histories, names, plotvalues='loss', show=True, save=False, save_path=''):
     '''
     Visualize multiple histories.
 
@@ -43,9 +43,9 @@ def visualize_histories(histories, names, show=True, save=False, save_path=''):
         # list all data in history
         print(hi.keys())
         # summarize history for loss
-        plt.plot(hi['loss'])
-        plt.plot(hi['val_loss'])
-        plt.title('model loss')
+        plt.plot(hi[plotvalues])
+        plt.plot(hi['val_'+plotvalues])
+        plt.title('model '+plotvalues)
         plt.ylabel('loss')
         plt.xlabel('epoch')
         leg.append(n + '_train')
@@ -53,7 +53,7 @@ def visualize_histories(histories, names, show=True, save=False, save_path=''):
         i += 1
     plt.legend(leg, loc='upper left')
     if save:
-        plt.savefig(save_path+'loss.png')
+        plt.savefig(save_path+plotvalues+'.png')
     if show:
         plt.show()
 
