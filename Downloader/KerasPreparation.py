@@ -52,8 +52,12 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
 
     return list_of_images, labels
 
-def LoadActualImages(list_of_images, resize=None):
-    x = preprocess_image_batch(list_of_images, img_size=resize)
+def LoadActualImages(list_of_images, resize=None, dim_ordering='default'):
+    x = load_images_with_keras(list_of_images, target_size=resize, dim_ordering=dim_ordering)
+
+    #x = preprocess_image_batch(list_of_images, img_size=resize)
+
+    x = np.array(x)
     return x
 
 
