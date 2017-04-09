@@ -57,7 +57,7 @@ def load_3342_valid_images_299x299(desired_number=None, seed=None):
     subset = dataset.spawnUniformSubset(desired_number)
     return subset
 
-d = load_8376_valid_images_640x640_120deg_turns_from_all_segments()
+#d = load_8376_valid_images_640x640_120deg_turns_from_all_segments()
 #dict = d.MapScoreToImages()
 #GenerateAverageImagesFromDictionary(dict,save_to_dir=True,output_folder=ABS_PATH_TO_PRJ+'debugVizAvgDatasetEntry/')
 #into_bins = 10
@@ -75,3 +75,4 @@ d = load_8376_valid_images_640x640_120deg_turns_from_all_segments()
 
 #path = '/home/ekmek/Project II/MGR-Project-Code/debugVizAvgDatasetEntry/__score-img_pairs/'
 #d.DumpFilesIntoDirectory_withScores(target_directory=path)
+

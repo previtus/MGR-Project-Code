@@ -146,6 +146,23 @@ class Dataset:
         #print indices
         return indices
 
+    # TODO sample wanted number of images, so that the resulting set is uniform with its scores
+    '''
+    def sampleUniformNumberOfImagesPerScore(self, desired_number=0):
+        X = self.__list_of_images
+        Y = self.__labels
+        sorted_list_of_images = [x for (y, x) in sorted(zip(Y, X), key=lambda pair: pair[0])]
+        sorted_labels = copy.copy(Y)
+        sorted_labels.sort()
+
+        for i in range(0,len(sorted_labels)):
+            print sorted_labels[i], sorted_list_of_images[i]
+
+        # not yet done, dont know if we need it
+
+        return [] #[sorted_list_of_images, sorted_labels]
+    '''
+
     def spawnUniformSubset(self, desired_number):
         '''
         Spawn a subset from dataset uniform distribution over the original data.
