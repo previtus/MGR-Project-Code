@@ -1,0 +1,2 @@
+for file in *.jpg; do convert $file -resize 150x150 $file; done
+
