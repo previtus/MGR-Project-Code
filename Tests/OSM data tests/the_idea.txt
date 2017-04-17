@@ -1,0 +1,12 @@
+The idea tested also in "03_list_of_pairs.py" is following.
+
+We need to enrich somehow our data about certain route segments - the streetview photo is not the only thing we can use. So we would like to look at the surrounding area and count 'interesting objects' nearby.
+
+Of course there is the question of what should we understand as 'interesting object'. In this test file we try to look at the most common key=attribute combinations (understand them as tags, like 'building=yes' or 'highway=residential', but excluding those which would have no value like  'building=None', in such case its just untagged in the OSM data, so we don't know anything).
+The most common tag combinations are available aggregated at taginfo.openstreetmap.org. 
+
+We will use the <X> first rows from here to scoop out which columns should we ask for in our data. From the SQL query (now its from full data, but it will be just from a certain radius) we get quantities of each combination and create a vector.
+When we will be asking for one specific area (given by radius around lat+long point), this vector will represent "what is important around" this place.
+
+At least that is our hope.
+We'll see how sparse data we will be getting from this...
