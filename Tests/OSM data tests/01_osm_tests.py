@@ -5,17 +5,26 @@ path_to_pbf_file = "small_planet_14.43,50.062_14.485,50.086.osm.pbf"
 print path_to_pbf_file
 
 # SLOWER
-'''
+
+stop_after = 100
+
 highway_count = 0
 for entity in parse_file(path_to_pbf_file):
+    stop_after -= 1
+    if stop_after < 0:
+        break
+
+    print entity
+
     if isinstance(entity, Way) and 'highway' in entity.tags:
         highway_count += 1
 
 print("%d highways found" % highway_count)
 # 4921 highways found
-'''
+
 
 # FASTER
+'''
 from imposm.parser import OSMParser
 
 # simple class that handles the parsed OSM data.
@@ -36,3 +45,4 @@ p.parse(path_to_pbf_file)
 # done
 print counter.highways
 
+'''
