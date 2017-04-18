@@ -100,7 +100,7 @@ def train_top_model(x, y, x_val, y_val, target_folder, name_of_the_experiment, n
     saveHistory(history.history, target_folder+'history_VGG16manual'+name_of_the_experiment+'.npy')
     visualize_history(history.history, save=True, save_path=target_folder+'VGG16manual'+name_of_the_experiment+'_'+str(nb_epoch))
 
-def main_vgg16():
+def main_vgg16(TMP_size_of_dataset=100, TMP_num_of_epochs = 1):
     # INPUTS
     local_folders = ['/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/ModelFiles/', '/storage/brno2/home/previtus/MGR-Project-Code/Data/ModelFiles/']
     local_folder = use_path_which_exists(local_folders)
@@ -112,14 +112,14 @@ def main_vgg16():
 
     target_folder = local_folder + 'results/'
     name_of_the_experiment = '-first_experiments'
-    # SETTINGS
-    nb_epoch = 1
 
-    dataset = CreateDataset.load_8376_resized_150x150(desired_number=100, seed=42)
+    # SETTINGS
+
+    dataset = CreateDataset.load_8376_resized_150x150(desired_number=TMP_size_of_dataset, seed=42)
     [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=0.25)
 
     import random
     random.seed(None)
 
-    save_bottlebeck_features(x, y, x_val, y_val, target_folder, name_of_the_experiment, vgg16_weights_path)
-    train_top_model(x, y, x_val, y_val)
+    #save_bottlebeck_features(x, y, x_val, y_val, target_folder, name_of_the_experiment, vgg16_weights_path)
+    #train_top_model(x, y, x_val, y_val, target_folder, name_of_the_experiment, TMP_num_of_epochs)
