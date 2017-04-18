@@ -15,18 +15,18 @@ print os.getcwd()
 print "this one needs th to be set up in Defaults and in Keras.json"
 
 # INPUTS
-LocalFolder = '/home/ekmek/Project II/MGR-Project-Code/Data/ModelFiles/ManualVGG16/'
+LocalFolder = '/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/ModelFiles/NVMTesting/'
 
-vgg16_weights_path = '/home/ekmek/TEMP_SPACE/vgg16/vgg16_weights.h5'
+vgg16_weights_path = '/home/ekmek/Desktop/Project II/vgg16_weights.h5'
 
 target_folder = LocalFolder+'results/'
-plus = '8376v-withSeedNoneAfter'
+plus = '-nvm-testing-'
 # SETTINGS
 img_width, img_height = 150, 150
 nb_epoch = 50
 
 
-dataset = CreateDataset.load_8376_resized_150x150(desired_number=8376, seed=42)
+dataset = CreateDataset.load_8376_resized_150x150(desired_number=100, seed=42)
 [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=0.25)
 
 import random
@@ -75,7 +75,9 @@ def save_bottlebeck_features(x, y, x_val, y_val):
 
     # manually load weights into the partial VGG16 model
     assert os.path.exists(vgg16_weights_path), 'VGG16 model weights not found!'
-    f = h5py.File(vgg16_weights_path)
+    f = h5py.File(vgg16_weights_path, mode="r")
+    print f
+
     for k in range(f.attrs['nb_layers']):
         if k >= len(model.layers):
             # we don't look at the last (fully-connected) layers in the savefile
@@ -115,7 +117,5 @@ def train_top_model(x, y, x_val, y_val):
     saveHistory(history.history, LocalFolder+'results/history_VGG16manual'+plus+'.npy')
     visualize_history(history.history, save=True, save_path=LocalFolder+'results/VGG16manual'+plus+'_'+str(nb_epoch))
 
-
-
-save_bottlebeck_features(x, y, x_val, y_val)
-train_top_model(x, y, x_val, y_val)
+#save_bottlebeck_features(x, y, x_val, y_val)
+#train_top_model(x, y, x_val, y_val)
