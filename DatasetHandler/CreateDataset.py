@@ -1,8 +1,16 @@
 from DatasetObj import Dataset
 from DatasetVizualizators import GenerateAverageImagesFromDictionary
 import random
+import os
 
-ABS_PATH_TO_PRJ = '/home/ekmek/Project II/MGR-Project-Code/'
+PATH_ALTERNATIVES = ['/home/ekmek/Project II/MGR-Project-Code/', '~/MGR-Project-Code/']
+ABS_PATH_TO_PRJ = ''
+
+for path in PATH_ALTERNATIVES:
+    if os.path.isdir(path):
+        ABS_PATH_TO_PRJ = path
+if ABS_PATH_TO_PRJ=='':
+    print "Error, cannot locate the path of project, will likely fail!"
 
 def load_8376_valid_images_640x640_120deg_turns_from_all_segments(desired_number=None, seed=None):
     '''
