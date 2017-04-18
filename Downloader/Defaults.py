@@ -40,7 +40,9 @@ ERROR_MESSAGE_QUOTA = 333
 
 # KERAS SETTING
 # tf example (40, 299, 299, 3)
-KERAS_SETTING_DIMENSIONS = 'th'
+
+# experiments work with th
+KERAS_SETTING_DIMENSIONS = 'default'
 
 ### Learning part ###
 # Number of epochs?, etc...
