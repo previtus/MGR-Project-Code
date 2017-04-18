@@ -41,8 +41,9 @@ ERROR_MESSAGE_QUOTA = 333
 # KERAS SETTING
 # tf example (40, 299, 299, 3)
 
-# experiments work with th
-KERAS_SETTING_DIMENSIONS = 'default'
+# experiments worked with th
+# new Keras version expects None (instead of 'default') to search for the default system set value
+KERAS_SETTING_DIMENSIONS = None
 
 ### Learning part ###
 # Number of epochs?, etc...
