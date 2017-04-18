@@ -3,7 +3,7 @@ from DatasetVizualizators import GenerateAverageImagesFromDictionary
 import random
 import os
 
-PATH_ALTERNATIVES = ['/home/ekmek/Project II/MGR-Project-Code/', '~/MGR-Project-Code/']
+PATH_ALTERNATIVES = ['/home/ekmek/Project II/MGR-Project-Code/', '/storage/brno2/home/previtus/MGR-Project-Code/']
 ABS_PATH_TO_PRJ = ''
 
 for path in PATH_ALTERNATIVES:
