@@ -9,7 +9,7 @@ import time
 start = time.time()
 print time.ctime()
 
-main_vgg16(TMP_num_of_epochs=100, name_of_the_experiment = '-first_experiments')
+main_vgg16(TMP_size_of_dataset=8000, TMP_num_of_epochs=150, name_of_the_experiment = '-second_experiment')
 
 end = time.time()
 print time.ctime()
