@@ -6,6 +6,12 @@ import DatasetHandler.CreateDataset as CreateDataset
 from Downloader.ImageHelpers import len_
 from Downloader.VisualizeHistory import *
 
+from keras.applications.vgg16 import VGG16
+from keras.preprocessing import image
+from keras.applications.vgg16 import preprocess_input
+import numpy as np
+import time
+
 import os.path
 import os
 print os.getcwd()
@@ -13,75 +19,27 @@ print "this one needs th to be set up in Defaults and in Keras.json"
 
 from DatasetHandler.FileHelperFunc import use_path_which_exists
 
-def save_bottlebeck_features(x, y, x_val, y_val, target_folder, name_of_the_experiment, vgg16_weights_path='vgg16_weights.h5'):
+def save_bottlebeck_features(x, y, x_val, y_val, filename_features_train, filename_features_test):
     # dimensions of x are (num,3,x_dim, y_dim) = (75, 3, 150, 150)
     img_width = len_(x)[2]
     img_height = len_(x)[3]
 
     # VGG16 network
-    model = Sequential()
-    model.add(ZeroPadding2D((1, 1), input_shape=(3, img_width, img_height)))
-
-    model.add(Convolution2D(64, 3, 3, activation='relu', name='conv1_1'))
-    model.add(ZeroPadding2D((1, 1)))
-    model.add(Convolution2D(64, 3, 3, activation='relu', name='conv1_2'))
-    model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-
-    model.add(ZeroPadding2D((1, 1)))
-    model.add(Convolution2D(128, 3, 3, activation='relu', name='conv2_1'))
-    model.add(ZeroPadding2D((1, 1)))
-    model.add(Convolution2D(128, 3, 3, activation='relu', name='conv2_2'))
-    model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-
-    model.add(ZeroPadding2D((1, 1)))
-    model.add(Convolution2D(256, 3, 3, activation='relu', name='conv3_1'))
-    model.add(ZeroPadding2D((1, 1)))
-    model.add(Convolution2D(256, 3, 3, activation='relu', name='conv3_2'))
-    model.add(ZeroPadding2D((1, 1)))
-    model.add(Convolution2D(256, 3, 3, activation='relu', name='conv3_3'))
-    model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-
-    model.add(ZeroPadding2D((1, 1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu', name='conv4_1'))
-    model.add(ZeroPadding2D((1, 1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu', name='conv4_2'))
-    model.add(ZeroPadding2D((1, 1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu', name='conv4_3'))
-    model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-
-    model.add(ZeroPadding2D((1, 1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu', name='conv5_1'))
-    model.add(ZeroPadding2D((1, 1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu', name='conv5_2'))
-    model.add(ZeroPadding2D((1, 1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu', name='conv5_3'))
-    model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-
-    # manually load weights into the partial VGG16 model
-    assert os.path.exists(vgg16_weights_path), 'VGG16 model weights not found!'
-    f = h5py.File(vgg16_weights_path)
-    for k in range(f.attrs['nb_layers']):
-        if k >= len(model.layers):
-            # we don't look at the last (fully-connected) layers in the savefile
-            break
-        g = f['layer_{}'.format(k)]
-        weights = [g['param_{}'.format(p)] for p in range(g.attrs['nb_params'])]
-        model.layers[k].set_weights(weights)
-    f.close()
+    model = VGG16(weights='imagenet', include_top=False)
     print('VGG16 partial model loaded.')
 
     bottleneck_features_train = model.predict(x,verbose=1)
-    np.save(open(target_folder+'features_train_VGG16manual'+name_of_the_experiment+'.npy', 'w'), bottleneck_features_train)
+    np.save(open(filename_features_train, 'w'), bottleneck_features_train)
     bottleneck_features_validation = model.predict(x_val,verbose=1)
-    np.save(open(target_folder+'features_validation_VGG16manual'+name_of_the_experiment+'.npy', 'w'), bottleneck_features_validation)
+    np.save(open(filename_features_test, 'w'), bottleneck_features_validation)
 
 
-def train_top_model(x, y, x_val, y_val, target_folder, name_of_the_experiment, nb_epoch):
+def train_top_model(x, y, x_val, y_val, filename_features_train, filename_features_test, filename_history, epochs):
 
-    train_data = np.load(open(target_folder+'features_train_VGG16manual'+name_of_the_experiment+'.npy'))
+    train_data = np.load(open(filename_features_train))
     train_labels = np.array(y)
 
-    validation_data = np.load(open(target_folder+'features_validation_VGG16manual'+name_of_the_experiment+'.npy'))
+    validation_data = np.load(open(filename_features_test))
     validation_labels = np.array(y_val)
 
     print train_data.shape[1:]
@@ -94,13 +52,17 @@ def train_top_model(x, y, x_val, y_val, target_folder, name_of_the_experiment, n
 
     model.compile(optimizer='rmsprop', loss='mean_squared_error', metrics=['mean_absolute_error'])
     history = model.fit(train_data, train_labels,
-              nb_epoch=nb_epoch, batch_size=32,
+              epochs=epochs, batch_size=32,
               validation_data=(validation_data, validation_labels))
 
-    saveHistory(history.history, target_folder+'history_VGG16manual'+name_of_the_experiment+'.npy')
-    visualize_history(history.history, save=True, save_path=target_folder+'VGG16manual'+name_of_the_experiment+'_'+str(nb_epoch))
+    saveHistory(history.history, filename_history)
+    visualize_history(history.history, show=False, save=True, save_path=filename_history+'_'+str(epochs))
 
-def main_vgg16(TMP_size_of_dataset=100, TMP_num_of_epochs = 1):
+def main_vgg16(name_of_the_experiment = '-nameMe', TMP_size_of_dataset=100, TMP_num_of_epochs = 1):
+    # TMP_size_of_dataset influences save_bottlebeck_features
+    # TMP_num_of_epochs influences train_top_model
+
+
     # INPUTS
     local_folders = ['/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/ModelFiles/', '/storage/brno2/home/previtus/MGR-Project-Code/Data/ModelFiles/']
     local_folder = use_path_which_exists(local_folders)
@@ -111,7 +73,9 @@ def main_vgg16(TMP_size_of_dataset=100, TMP_num_of_epochs = 1):
     vgg16_weights_path = use_path_which_exists(vgg16_locations)
 
     target_folder = local_folder + 'results/'
-    name_of_the_experiment = '-first_experiments'
+
+    if not os.path.exists(target_folder):
+        os.makedirs(target_folder)
 
     # SETTINGS
 
@@ -121,5 +85,16 @@ def main_vgg16(TMP_size_of_dataset=100, TMP_num_of_epochs = 1):
     import random
     random.seed(None)
 
-    #save_bottlebeck_features(x, y, x_val, y_val, target_folder, name_of_the_experiment, vgg16_weights_path)
-    #train_top_model(x, y, x_val, y_val, target_folder, name_of_the_experiment, TMP_num_of_epochs)
+    print len_(x)
+
+    filename_features_train = target_folder+'features_train_VGG16manual'+name_of_the_experiment+'.npy'
+    filename_features_test = target_folder+'features_validation_VGG16manual'+name_of_the_experiment+'.npy'
+    filename_history = target_folder + 'history_VGG16manual' + name_of_the_experiment + '.npy'
+
+    start = time.time()
+    save_bottlebeck_features(x, y, x_val, y_val, filename_features_train, filename_features_test)
+    print "### 1st step TIME ", format(time.time() - start, '.2f'), " sec."
+    start = time.time()
+
+    train_top_model(x, y, x_val, y_val, filename_features_train, filename_features_test, filename_history, TMP_num_of_epochs)
+    print "### 2nd step TIME ", format(time.time() - start, '.2f'), " sec."

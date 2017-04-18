@@ -43,7 +43,7 @@ ERROR_MESSAGE_QUOTA = 333
 
 # experiments worked with th
 # new Keras version expects None (instead of 'default') to search for the default system set value
-KERAS_SETTING_DIMENSIONS = None
+KERAS_SETTING_DIMENSIONS = 'channels_last'
 
 ### Learning part ###
 # Number of epochs?, etc...
