@@ -1,14 +1,10 @@
-import h5py
 from keras.models import Sequential
-from keras.layers import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.layers import Dropout, Flatten, Dense
 import DatasetHandler.CreateDataset as CreateDataset
 from Downloader.ImageHelpers import len_
-from Downloader.VisualizeHistory import *
+from Downloader.VisualizeHistory import visualize_history, saveHistory
 
 from keras.applications.vgg16 import VGG16
-from keras.preprocessing import image
-from keras.applications.vgg16 import preprocess_input
 import numpy as np
 import time
 import datetime
@@ -103,9 +99,9 @@ def main_vgg16(name_of_the_experiment = '-nameMe', TMP_size_of_dataset=100, TMP_
         start = time.time()
         save_bottlebeck_features(x, y, x_val, y_val, filename_features_train, filename_features_test)
         print "### 1st step TIME ", format(time.time() - start, '.2f'), " sec."
-        start = time.time()
     else:
         print "### 1st step RECYCLED precomputed features"
 
+    start = time.time()
     train_top_model(x, y, x_val, y_val, filename_features_train, filename_features_test, filename_history, TMP_num_of_epochs)
     print "### 2nd step TIME ", format(time.time() - start, '.2f'), " sec."

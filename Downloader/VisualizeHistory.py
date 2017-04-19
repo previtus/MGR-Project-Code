@@ -1,6 +1,10 @@
-import matplotlib
+import matplotlib, os
 # IF WE ARE ON SERVER WITH NO DISPLAY, then:
-# print matplotlib.get_backend()
+#print matplotlib.get_backend()
+if not('DISPLAY' in os.environ):
+    matplotlib.use("Agg")
+
+import matplotlib.pyplot as plt
 
 import numpy as np
 
@@ -14,12 +18,6 @@ visualize_history(loadHistory('tmp_saved_history.npy'))
 '''
 
 def visualize_history(hi, show=True, save=False, save_path='', show_also=''):
-    if show:
-        matplotlib.use('TkAgg')  # If we want to show, we need the display support
-    else:
-        matplotlib.use('Agg')  # no display support
-
-    import matplotlib.pyplot as plt
 
     # list all data in history
     print(hi.keys())
@@ -49,8 +47,6 @@ def visualize_history(hi, show=True, save=False, save_path='', show_also=''):
     return plt
 
 def visualize_histories(histories, names, plotvalues='loss', show=True, save=False, save_path=''):
-    if show:
-        matplotlib.use('TkAgg')  # If we want to show, we need the display support
 
     import matplotlib.pyplot as plt
 

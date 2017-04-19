@@ -1,7 +1,6 @@
 import Downloader.DataOperations as DataOperations
 import Downloader.KerasPreparation as KerasPreparation
 import os
-import copy
 import shutil
 import numpy as np
 import DatasetVizualizators

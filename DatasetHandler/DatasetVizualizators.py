@@ -1,9 +1,12 @@
 import numpy as np
-import os, PIL
 from PIL import Image
+import matplotlib, os
+
+if not('DISPLAY' in os.environ):
+    matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
-import matplotlib.mlab as mlab
+
 import matplotlib.ticker as ticker
 import matplotlib.backends.backend_pdf
 import copy
