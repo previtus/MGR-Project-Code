@@ -74,7 +74,7 @@ def main_vgg16(name_of_the_experiment = '-nameMe', TMP_size_of_dataset=100, TMP_
     vgg16_weights_path = use_path_which_exists(vgg16_locations)
 
     now = datetime.datetime.now()
-    specific_folder_name = now.day + 'th' + '-' + now.hour + '-' + now.minute + '_' + name_of_the_experiment # <day>th-hour-minute_experimentName
+    specific_folder_name = str(now.day) + 'th' + '-' + str(now.hour) + '-' + str(now.minute) + '_' + name_of_the_experiment # <day>th-hour-minute_experimentName
     target_folder = local_folder + specific_folder_name + '/'
 
     if not os.path.exists(target_folder):
