@@ -6,58 +6,63 @@ from FileHelperFunc import use_path_which_exists
 PATH_ALTERNATIVES = ['/home/ekmek/Project II/MGR-Project-Code/', '/storage/brno2/home/previtus/MGR-Project-Code/']
 ABS_PATH_TO_PRJ = use_path_which_exists(PATH_ALTERNATIVES)
 
+def determineUniqueId(dataset_nickname, desired_number,seed):
+    unique_id = dataset_nickname
+    if desired_number is not None:
+        unique_id = unique_id+'-'+desired_number
+    else:
+        unique_id = unique_id + '-full'
+    if seed is not None:
+        unique_id = unique_id+'-seed'+seed
+    return unique_id
+
+def prepareDataset(path, dims, desired_number, seed):
+    dataset = Dataset()
+    dataset.init_from_segments(path, dims[0], dims[1])
+    if desired_number is None:
+        return dataset
+
+    if seed is not None:
+        random.seed(seed)
+
+    subset = dataset.spawnUniformSubset(desired_number)
+    return subset
+
 def load_8376_valid_images_640x640_120deg_turns_from_all_segments(desired_number=None, seed=None):
     '''
     :param desired_number: size of generated subset (for example 1000 out of the 8376)
     :param seed: random seed to allow for equal results every time
-    :return:
+    :return: subset and a unique identifier, which defines which images we have
+
+    unique identifier depends on the exact folder used as source, the number which we chose by desired_number and seed
     '''
+
+    unique_id = determineUniqueId('data640',desired_number,seed)
     path = ABS_PATH_TO_PRJ+'Data/StreetViewData/8376_valid_images_640x640_120deg_turns_from_all_segments/SegmentsData.dump'
-    dataset = Dataset()
-    dataset.init_from_segments(path, 640, 640)
-    if desired_number is None:
-        return dataset
+    dataset = prepareDataset(path, [640, 640], desired_number, seed)
 
-    if seed is not None:
-        random.seed(seed)
-
-    subset = dataset.spawnUniformSubset(desired_number)
-    return subset
+    return [dataset, unique_id]
 
 def load_8376_resized_299x299(desired_number=None, seed=None):
+    unique_id = determineUniqueId('data299',desired_number,seed)
     path = ABS_PATH_TO_PRJ+'Data/StreetViewData/8376_valid_images_resized_299x299/SegmentsData.dump'
-    dataset = Dataset()
-    dataset.init_from_segments(path, 299, 299)
-    if desired_number is None:
-        return dataset
-    if seed is not None:
-        random.seed(seed)
-    subset = dataset.spawnUniformSubset(desired_number)
-    return subset
+    dataset = prepareDataset(path, [299, 299], desired_number, seed)
+
+    return [dataset, unique_id]
 
 def load_8376_resized_150x150(desired_number=None, seed=None):
+    unique_id = determineUniqueId('data150',desired_number,seed)
     path = ABS_PATH_TO_PRJ+'Data/StreetViewData/8376_valid_images_resized_150x150/SegmentsData.dump'
-    dataset = Dataset()
-    dataset.init_from_segments(path, 150, 150)
-    if desired_number is None:
-        return dataset
-    if seed is not None:
-        random.seed(seed)
-    subset = dataset.spawnUniformSubset(desired_number)
-    return subset
+    dataset = prepareDataset(path, [150, 150], desired_number, seed)
+
+    return [dataset, unique_id]
 
 def load_3342_valid_images_299x299(desired_number=None, seed=None):
+    unique_id = determineUniqueId('data299subset',desired_number,seed)
     path = ABS_PATH_TO_PRJ+'Data/StreetViewData/3342_calid_images_299x299/SegmentsData.dump'
-    dataset = Dataset()
-    dataset.init_from_segments(path, 299, 299)
-    if desired_number is None:
-        return dataset
+    dataset = prepareDataset(path, [299, 299], desired_number, seed)
 
-    if seed is not None:
-        random.seed(seed)
-
-    subset = dataset.spawnUniformSubset(desired_number)
-    return subset
+    return [dataset, unique_id]
 
 #d = load_8376_valid_images_640x640_120deg_turns_from_all_segments()
 #dict = d.MapScoreToImages()
