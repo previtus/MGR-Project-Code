@@ -79,6 +79,7 @@ def main_vgg16(name_of_the_experiment = '-nameMe', TMP_size_of_dataset=100, TMP_
 
     if not os.path.exists(target_folder):
         os.makedirs(target_folder)
+        os.makedirs(local_folder + 'shared/')
 
     # SETTINGS
 
