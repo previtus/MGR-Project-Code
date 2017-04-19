@@ -9,11 +9,11 @@ ABS_PATH_TO_PRJ = use_path_which_exists(PATH_ALTERNATIVES)
 def determineUniqueId(dataset_nickname, desired_number,seed):
     unique_id = dataset_nickname
     if desired_number is not None:
-        unique_id = unique_id+'-'+desired_number
+        unique_id = unique_id+'-'+str(desired_number)
     else:
         unique_id = unique_id + '-full'
     if seed is not None:
-        unique_id = unique_id+'-seed'+seed
+        unique_id = unique_id+'-seed'+str(seed)
     return unique_id
 
 def prepareDataset(path, dims, desired_number, seed):
