@@ -79,7 +79,7 @@ def main_vgg16(name_of_the_experiment = '-nameMe', TMP_size_of_dataset=100, TMP_
 
     # SETTINGS
 
-    dataset = CreateDataset.load_8376_resized_150x150(desired_number=TMP_size_of_dataset, seed=42)
+    [dataset, uniqueId] = CreateDataset.load_8376_resized_150x150(desired_number=TMP_size_of_dataset, seed=42)
     [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=0.25)
 
     import random

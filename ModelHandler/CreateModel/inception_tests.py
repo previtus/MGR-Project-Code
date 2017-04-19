@@ -15,8 +15,8 @@ base_model = applications.vgg16.VGG16(include_top=False, weights='imagenet', inp
 #base_model = applications.inception_v3.InceptionV3(weights='imagenet', include_top=True, input_shape=input_shape)
 #base_model = applications.xception.Xception(include_top=False, weights='imagenet', input_tensor=None, input_shape=input_shape)
 
-#dataset = CreateDataset.load_3342_valid_images_299x299(desired_number=50, seed=42)
-dataset = CreateDataset.load_8376_resized_299x299(desired_number=1200, seed=42)
+#[dataset, uniqueId] = CreateDataset.load_3342_valid_images_299x299(desired_number=50, seed=42)
+[dataset, uniqueId] = CreateDataset.load_8376_resized_299x299(desired_number=1200, seed=42)
 [x, y, x_val, y_val] = dataset.getDataLabels_split()
 
 print len_(x)
