@@ -1,13 +1,11 @@
-import keras
-from DatasetHandler.CreateDataset import *
 from ModelHandler.CreateModel.functions_for_vgg16 import *
 import time
 import sys
 
 # DEFAULT VALUES:
-TMP_size_of_dataset=100
-TMP_num_of_epochs=150
-name_of_the_experiment = '-newWawe-1stRoundShouldCountBoth'
+TMP_size_of_dataset=5
+TMP_num_of_epochs=1
+name_of_the_experiment = '-test'
 
 # python python_script.py var1 var2 var3
 if len(sys.argv) > 3:
