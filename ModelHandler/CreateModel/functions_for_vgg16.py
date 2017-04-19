@@ -11,6 +11,8 @@ from keras.preprocessing import image
 from keras.applications.vgg16 import preprocess_input
 import numpy as np
 import time
+import datetime
+
 
 import os.path
 import os
@@ -64,15 +66,16 @@ def main_vgg16(name_of_the_experiment = '-nameMe', TMP_size_of_dataset=100, TMP_
 
 
     # INPUTS
-    local_folders = ['/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/ModelFiles/', '/storage/brno2/home/previtus/MGR-Project-Code/Data/ModelFiles/']
-    local_folder = use_path_which_exists(local_folders)
-
-    local_folder = local_folder+'NVMTesting/'
+    log_folders = ['/home/ekmek/Desktop/Project II/MGR-Project-Code/Logs/',
+                     '/storage/brno2/home/previtus/Logs/']
+    local_folder = use_path_which_exists(log_folders)
 
     vgg16_locations = ['/home/ekmek/Desktop/Project II/vgg16_weights.h5', '/storage/brno2/home/previtus/vgg16_weights.h5']
     vgg16_weights_path = use_path_which_exists(vgg16_locations)
 
-    target_folder = local_folder + 'results/'
+    now = datetime.datetime.now()
+    specific_folder_name = now.day + 'th' + '-' + now.hour + '-' + now.minute + '_' + name_of_the_experiment # <day>th-hour-minute_experimentName
+    target_folder = local_folder + specific_folder_name + '/'
 
     if not os.path.exists(target_folder):
         os.makedirs(target_folder)
@@ -87,14 +90,20 @@ def main_vgg16(name_of_the_experiment = '-nameMe', TMP_size_of_dataset=100, TMP_
 
     print len_(x)
 
-    filename_features_train = target_folder+'features_train_VGG16manual'+name_of_the_experiment+'.npy'
-    filename_features_test = target_folder+'features_validation_VGG16manual'+name_of_the_experiment+'.npy'
-    filename_history = target_folder + 'history_VGG16manual' + name_of_the_experiment + '.npy'
+    filename_features_train = local_folder+'shared/'+'features_train_'+uniqueId+'.npy'
+    filename_features_test = local_folder+'shared/'+'features_validation_'+uniqueId+'.npy'
 
-    start = time.time()
-    save_bottlebeck_features(x, y, x_val, y_val, filename_features_train, filename_features_test)
-    print "### 1st step TIME ", format(time.time() - start, '.2f'), " sec."
-    start = time.time()
+    filename_history = target_folder + 'history_' + name_of_the_experiment + '.npy'
+
+    if not(os.path.exists(filename_features_train) and os.path.getsize(filename_features_train) > 0
+        and os.path.exists(filename_features_test) and os.path.getsize(filename_features_test) > 0):
+
+        start = time.time()
+        save_bottlebeck_features(x, y, x_val, y_val, filename_features_train, filename_features_test)
+        print "### 1st step TIME ", format(time.time() - start, '.2f'), " sec."
+        start = time.time()
+    else:
+        print "### 1st step RECYCLED precomputed features"
 
     train_top_model(x, y, x_val, y_val, filename_features_train, filename_features_test, filename_history, TMP_num_of_epochs)
     print "### 2nd step TIME ", format(time.time() - start, '.2f'), " sec."
