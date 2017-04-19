@@ -26,7 +26,7 @@ print "[Setting] python_script.py", TMP_size_of_dataset, TMP_num_of_epochs, name
 start = time.time()
 print time.ctime()
 
-main_vgg16(TMP_size_of_dataset=100, TMP_num_of_epochs=150, name_of_the_experiment = '-newWawe-1stRoundShouldCountBoth')
+main_vgg16(TMP_size_of_dataset=TMP_size_of_dataset, TMP_num_of_epochs=TMP_num_of_epochs, name_of_the_experiment = name_of_the_experiment)
 
 end = time.time()
 print time.ctime()
