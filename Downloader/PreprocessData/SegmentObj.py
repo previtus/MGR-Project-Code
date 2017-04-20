@@ -4,13 +4,12 @@ import sys
 sys.path.append('..')
 from Downloader.Defaults import *
 
-class GraphEdgeSegment:
+class SegmentObj:
     '''
     Common base class for segment
     Variables: FromId, ToId, SegmentId
     Functions: getBearingString(), getGoogleViewUrl()
     '''
-    tmp = 0
 
     def __init__(self, Start, End, Score, SegmentId):
         '''
@@ -34,7 +33,18 @@ class GraphEdgeSegment:
         self.Start = Start
         self.End = End
 
-        GraphEdgeSegment.tmp += 1
+        # each of the i images has it's own location
+        self.LocationsIndex = []
+        self.DistinctLocations = []
+        # ... and after as well its own Nearby vector
+        self.DistinctNearbyVector = []
+        # One segment can generate multiple images, where we "stand" and "look" at different positions, each of these
+        # will have different central location associated.
+
+        # PS: when we have 3 images based in Start and 3 based in End, we can reuse the values of neighborhood
+        # (as long as we use cirle around the point as neighborhood)
+
+        self.Segment_OSM_MARKING_VERSION = '-1'
 
     def ScoreAdjustment(self,val):
         # val goes <0,100> we want <0,1> (when using sigmoid)
@@ -77,9 +87,12 @@ class GraphEdgeSegment:
         filenames = []
 
         # Looking from START to END
+        self.DistinctLocations.append(self.Start) # we are standing in Start
+
         # 1 IMG
         urls.append(self.getGoogleViewUrl(self.Start, self.End, PIXELS_X, PIXELS_Y))
         filenames.append(self.getImageFilename(len(filenames)))
+        self.LocationsIndex.append(0)
 
         '''
         # Turning around the spot on for the two end points:
@@ -95,13 +108,18 @@ class GraphEdgeSegment:
 
         urls.append(self.getGoogleViewUrl(self.Start, self.End, PIXELS_X, PIXELS_Y, degrees_offset=120.0))
         filenames.append(self.getImageFilename(len(filenames)))
+        self.LocationsIndex.append(0)
         urls.append(self.getGoogleViewUrl(self.Start, self.End, PIXELS_X, PIXELS_Y, degrees_offset=240.0))
         filenames.append(self.getImageFilename(len(filenames)))
+        self.LocationsIndex.append(0)
 
         # Looking from END to START
+        self.DistinctLocations.append(self.End) # we are standing in Start
+
         # 1 IMG
         urls.append( self.getGoogleViewUrl(self.End, self.Start, PIXELS_X,PIXELS_Y) )
         filenames.append( self.getImageFilename(len(filenames)) )
+        self.LocationsIndex.append(1)
 
         '''
         # Smart turns: END->START turn till 180 'right'
@@ -117,13 +135,18 @@ class GraphEdgeSegment:
 
         urls.append( self.getGoogleViewUrl(self.End, self.Start, PIXELS_X,PIXELS_Y, degrees_offset=120.0))
         filenames.append(self.getImageFilename(len(filenames)))
+        self.LocationsIndex.append(1)
         urls.append( self.getGoogleViewUrl(self.End, self.Start, PIXELS_X,PIXELS_Y, degrees_offset=240.0))
         filenames.append(self.getImageFilename(len(filenames)))
+        self.LocationsIndex.append(1)
 
         # And more to come <3
 
         number_of_images = len(urls)
         self.resetImageMemory(number_of_images)
+
+        for distLoc in self.DistinctLocations:
+            self.DistinctNearbyVector.append(None)
 
         return [urls, filenames]
 
@@ -155,3 +178,17 @@ class GraphEdgeSegment:
 
     def hasUnknownScore(self):
         return (self.getScore() < 0) # negative score means unknown (-1 in source was /100)
+
+    def getLocation(self, i_th_image):
+        index = self.LocationsIndex(i_th_image)
+        return self.DistinctLocations[index]
+
+    def checkOSMVersion(self):
+        print "Current project-wide OSM Marking version is: " + OSM_MARKING_VERSION + " | These Segments are on: " + self.Segment_OSM_MARKING_VERSION
+        return (self.Segment_OSM_MARKING_VERSION == OSM_MARKING_VERSION)
+
+    def getNearbyVector(self, i_th_image):
+        if not self.checkOSMVersion():
+            print "Warning, the Segment's OSM_MARKING_VERSION is not up to date, the NearbyVector structure might have changed!"
+        index = self.LocationsIndex(i_th_image)
+        return self.DistinctNearbyVector[index]

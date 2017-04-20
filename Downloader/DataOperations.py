@@ -2,7 +2,7 @@
 import pickle
 from PreprocessData.GenListOfUrls import *
 from PreprocessData.DownloadUrlFilenameMap import *
-from PreprocessData.GraphEdgeSegment import *
+from PreprocessData.SegmentObj import *
 
 ''' todo: return false/true and take into account fails  '''
 

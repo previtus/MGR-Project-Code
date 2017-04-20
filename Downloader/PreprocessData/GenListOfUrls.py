@@ -1,5 +1,5 @@
 # GenListOfUrls.py
-from GraphEdgeSegment import *
+from SegmentObj import *
 import sys
 sys.path.append('..')
 from Downloader.Defaults import *

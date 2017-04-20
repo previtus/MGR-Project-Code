@@ -1,5 +1,5 @@
 # PrepSegments.py
-from GraphEdgeSegment import *
+from SegmentObj import *
 import sys
 sys.path.append('..')
 from Downloader.Defaults import *
@@ -25,7 +25,7 @@ def PrepSegments(EdgesGEOJSON):
             Start = tuple([Coordinates[0][1], Coordinates[0][0]])
             End = tuple([Coordinates[-1][1], Coordinates[-1][0]])
 
-            segment = GraphEdgeSegment(Start, End, Score, SegmentId)
+            segment = SegmentObj(Start, End, Score, SegmentId)
             if verbose: segment.displaySegment()
             SegmentId += 1
 
