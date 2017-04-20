@@ -4,7 +4,7 @@
 ### PreprocessData part ###
 
 FromEdgeID = 0 # 2 -> will start with 002.jpg
-ToEdgeID = 1000 #15 # 14 -> will end with 013.jpg
+ToEdgeID = 50 #15 # 14 -> will end with 013.jpg
 
 #no data on:
 #FromEdgeID = 5288
@@ -25,7 +25,7 @@ DOWNLOAD_OVERRIDE_PRETEND_YOU_WERE_ABLE_TO_DOWNLOAD_ALL_BUT_DONT_DO_IT = True
 #FILE_NOT_FOUND_CHECKSUM = "79d895a10e5947aa682b79cf0cfdcda1" #640x640
 FILE_NOT_FOUND_CHECKSUM = "a1ffb93c541716d60f3536d3ed308339" #299x299
 
-QUOTA_EXCEEDED_CHECKSUM="b2328ec7ff935944a85723daddf0e8b7" # I suspect...
+QUOTA_EXCEEDED_CHECKSUM="b2328ec7ff935944a85723daddf0e8b7"
 
 # TODO: Check for file not found in different manner
 # probably: https://developers.google.com/maps/documentation/javascript/streetview#StreetViewService
@@ -40,6 +40,9 @@ ERROR_MESSAGE_NO_ERROR = -1
 ERROR_MESSAGE_NOT_FOUND = 404
 ERROR_MESSAGE_FAILED_MANY_TIMES = 101
 ERROR_MESSAGE_QUOTA = 333
+
+# OSM Formula version
+OSM_MARKING_VERSION = '0.0'
 
 # KERAS SETTING
 # tf example (40, 299, 299, 3)

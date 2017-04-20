@@ -8,7 +8,6 @@ import csv
 import psycopg2
 from OSMHandler.ConnectionSettingsSecrets import hostname,username,password,database
 
-
 class ConnectionHandler:
     '''
     Connection Handler
@@ -31,7 +30,7 @@ class ConnectionHandler:
     # inverted indices with location of watcher key=attr pair in the final vector
     # ex: final_vector[ indices_dict[pair] ] = 4
     # indices_dict['highway=bus_stop'] = 39, so in final_vector[39] we indicate that there are 4 bus stops nearby
-
+    opened = False
 
     foo = -1
 
@@ -42,9 +41,11 @@ class ConnectionHandler:
         self.__connection = self.setup_db_connection(hostname,username, password, database)
         [self.__distinct_keys, self.__list_of_watched_pairs, self.__indices_dict] = self.load_key_attr_pairs(key_attr_pairs_file,
                                                                                    limit_number=number_of_loaded_pairs)
-        print self.__distinct_keys
-        print self.__list_of_watched_pairs
-        print self.__indices_dict
+
+
+        print len(self.__distinct_keys), self.__distinct_keys
+        print len(self.__list_of_watched_pairs), self.__list_of_watched_pairs
+        print len(self.__indices_dict), self.__indices_dict
 
         return None
 
@@ -56,9 +57,15 @@ class ConnectionHandler:
         try:
             connection = psycopg2.connect(host=hostname, user=username, password=password, dbname=database)
             print "Connected to DB."
+            self.opened = True
+
         except:
             print "I am was to connect to host "+ hostname +" and database " + database + " with username " + username
         return connection
+
+    def close_connection(self):
+        self.__connection.close()
+        self.opened = False
 
     def load_key_attr_pairs(self, csv_name, limit_number = -1 ):
         '''
@@ -109,3 +116,88 @@ class ConnectionHandler:
         distinct_keys = set(keys)
 
         return [distinct_keys, list_of_watched_pairs, indices_dict]
+
+    def run_command(self, command):
+        '''
+        Runs command and returns the rows and column names
+        :param command: sql command
+        :return:
+        '''
+        cursor = self.__connection.cursor()
+        cursor.execute(command)
+        rows = cursor.fetchall()
+        colnames = [desc[0] for desc in cursor.description]
+        return [rows, colnames]
+
+    def extract_all_pairs(self, rows, colnames):
+        key_attr_pairs = []
+
+        for row in rows:
+
+            value_index = 0
+            for value in row:
+                key = colnames[value_index]
+                attr = ""
+                if value is not None:
+                    attr = value
+
+                key_attr_pair = "=".join([key, attr])
+                key_attr_pairs.append(key_attr_pair)
+
+                value_index += 1
+        return key_attr_pairs
+
+    def query_location(self, location):
+        # run query to get neighborhood
+        sql_command = self.build_sql_command_REWRITE(column_names = self.__distinct_keys, location=location)
+        [rows, colnames] = self.run_command(sql_command)
+
+        all_pairs = self.extract_all_pairs(rows, colnames)
+
+        # count the occurrences
+        nearby_vector = [0] * len(self.__list_of_watched_pairs)
+
+        for pair in all_pairs:
+            # pair can be 'building=yes' but also 'building='
+            if pair in self.__indices_dict:
+                ind = self.__indices_dict[pair]
+                nearby_vector[ind] += 1
+
+        # debug report:
+        print "We ended up with these not-null:"
+        i = 0
+        sorted_final_vec = []
+        for value in nearby_vector:
+            ind = self.__list_of_watched_pairs[i]
+
+            if (value > 0):
+                print ind, " *= ", value
+            i += 1
+
+            sorted_final_vec.append([ind, value])
+
+        sorted_final_vec.sort(key=lambda x: -x[1])
+        print sorted_final_vec
+        return []
+
+    def build_sql_command_REWRITE(self, column_names, table_name = 'planet_osm_line',sql_limit_rows=-1, location=[]):
+        # SELECT <> FROM planet_osm_line
+
+        list = ["SELECT \""]
+        list.append('\", \"'.join(column_names))
+        list.append("\" FROM "+table_name)
+        if sql_limit_rows<>-1:
+            list.append(" LIMIT ")
+            list.append(str(sql_limit_rows))
+
+        # TODO> WHERE location is nearby location
+        list.append(";")
+
+        command = ''.join(list)
+        return command
+
+    def report(self):
+        if self.opened:
+            print "Connection is opened to host "+ hostname +" and database " + database + " with username " + username
+        else:
+            print "Connection is closed."

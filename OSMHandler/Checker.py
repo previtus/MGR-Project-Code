@@ -4,3 +4,11 @@
 #
 # Can Ensure() the validity of Segments - aka it checks and if we are not up to date, then we will use Marker
 # this section will import some of the parts requiring running db.
+
+def Check(Segments):
+    if len(Segments) == 0:
+        print "Size of Segments is 0!"
+        return False
+    else:
+        return Segments[0].checkOSMVersion()
+
