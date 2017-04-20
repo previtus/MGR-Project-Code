@@ -57,8 +57,12 @@ def DownloadUrlFilenameMap(FilenameMap, Segments):
         md5_code = ""
         
         try:
-            image_header = urlretrieve_with_retry(url, filename)
-            md5_code = md5(image_header[0])
+            # ONLY TO CIRCUMVENT DOWNLOADING, DEBUG ONLY
+            if DOWNLOAD_OVERRIDE_PRETEND_YOU_WERE_ABLE_TO_DOWNLOAD_ALL_BUT_DONT_DO_IT:
+                md5_code = ""
+            else:
+                image_header = urlretrieve_with_retry(url, filename)
+                md5_code = md5(image_header[0])
             
             if (md5_code == FILE_NOT_FOUND_CHECKSUM):
                 # HANDLE PHOTO NOT FOUND / INVALID SEGMENT
