@@ -39,8 +39,12 @@ class ConnectionHandler:
         number_of_loaded_pairs = 1103 # out of 1103 rows
 
         self.__connection = self.setup_db_connection(hostname,username, password, database)
-        [self.__distinct_keys, self.__list_of_watched_pairs, self.__indices_dict] = self.load_key_attr_pairs(key_attr_pairs_file,
-                                                                                   limit_number=number_of_loaded_pairs)
+        columns_we_have_in_database = self.get_column_names_in_db()
+        #print columns_we_have_in_database
+
+        [self.__distinct_keys, self.__list_of_watched_pairs, self.__indices_dict] = self.load_key_attr_pairs(
+            key_attr_pairs_file, limit_number=number_of_loaded_pairs,
+            dont_take_keys_which_are_not_in_list = columns_we_have_in_database )
 
         return None
 
@@ -62,7 +66,7 @@ class ConnectionHandler:
         self.__connection.close()
         self.opened = False
 
-    def load_key_attr_pairs(self, csv_name, limit_number = -1 ):
+    def load_key_attr_pairs(self, csv_name, dont_take_keys_which_are_not_in_list, limit_number = -1):
         '''
         Builds the lists of interesting key-attribute pairs.
          distinct_keys contains just the names of keys
@@ -74,6 +78,10 @@ class ConnectionHandler:
             We will count these occurances in the resulting neighborhood.
 
         In list_of_watched_pairs we can find only combinations of key=attribute which have keys from distinct_keys!
+
+        In dont_take_keys_which_are_not_in_list we have column names of our available database, those show us, which
+        keys we actually have about the data - so for any key not in there, we don't have to make space in the final
+        vector (as it would always be 0, for all the data).
 
         :param csv_name: Name of tha file containing most common pairs of key-attribute combinations
         :param limit_number: Number of rows we would like to look at
@@ -98,15 +106,17 @@ class ConnectionHandler:
                 attr = row[1]
                 count = row[2]
 
-                key_attr_pair = "=".join([key, attr])
+                if key in dont_take_keys_which_are_not_in_list:
 
-                list_of_watched_pairs.append( key_attr_pair )
-                indices_dict[key_attr_pair] = i # inverted indices to the pairs
+                    key_attr_pair = "=".join([key, attr])
 
-                keys.append(key)
-                attributes.append(attr)
-                counts.append(count)
-                i += 1
+                    list_of_watched_pairs.append( key_attr_pair )
+                    indices_dict[key_attr_pair] = i # inverted indices to the pairs
+
+                    keys.append(key)
+                    attributes.append(attr)
+                    counts.append(count)
+                    i += 1
 
         distinct_keys = set(keys)
 
@@ -124,23 +134,11 @@ class ConnectionHandler:
         colnames = [desc[0] for desc in cursor.description]
         return [rows, colnames]
 
-    def check_column_names(self, columns_we_want_to_call):
-        '''
-        Tries to look into the database and checks all its available column values. From the list of columns we would
-        like to know about subtracts the ones we cannot call (doing an intersection between columns_we_want_to_call
-        and the columns we actually have in the db).
-
-        :param columns_we_want_to_call: Column names of the ones we would like to know
-        :return: Column names of those which we actually can call (so it's subset of columns_we_want_to_call)
-        '''
-        columns_we_want_to_call = self.__distinct_keys
-
+    def get_column_names_in_db(self):
         table_name = 'planet_osm_line'
         command = 'SELECT * FROM ' + table_name + " LIMIT 1"
         [_, columns_we_have] = self.run_command(command)
-
-        columns_we_will_call = set(columns_we_have) & set(columns_we_want_to_call)
-        return list(columns_we_will_call)
+        return columns_we_have
 
     def extract_all_pairs(self, rows, colnames, excluded_column='dist_meters'):
         key_attr_pairs = []
@@ -166,10 +164,8 @@ class ConnectionHandler:
 
     def query_location(self, location, radius):
         # run query to get neighborhood
-        filtered_column_names = self.check_column_names(self.__distinct_keys)
-
-        #sql_command = self.sql_cmd_everywhere(column_names = filtered_column_names)
-        sql_command = self.sql_cmd_radius(column_names = filtered_column_names, location=location, radius=radius)
+        #sql_command = self.sql_cmd_everywhere(column_names = self.__distinct_keys)
+        sql_command = self.sql_cmd_radius(column_names = self.__distinct_keys, location=location, radius=radius)
         [rows, colnames] = self.run_command(sql_command)
 
         all_pairs = self.extract_all_pairs(rows, colnames)
