@@ -42,10 +42,6 @@ class ConnectionHandler:
         [self.__distinct_keys, self.__list_of_watched_pairs, self.__indices_dict] = self.load_key_attr_pairs(key_attr_pairs_file,
                                                                                    limit_number=number_of_loaded_pairs)
 
-        #print len(self.__distinct_keys), self.__distinct_keys
-        #print len(self.__list_of_watched_pairs), self.__list_of_watched_pairs
-        #print len(self.__indices_dict), self.__indices_dict
-
         return None
 
     def setup_db_connection(self, hostname, username, password, database):
@@ -143,17 +139,10 @@ class ConnectionHandler:
         command = 'SELECT * FROM ' + table_name + " LIMIT 1"
         [_, columns_we_have] = self.run_command(command)
 
-        #print len(columns_we_have), columns_we_have
-
-        columns_we_dont_have = set(columns_we_want_to_call) - set(columns_we_have)
         columns_we_will_call = set(columns_we_have) & set(columns_we_want_to_call)
-
-        #print len(columns_we_dont_have), columns_we_dont_have
-        #print len(columns_we_will_call), columns_we_will_call
-
         return list(columns_we_will_call)
 
-    def extract_all_pairs(self, rows, colnames):
+    def extract_all_pairs(self, rows, colnames, excluded_column='dist_meters'):
         key_attr_pairs = []
 
         for row in rows:
@@ -165,17 +154,22 @@ class ConnectionHandler:
                 if value is not None:
                     attr = value
 
-                key_attr_pair = "=".join([key, attr])
-                key_attr_pairs.append(key_attr_pair)
+                #print key, attr
+
+                # temporary solution - we exclude the 'dist_meters' column
+                if (key != excluded_column):
+                    key_attr_pair = "=".join([key, attr])
+                    key_attr_pairs.append(key_attr_pair)
 
                 value_index += 1
         return key_attr_pairs
 
-    def query_location(self, location):
+    def query_location(self, location, radius):
         # run query to get neighborhood
         filtered_column_names = self.check_column_names(self.__distinct_keys)
 
-        sql_command = self.build_sql_command_REWRITE(column_names = filtered_column_names, location=location)
+        #sql_command = self.sql_cmd_everywhere(column_names = filtered_column_names)
+        sql_command = self.sql_cmd_radius(column_names = filtered_column_names, location=location, radius=radius)
         [rows, colnames] = self.run_command(sql_command)
 
         all_pairs = self.extract_all_pairs(rows, colnames)
@@ -210,10 +204,33 @@ class ConnectionHandler:
         #        print "The rest is just zero values!"
         #        break
 
-        #print sorted_final_vec
+        print sorted_final_vec
         return []
 
-    def build_sql_command_REWRITE(self, column_names, table_name = 'planet_osm_line',sql_limit_rows=-1, location=[]):
+    def sql_cmd_radius(self, column_names, table_name = 'planet_osm_line',sql_limit_rows=-1, location=[], radius=10):
+        # SELECT <> FROM planet_osm_line
+
+        list = ["SELECT * FROM ( "]
+
+        inner_select = ["SELECT ST_Distance(ST_Transform(way, 4326), ST_MakePoint(14.4310467875143, 50.0631591705215)::geography) AS dist_meters, "]
+        inner_select.append("\"")
+        inner_select.append('\", \"'.join(column_names))
+        inner_select.append("\" FROM "+table_name)
+
+        list = list + inner_select
+
+        list.append(") AS A WHERE A.dist_meters < ")
+        list.append(str(radius))
+        list.append(";")
+
+        command = ''.join(list)
+
+        #print ''.join(inner_select)
+        #print command
+
+        return command
+
+    def sql_cmd_everywhere(self, column_names, table_name = 'planet_osm_line',sql_limit_rows=-1):
         # SELECT <> FROM planet_osm_line
 
         list = ["SELECT \""]
