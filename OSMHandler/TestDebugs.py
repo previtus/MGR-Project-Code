@@ -4,8 +4,12 @@
 def testConnection():
     from OSMHandler.ConnectionHandlerObj import ConnectionHandler
     conHand = ConnectionHandler()
-    conHand.query_location(location=[14.4310467875143, 50.0631591705215], radius=10)
-    conHand.query_location(location=[14.4310467875143, 50.0631591705215], radius=100)
+    [vec_a, _] = conHand.query_location(location=[14.4310467875143, 50.0631591705215], radius=10)
+    [vec_b, _] = conHand.query_location(location=[14.4310467875143, 50.0631591705215], radius=100)
+
+    print len(vec_a), vec_a
+    print len(vec_b), vec_b
+
 
 def testCheckingSegments():
     import OSMHandler.Checker as Checker

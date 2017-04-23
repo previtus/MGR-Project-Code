@@ -48,6 +48,9 @@ class ConnectionHandler:
 
         return None
 
+    def final_vec_invert_indices(self, i):
+        return self.__list_of_watched_pairs[i]
+
     def setup_db_connection(self, hostname, username, password, database):
         '''
         Establish connection
@@ -182,6 +185,7 @@ class ConnectionHandler:
         # debug report:
         # print "We ended up with these not-null:"
         i = 0
+        final_vec_dict = {}
         sorted_final_vec = []
         for value in nearby_vector:
             ind = self.__list_of_watched_pairs[i]
@@ -191,6 +195,7 @@ class ConnectionHandler:
             i += 1
 
             sorted_final_vec.append([ind, value])
+            final_vec_dict[ind] = value
 
         sorted_final_vec.sort(key=lambda x: -x[1])
 
@@ -199,9 +204,15 @@ class ConnectionHandler:
         #    if int(itm[1]) == 0:
         #        print "The rest is just zero values!"
         #        break
+        #print sorted_final_vec
 
-        print sorted_final_vec
-        return []
+        # final neighborhood vector is in nearby_vector
+        # and final neighborhood dictionary in final_vec_dict
+        #print nearby_vector
+        #print final_vec_dict
+
+        # i-th value in nearby_vector has descriptor (key=attr pair) of self.__list_of_watched_pairs[i]
+        return [nearby_vector, self.__list_of_watched_pairs]
 
     def sql_cmd_radius(self, column_names, table_name = 'planet_osm_line',sql_limit_rows=-1, location=[], radius=10):
         # SELECT <> FROM planet_osm_line
