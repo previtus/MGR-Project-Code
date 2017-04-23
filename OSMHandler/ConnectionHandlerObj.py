@@ -36,16 +36,15 @@ class ConnectionHandler:
 
     def __init__(self):
         key_attr_pairs_file = 'key-attr-pairs.csv'
-        number_of_loaded_pairs = 50 # out of 1103 rows
+        number_of_loaded_pairs = 1103 # out of 1103 rows
 
         self.__connection = self.setup_db_connection(hostname,username, password, database)
         [self.__distinct_keys, self.__list_of_watched_pairs, self.__indices_dict] = self.load_key_attr_pairs(key_attr_pairs_file,
                                                                                    limit_number=number_of_loaded_pairs)
 
-
-        print len(self.__distinct_keys), self.__distinct_keys
-        print len(self.__list_of_watched_pairs), self.__list_of_watched_pairs
-        print len(self.__indices_dict), self.__indices_dict
+        #print len(self.__distinct_keys), self.__distinct_keys
+        #print len(self.__list_of_watched_pairs), self.__list_of_watched_pairs
+        #print len(self.__indices_dict), self.__indices_dict
 
         return None
 
@@ -129,6 +128,31 @@ class ConnectionHandler:
         colnames = [desc[0] for desc in cursor.description]
         return [rows, colnames]
 
+    def check_column_names(self, columns_we_want_to_call):
+        '''
+        Tries to look into the database and checks all its available column values. From the list of columns we would
+        like to know about subtracts the ones we cannot call (doing an intersection between columns_we_want_to_call
+        and the columns we actually have in the db).
+
+        :param columns_we_want_to_call: Column names of the ones we would like to know
+        :return: Column names of those which we actually can call (so it's subset of columns_we_want_to_call)
+        '''
+        columns_we_want_to_call = self.__distinct_keys
+
+        table_name = 'planet_osm_line'
+        command = 'SELECT * FROM ' + table_name + " LIMIT 1"
+        [_, columns_we_have] = self.run_command(command)
+
+        #print len(columns_we_have), columns_we_have
+
+        columns_we_dont_have = set(columns_we_want_to_call) - set(columns_we_have)
+        columns_we_will_call = set(columns_we_have) & set(columns_we_want_to_call)
+
+        #print len(columns_we_dont_have), columns_we_dont_have
+        #print len(columns_we_will_call), columns_we_will_call
+
+        return list(columns_we_will_call)
+
     def extract_all_pairs(self, rows, colnames):
         key_attr_pairs = []
 
@@ -149,7 +173,9 @@ class ConnectionHandler:
 
     def query_location(self, location):
         # run query to get neighborhood
-        sql_command = self.build_sql_command_REWRITE(column_names = self.__distinct_keys, location=location)
+        filtered_column_names = self.check_column_names(self.__distinct_keys)
+
+        sql_command = self.build_sql_command_REWRITE(column_names = filtered_column_names, location=location)
         [rows, colnames] = self.run_command(sql_command)
 
         all_pairs = self.extract_all_pairs(rows, colnames)
@@ -164,20 +190,27 @@ class ConnectionHandler:
                 nearby_vector[ind] += 1
 
         # debug report:
-        print "We ended up with these not-null:"
+        # print "We ended up with these not-null:"
         i = 0
         sorted_final_vec = []
         for value in nearby_vector:
             ind = self.__list_of_watched_pairs[i]
 
-            if (value > 0):
-                print ind, " *= ", value
+            #if (value > 0):
+            #    print ind, " *= ", value
             i += 1
 
             sorted_final_vec.append([ind, value])
 
         sorted_final_vec.sort(key=lambda x: -x[1])
-        print sorted_final_vec
+
+        #for itm in sorted_final_vec:
+        #    print itm[0], itm[1]
+        #    if int(itm[1]) == 0:
+        #        print "The rest is just zero values!"
+        #        break
+
+        #print sorted_final_vec
         return []
 
     def build_sql_command_REWRITE(self, column_names, table_name = 'planet_osm_line',sql_limit_rows=-1, location=[]):
