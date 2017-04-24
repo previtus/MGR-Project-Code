@@ -192,3 +192,7 @@ class SegmentObj:
             print "Warning, the Segment's OSM_MARKING_VERSION is not up to date, the NearbyVector structure might have changed!"
         index = self.LocationsIndex(i_th_image)
         return self.DistinctNearbyVector[index]
+
+    def markWithVector(self, nearby_vector, index, MARKING_VERSION):
+        self.DistinctNearbyVector[index] = nearby_vector
+        self.Segment_OSM_MARKING_VERSION = MARKING_VERSION
