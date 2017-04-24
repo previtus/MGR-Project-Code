@@ -169,6 +169,7 @@ class ConnectionHandler:
         # run query to get neighborhood
         #sql_command = self.sql_cmd_everywhere(column_names = self.__distinct_keys)
         sql_command = self.sql_cmd_radius(column_names = self.__distinct_keys, location=location, radius=radius)
+        print sql_command
         [rows, colnames] = self.run_command(sql_command)
 
         all_pairs = self.extract_all_pairs(rows, colnames)
@@ -219,7 +220,8 @@ class ConnectionHandler:
 
         list = ["SELECT * FROM ( "]
 
-        inner_select = ["SELECT ST_Distance(ST_Transform(way, 4326), ST_MakePoint(14.4310467875143, 50.0631591705215)::geography) AS dist_meters, "]
+
+        inner_select = ["SELECT ST_Distance(ST_Transform(way, 4326), ST_MakePoint(", str(location[0]),", ", str(location[1]), ")::geography) AS dist_meters, "]
         inner_select.append("\"")
         inner_select.append('\", \"'.join(column_names))
         inner_select.append("\" FROM "+table_name)

@@ -16,18 +16,25 @@ def testCheckingSegments():
     import OSMHandler.Marker as Marker
     import Downloader.DataOperations
 
-    path_to_segments_file = '/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/StreetViewData/50_rewritingObj_299x299/SegmentsData.dump'
+    #path_to_segments_file = '/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/StreetViewData/50_rewritingObj_299x299/SegmentsData.dump'
+    path_to_segments_file = '/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/StreetViewData/50_rewritingObj_299x299/SegmentsData_marked.dump'
     Segments = Downloader.DataOperations.LoadDataFile(path_to_segments_file)
 
-    Segments = Segments[0:3]
+    #Segments = Segments[0:3]
+    radius = 100
 
     allright = Checker.Check(Segments)
+    print "checks out as ", allright
     if not allright:
-        Marker.Mark(Segments)
+        Marker.Mark(Segments, radius = radius)
 
-    Marker.closeConnection()
+        Marker.closeConnection()
 
     allright = Checker.Check(Segments)
+    print "checks out as ", allright
+
+    path2 = '/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/StreetViewData/50_rewritingObj_299x299/SegmentsData_marked.dump'
+    Segments = Downloader.DataOperations.SaveDataFile(path2, Segments)
 
 
-testConnection()
+testCheckingSegments()

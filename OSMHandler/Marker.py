@@ -10,7 +10,7 @@ print "imported Marker.py, inside DB requiring section."
 # global variable - we can reuse Marker
 ConnHandler = None
 
-def Mark(Segments):
+def Mark(Segments, radius = 50):
     from OSMHandler.ConnectionHandlerObj import ConnectionHandler
 
     global ConnHandler
@@ -24,20 +24,19 @@ def Mark(Segments):
 
     # Mark segments
     for Segment in Segments:
-        MarkSegment(Segment)
+        MarkSegment(Segment, radius = radius)
 
-def MarkSegment(Segment):
+def MarkSegment(Segment, radius = 50):
     index = 0
     for distinctLocation in Segment.DistinctLocations:
         print "We are in ", distinctLocation
 
         # we mark it here!
-        # >>build_sql_command_REWRITE
-        nearby_vector = []
+        global ConnHandler
+        [nearby_vector, _] = ConnHandler.query_location(location=[distinctLocation[1], distinctLocation[0]], radius=radius)
+        print len(nearby_vector), nearby_vector
 
-        Segment.DistinctNearbyVector[index] = nearby_vector
-
-        Segment.Segment_OSM_MARKING_VERSION = OSM_MARKING_VERSION
+        Segment.markWithVector(nearby_vector, index, OSM_MARKING_VERSION)
         index += 1
     print Segment
 
