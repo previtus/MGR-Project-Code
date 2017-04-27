@@ -4,7 +4,7 @@
 ### PreprocessData part ###
 
 FromEdgeID = 0 # 2 -> will start with 002.jpg
-ToEdgeID = 50 #15 # 14 -> will end with 013.jpg
+ToEdgeID = 150 #15 # 14 -> will end with 013.jpg
 
 #no data on:
 #FromEdgeID = 5288
@@ -18,7 +18,7 @@ NUMBER_OF_ZEROS_PADDING = '04'
 DOWNLOAD_TIMEOUT = 0.7
 
 # False mostly!
-DOWNLOAD_OVERRIDE_PRETEND_YOU_WERE_ABLE_TO_DOWNLOAD_ALL_BUT_DONT_DO_IT = True
+DOWNLOAD_OVERRIDE_PRETEND_YOU_WERE_ABLE_TO_DOWNLOAD_ALL_BUT_DONT_DO_IT = False
 
 #FILE_NOT_FOUND_CHECKSUM = "460cd333e543a08a47cb4b986de5942b" #300x300
 #FILE_NOT_FOUND_CHECKSUM = "b31c4837d780bd4ea95da73ba0e8a54b" #150x150
