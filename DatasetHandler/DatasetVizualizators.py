@@ -2,6 +2,8 @@ import numpy as np
 from PIL import Image
 import matplotlib, os
 
+#print "importing visual module"
+
 if not('DISPLAY' in os.environ):
     matplotlib.use("Agg")
 

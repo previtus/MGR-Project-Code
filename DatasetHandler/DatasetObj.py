@@ -3,7 +3,6 @@ import Downloader.KerasPreparation as KerasPreparation
 import os
 import shutil
 import numpy as np
-import DatasetVizualizators
 import random
 import Downloader.Defaults
 
@@ -83,6 +82,7 @@ class Dataset:
         #print len(x)
 
     def plotHistogram(self, save_to_pdf=False):
+        import DatasetVizualizators
         DatasetVizualizators.plotHistogram(self.__labels, 'Score distribution histogram')
         DatasetVizualizators.plotWhisker(self.__labels, 'Whisker box plot')
         DatasetVizualizators.plotX_sortValues(self.__labels, 'Distribution of score (sorted)')
