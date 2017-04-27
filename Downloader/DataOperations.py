@@ -19,8 +19,14 @@ def LoadDataFile(name):
     Load Segments from the file <name>
     '''
     Segments = []
-    with open(name,'rb') as f:
-        Segments = pickle.load(f)
+
+
+    try:
+        with open(name,'rb') as f:
+            Segments = pickle.load(f)
+    except:
+        print "Failed opening file at", name
+
 
     print "Loaded |", len(Segments), "| segments."
     return Segments

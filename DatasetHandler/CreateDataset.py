@@ -3,7 +3,7 @@ from DatasetVizualizators import GenerateAverageImagesFromDictionary
 import random
 from FileHelperFunc import use_path_which_exists
 
-PATH_ALTERNATIVES = ['/home/ekmek/Project II/MGR-Project-Code/', '/storage/brno2/home/previtus/MGR-Project-Code/']
+PATH_ALTERNATIVES = ['/home/ekmek/Project II/MGR-Project-Code/', '/storage/brno2/home/previtus/MGR-Project-Code/', '/home/ekmek/Vitek/MGR-Project-Code/']
 ABS_PATH_TO_PRJ = use_path_which_exists(PATH_ALTERNATIVES)
 
 def determineUniqueId(dataset_nickname, desired_number,seed):
@@ -60,6 +60,13 @@ def load_8376_resized_150x150(desired_number=None, seed=None):
 def load_3342_valid_images_299x299(desired_number=None, seed=None):
     unique_id = determineUniqueId('data299subset',desired_number,seed)
     path = ABS_PATH_TO_PRJ+'Data/StreetViewData/3342_calid_images_299x299/SegmentsData.dump'
+    dataset = prepareDataset(path, [299, 299], desired_number, seed)
+
+    return [dataset, unique_id]
+
+def load_1200x_marked_299x299(desired_number=None, seed=None):
+    unique_id = determineUniqueId('data299subset',desired_number,seed)
+    path = ABS_PATH_TO_PRJ+'Data/StreetViewData/1200x_markable_299x299/SegmentsData_marked_R100.dump'
     dataset = prepareDataset(path, [299, 299], desired_number, seed)
 
     return [dataset, unique_id]
