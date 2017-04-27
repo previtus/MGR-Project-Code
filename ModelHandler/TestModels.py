@@ -1,12 +1,15 @@
 import DatasetHandler.CreateDataset as CreateDataset
+import ModelHandler.CreateModel.models as Models
 
 # Test functions to handle models
 
 def DatasetTester(dataset, dataset_uid):
     # Load dataset, report input sizes
-
+    print "### Dataset reporting"
+    print "w*h*ch:", dataset.img_width, "x", dataset.img_height, "x 3"
 
     # Cook features for various models
+    all_models = Models.all_models()
 
     # Report feature output sizes
 
