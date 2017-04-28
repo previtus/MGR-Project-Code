@@ -31,7 +31,9 @@ def xception():
     return model
 
 def all_models():
-    return [vgg16(), vgg19(), resnet50(), inception_v3(), xception()]
+    #return [['vgg16', vgg16()]]
+    return [['vgg16', vgg16()], ['vgg19', vgg19()], ['resnet50', resnet50()],
+            ['inception_v3', inception_v3()], ['xception', xception()]]
 
 def load_model(name="vgg16"):
     if name == "vgg16":
