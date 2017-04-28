@@ -28,6 +28,7 @@ class Dataset:
     img_width = -1
     img_height = -1
     num_of_images = 0
+    unique_id = ''
 
     def __init__(self):
         return None

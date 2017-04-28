@@ -26,7 +26,7 @@ img_width, img_height = 150, 150
 nb_epoch = 50
 
 
-[dataset, uniqueId] = CreateDataset.load_8376_resized_150x150(desired_number=100, seed=42)
+dataset = CreateDataset.load_8376_resized_150x150(desired_number=100, seed=42)
 [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=0.25)
 
 import random

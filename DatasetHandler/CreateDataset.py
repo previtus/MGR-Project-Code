@@ -41,35 +41,40 @@ def load_8376_valid_images_640x640_120deg_turns_from_all_segments(desired_number
     path = ABS_PATH_TO_PRJ+'Data/StreetViewData/8376_valid_images_640x640_120deg_turns_from_all_segments/SegmentsData.dump'
     dataset = prepareDataset(path, [640, 640], desired_number, seed)
 
-    return [dataset, unique_id]
+    dataset.unique_id = unique_id
+    return dataset
 
 def load_8376_resized_299x299(desired_number=None, seed=None):
     unique_id = determineUniqueId('data299',desired_number,seed)
     path = ABS_PATH_TO_PRJ+'Data/StreetViewData/8376_valid_images_resized_299x299/SegmentsData.dump'
     dataset = prepareDataset(path, [299, 299], desired_number, seed)
 
-    return [dataset, unique_id]
+    dataset.unique_id = unique_id
+    return dataset
 
 def load_8376_resized_150x150(desired_number=None, seed=None):
     unique_id = determineUniqueId('data150',desired_number,seed)
     path = ABS_PATH_TO_PRJ+'Data/StreetViewData/8376_valid_images_resized_150x150/SegmentsData.dump'
     dataset = prepareDataset(path, [150, 150], desired_number, seed)
 
-    return [dataset, unique_id]
+    dataset.unique_id = unique_id
+    return dataset
 
 def load_3342_valid_images_299x299(desired_number=None, seed=None):
     unique_id = determineUniqueId('data299subset',desired_number,seed)
     path = ABS_PATH_TO_PRJ+'Data/StreetViewData/3342_calid_images_299x299/SegmentsData.dump'
     dataset = prepareDataset(path, [299, 299], desired_number, seed)
 
-    return [dataset, unique_id]
+    dataset.unique_id = unique_id
+    return dataset
 
 def load_1200x_marked_299x299(desired_number=None, seed=None):
-    unique_id = determineUniqueId('data299subset',desired_number,seed)
+    unique_id = determineUniqueId('data299mark',desired_number,seed)
     path = ABS_PATH_TO_PRJ+'Data/StreetViewData/1200x_markable_299x299/SegmentsData_marked_R100.dump'
     dataset = prepareDataset(path, [299, 299], desired_number, seed)
 
-    return [dataset, unique_id]
+    dataset.unique_id = unique_id
+    return dataset
 
 #d = load_8376_valid_images_640x640_120deg_turns_from_all_segments()
 #dict = d.MapScoreToImages()
