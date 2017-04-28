@@ -1,4 +1,4 @@
-import matplotlib, os
+import matplotlib, os, errno
 # IF WE ARE ON SERVER WITH NO DISPLAY, then:
 #print matplotlib.get_backend()
 if not('DISPLAY' in os.environ):
@@ -40,10 +40,20 @@ def visualize_history(hi, show=True, save=False, save_path='', show_also=''):
 
 
     if save:
-        plt.savefig(save_path+'loss.png')
+        filename = save_path+'loss.png'
+        if not os.path.exists(os.path.dirname(filename)):
+            try:
+                os.makedirs(os.path.dirname(filename))
+            except OSError as exc: # Guard against race condition
+                if exc.errno != errno.EEXIST:
+                    raise
+
+        plt.savefig(filename)
+        print "Saved image to "+filename
     if show:
         plt.show()
 
+    plt.clf()
     return plt
 
 def visualize_histories(histories, names, plotvalues='loss', show=True, save=False, save_path=''):
@@ -82,6 +92,13 @@ def visualize_histories(histories, names, plotvalues='loss', show=True, save=Fal
     return plt
 
 def saveHistory(history_dict, filename):
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+
     to_be_saved = data = {'S': history_dict}
     np.save(open(filename, 'w'), to_be_saved)
 
