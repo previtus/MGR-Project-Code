@@ -23,7 +23,7 @@ def train_top_model(x, y, x_val, y_val, filename_features_train, filename_featur
     model = build_top_model(train_data.shape[1:], 3)
 
     model.compile(optimizer='rmsprop', loss='mean_squared_error', metrics=['mean_absolute_error'])
-    plot_model(model, to_file='TEST.png', show_shapes=True)
+    #plot_model(model, to_file='TEST.png', show_shapes=True)
 
     history = model.fit(train_data, train_labels,
               epochs=epochs, batch_size=32,

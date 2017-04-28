@@ -3,6 +3,8 @@ import numpy as np
 
 from keras.models import Sequential
 from keras.layers import Dropout, Flatten, Dense
+from keras.utils import plot_model
+from Downloader.VisualizeHistory import saveHistory, visualize_history
 
 def doWeNeedToCook(filename_features_train, filename_features_test):
     return not(os.path.exists(filename_features_train) and os.path.getsize(filename_features_train) > 0
@@ -33,3 +35,17 @@ def build_top_model(input_shape, number_of_repeats):
     model.add(Dense(1, activation='sigmoid'))
     return model
 
+def train_top_model(model, train_data, train_labels, epochs, validation_data, validation_labels, save_img_name=None):
+
+    model.compile(optimizer='rmsprop', loss='mean_squared_error', metrics=['mean_absolute_error'])
+    if save_img_name is not None:
+        plot_model(model, to_file=save_img_name+'.png', show_shapes=True)
+
+    history = model.fit(train_data, train_labels,
+              epochs=epochs, batch_size=32,
+              validation_data=(validation_data, validation_labels))
+    return history.history
+
+def save_model_history(history, filename_history, filename_image):
+    saveHistory(history, filename_history)
+    visualize_history(history, show=False, save=True, save_path=filename_image)
