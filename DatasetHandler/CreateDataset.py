@@ -75,6 +75,18 @@ def load_1200x_marked_299x299(desired_number=None, seed=None):
     dataset.unique_id = unique_id
     return dataset
 
+def load_custom(folder, pixels, desired_number=None, seed=None):
+    # folder should be name of the dir, like 50x_markable_350x350
+    unique_id = determineUniqueId(folder+str(pixels),desired_number,seed)
+    path = ABS_PATH_TO_PRJ+'Data/StreetViewData/'+folder+'/SegmentsData.dump'
+    dataset = prepareDataset(path, [pixels, pixels], desired_number, seed)
+
+    dataset.unique_id = unique_id
+
+    print "Loaded dataset with unique_id=", unique_id, ", statistics:"
+    dataset.statistics()
+    return dataset
+
 #d = load_8376_valid_images_640x640_120deg_turns_from_all_segments()
 #dict = d.MapScoreToImages()
 #GenerateAverageImagesFromDictionary(dict,save_to_dir=True,output_folder=ABS_PATH_TO_PRJ+'debugVizAvgDatasetEntry/')
