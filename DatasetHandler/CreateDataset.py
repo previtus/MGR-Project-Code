@@ -1,10 +1,9 @@
 from DatasetObj import Dataset
 from DatasetVizualizators import GenerateAverageImagesFromDictionary
 import random
-from FileHelperFunc import use_path_which_exists
+from FileHelperFunc import get_project_folder
 
-PATH_ALTERNATIVES = ['/home/ekmek/Project II/MGR-Project-Code/', '/storage/brno2/home/previtus/MGR-Project-Code/', '/home/ekmek/Vitek/MGR-Project-Code/']
-ABS_PATH_TO_PRJ = use_path_which_exists(PATH_ALTERNATIVES)
+ABS_PATH_TO_PRJ = get_project_folder()
 
 def determineUniqueId(dataset_nickname, desired_number,seed):
     unique_id = dataset_nickname
