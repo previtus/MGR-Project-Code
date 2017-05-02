@@ -1,9 +1,9 @@
 from Downloader.DownloaderRunner import RunDownload, RunCheck
 import sys
 
-name = "GeorgeOrwell2000x_markable_299x299"
+name = "5556x_markable_299x299"
 from_id = 0
-to_id = 5
+to_id = 5556
 pixels = 299
 
 # python python_script.py NAME FROMID TOID PIXELS
