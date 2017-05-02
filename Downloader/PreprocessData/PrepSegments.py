@@ -2,9 +2,10 @@
 from SegmentObj import *
 import sys
 sys.path.append('..')
+
 from Downloader.Defaults import *
 
-def PrepSegments(EdgesGEOJSON):
+def PrepSegments(EdgesGEOJSON, FromEdgeID = FromEdgeID, ToEdgeID=ToEdgeID):
     '''
     Alternative loading method, which relies just upon edge data (we don't have nodes fully available this time).
 

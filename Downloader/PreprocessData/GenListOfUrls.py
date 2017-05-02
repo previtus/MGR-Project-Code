@@ -2,9 +2,8 @@
 from SegmentObj import *
 import sys
 sys.path.append('..')
-from Downloader.Defaults import *
 
-def GenListOfUrls(Segments):
+def GenListOfUrls(Segments, PIXELS_X, PIXELS_Y, PrependPath=''):
     '''
     Iterates over the segment list and returns a list of urls needed for download
     Outputs list of tripples in [ (<url>, <filename>, <edge id>), ... ]
@@ -23,6 +22,6 @@ def GenListOfUrls(Segments):
             if verbose: print urls, '\n', filenames, '\n'
             # print filename
 
-            FilenameMap.append((urls[i_nth_image], filenames[i_nth_image], segment.SegmentId, i_nth_image))
+            FilenameMap.append((urls[i_nth_image], PrependPath+filenames[i_nth_image], segment.SegmentId, i_nth_image))
 
     return FilenameMap

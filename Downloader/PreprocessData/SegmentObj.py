@@ -75,7 +75,7 @@ class SegmentObj:
             self.HasLoadedImages.append(False)
             self.ErrorMessages.append(ERROR_MESSAGE_NO_ERROR)
 
-    def getGoogleViewUrls(self,resx,resy):
+    def getGoogleViewUrls(self, PIXELS_X, PIXELS_Y):
         '''
         Generate urls for the Segment. Here we also reset the
         :param resx: Resolution of images, X

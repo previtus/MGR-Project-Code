@@ -8,7 +8,7 @@ import os
 
 if not(os.path.isfile(DATASTRUCTUREFILE)):
     print "Data file was not found, downloading it!"
-    PreprocessDataF(EDGESFILES_GEOJSON, DATASTRUCTUREFILE)
+    PreprocessDataF(EDGESFILES_GEOJSON, '', FromEdgeID, ToEdgeID, PIXELS_X, PIXELS_Y)
 
 Segments = LoadDataFile(DATASTRUCTUREFILE)
 StatisticsSegments(Segments)

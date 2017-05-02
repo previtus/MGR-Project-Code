@@ -79,7 +79,7 @@ def HasSomeErrorneousData(Segments, ERROR_TYPE):
 # todo version with directly Segments:
 # > FixDataFile_FailedDownloads(___, ERROR_TYPE):
 
-def FixDataFile_FailedDownloads(name, ERROR_TYPE):
+def FixDataFile_FailedDownloads(name, ERROR_TYPE, PIXELS_X, PIXELS_Y, PrependPath):
     '''
     Loads, fixes and saves the structure of Segments. Looks at those
     with particular error messages ERROR_TYPE and redownloads images.
@@ -117,7 +117,7 @@ def FixDataFile_FailedDownloads(name, ERROR_TYPE):
             
     #print "BrokenSegments: ", BrokenSegments
     print "Fixing |", len(BrokenSegments), "| Segments."
-    FilenameMapOfBroken = GenListOfUrls(BrokenSegments)
+    FilenameMapOfBroken = GenListOfUrls(BrokenSegments, PIXELS_X, PIXELS_Y, PrependPath)
     print "Equals to |", len(FilenameMapOfBroken), "| Images."
 
     #print "FilenameMapOfBroken: ", FilenameMapOfBroken

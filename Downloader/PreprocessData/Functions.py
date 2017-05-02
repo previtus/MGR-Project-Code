@@ -4,9 +4,10 @@ from math import *
 import sys
 sys.path.append('..')
 from Downloader.Defaults import FromEdgeID
+from DatasetHandler.FileHelperFunc import get_project_folder
 
 def getApi():
-    api = open('../apicode.txt', 'r').read()
+    api = open(get_project_folder()+'apicode.txt', 'r').read()
     return api
 
 def bearing_between_two_points(start, end, degrees_offset=0.0):
