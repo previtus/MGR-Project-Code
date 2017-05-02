@@ -13,6 +13,7 @@ def main():
                    '/home/ekmek/Vitek/Logs/',
                      '/storage/brno2/home/previtus/Logs/']
     local_folder = use_path_which_exists(log_folders)
+    make_folder_ifItDoesntExist(local_folder+'shared/')
 
     dataset = CreateDataset.load_1200x_marked_299x299(desired_number=None, seed=42)
     list_of_features = CookADataset(dataset, local_folder=local_folder)
