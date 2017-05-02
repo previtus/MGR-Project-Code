@@ -21,7 +21,6 @@ def get_geojson_path():
 
     return folder+'attractivity_previtus_data_1_edges.geojson'
 
-
 def use_path_which_exists(list_of_possible_paths):
     used_path = ''
 

@@ -4,7 +4,7 @@
 ### PreprocessData part ###
 
 FromEdgeID = 0 # 2 -> will start with 002.jpg
-ToEdgeID = 150 #15 # 14 -> will end with 013.jpg
+ToEdgeID = 2 #15 # 14 -> will end with 013.jpg
 
 #no data on:
 #FromEdgeID = 5288
