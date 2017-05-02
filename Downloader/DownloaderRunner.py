@@ -31,6 +31,8 @@ def RunDownload(name, from_edge, to_edge, px_py):
 
     PreprocessDataF(path_to_edges, path_to_datafolder, FromEdgeID, ToEdgeID, PIXELS_X, PIXELS_Y)
 
+def RunCheck(name, px_py):
+    path_to_datafolder = get_project_folder()+'Data/StreetViewData/'+name+'/'
     segments_file = path_to_datafolder+'/SegmentsData.dump'
     print "Downloaded, now checking"
     Segments = LoadDataFile(segments_file)
