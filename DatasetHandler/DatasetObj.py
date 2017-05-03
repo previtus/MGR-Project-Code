@@ -141,6 +141,8 @@ class Dataset:
 
     def sampleUniform(self, desired_number):
         # this is without repetition
+        #print self.num_of_images, desired_number
+
         indices = random.sample(xrange(self.num_of_images), desired_number)
 
         #print indices

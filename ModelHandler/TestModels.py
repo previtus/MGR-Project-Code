@@ -15,12 +15,12 @@ def main(set='50x_markable_640x640', PIXELS=640):
     local_folder = use_path_which_exists(log_folders)
     make_folder_ifItDoesntExist(local_folder+'shared/')
 
-    dataset = CreateDataset.load_custom(set, PIXELS, desired_number=300, seed=42)
+    dataset = CreateDataset.load_custom(set, PIXELS, desired_number=200, seed=42)
 
     list_of_features = CookADataset(dataset, local_folder=local_folder)
     histories = []
     histories_names = []
-    specific_folder_name = 'size5'
+    specific_folder_name = 'size240imgs-pixelCountsVersus'
 
     for features in list_of_features:
         [model_name, filename_features_train, filename_features_test] = features
@@ -39,5 +39,5 @@ def main(set='50x_markable_640x640', PIXELS=640):
     img = local_folder + specific_folder_name + "_all_PX"+str(PIXELS)
     visualize_histories(histories, histories_names, show=False, save=True, save_path=img)
 
-main()
+#main()
 main(set='1200x_markable_299x299', PIXELS=299)
