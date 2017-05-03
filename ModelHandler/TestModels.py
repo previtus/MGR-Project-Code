@@ -8,7 +8,7 @@ from Downloader.VisualizeHistory import visualize_histories
 import datetime
 # Test functions to handle models
 
-def main(set='50x_markable_640x640', PIXELS=640):
+def main(set, PIXELS):
     log_folders = ['/home/ekmek/Desktop/Project II/MGR-Project-Code/Logs/',
                    '/home/ekmek/Vitek/Logs/',
                      '/storage/brno2/home/previtus/Logs/']
@@ -41,3 +41,4 @@ def main(set='50x_markable_640x640', PIXELS=640):
 
 #main()
 main(set='1200x_markable_640x640', PIXELS=640)
+#main(set='1200x_markable_299x299', PIXELS=299)

@@ -20,7 +20,8 @@ def CookADataset(dataset, local_folder):
     random.seed(None)
 
     # Cook features for various models
-    all_models = Models.all_model_names()
+    #all_models = Models.all_model_names()
+    all_models = ['resnet50']
 
     for model_name in all_models:
         #print model_name
