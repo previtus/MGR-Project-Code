@@ -26,10 +26,8 @@ def RunDownload(name, from_edge, to_edge, px_py):
 
     FromEdgeID = from_edge
     ToEdgeID = to_edge
-    PIXELS_X = px_py
-    PIXELS_Y = px_py
 
-    PreprocessDataF(path_to_edges, path_to_datafolder, FromEdgeID, ToEdgeID, PIXELS_X, PIXELS_Y)
+    PreprocessDataF(path_to_edges, path_to_datafolder, FromEdgeID, ToEdgeID, PIXELS_X=px_py, PIXELS_Y=px_py)
 
 def RunCheck(name, px_py):
     path_to_datafolder = get_project_folder()+'Data/StreetViewData/'+name+'/'
@@ -40,8 +38,18 @@ def RunCheck(name, px_py):
 
     if (HasSomeErrorneousData(Segments, ERROR_MESSAGE_QUOTA)):
         print "Surpassed quota last lime! Redownloading."
-        Segments = FixDataFile_FailedDownloads(segments_file, ERROR_MESSAGE_QUOTA, PIXELS_X, PIXELS_Y, path_to_datafolder)
+        Segments = FixDataFile_FailedDownloads(segments_file, ERROR_MESSAGE_QUOTA, PIXELS_X=px_py, PIXELS_Y=px_py, PrependPath=path_to_datafolder)
 
     if (HasSomeErrorneousData(Segments, ERROR_MESSAGE_FAILED_MANY_TIMES)):
         print "Data had some errors, filling in the blanks!"
-        Segments = FixDataFile_FailedDownloads(segments_file, ERROR_MESSAGE_FAILED_MANY_TIMES, PIXELS_X, PIXELS_Y, path_to_datafolder)
+        Segments = FixDataFile_FailedDownloads(segments_file, ERROR_MESSAGE_FAILED_MANY_TIMES, PIXELS_X=px_py, PIXELS_Y=px_py, PrependPath=path_to_datafolder)
+
+def RunMarkBad(name):
+    path_to_datafolder = get_project_folder()+'Data/StreetViewData/'+name+'/'
+    segments_file = path_to_datafolder+'/SegmentsData.dump'
+
+    print "Marking bad guys"
+    Segments = LoadDataFile(segments_file)
+    StatisticsSegments(Segments)
+
+    MarkBadSegments(Segments, BAD_MD5_LIST, ERROR_GENERAL)

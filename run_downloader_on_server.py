@@ -1,10 +1,10 @@
-from Downloader.DownloaderRunner import RunDownload, RunCheck
+from Downloader.DownloaderRunner import RunDownload, RunCheck, RunMarkBad
 import sys
 
-name = "5556x_markable_299x299"
+name = "1200x_markable_640x640"
 from_id = 0
-to_id = 5556
-pixels = 299
+to_id = 1200
+pixels = 640
 
 # python python_script.py NAME FROMID TOID PIXELS
 if len(sys.argv) > 4:
@@ -17,5 +17,10 @@ else:
 
 print "[Setting] python_script.py", name, from_id, to_id, pixels
 
+print 'CAREFULLY CHECK THE FILE_NOT_FOUND_CHECKSUM!!! Is it the one for '+str(pixels)+' ??'
+
 RunDownload(name, from_id, to_id, pixels)
-RunCheck(name, pixels)
+#RunCheck(name, pixels)
+
+#RunMarkBad(name)
+#RunCheck(name, pixels)
