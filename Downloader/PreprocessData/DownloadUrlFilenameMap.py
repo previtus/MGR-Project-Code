@@ -20,10 +20,13 @@ def urlretrieve_with_retry(url, filename):
 
 def md5(fname):
     hash_md5 = hashlib.md5()
-    with open(fname, "rb") as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
+    try:
+        with open(fname, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                hash_md5.update(chunk)
+        return hash_md5.hexdigest()
+    except:
+        return -1
 
 
 def DownloadUrlFilenameMap(FilenameMap, Segments):
@@ -74,7 +77,7 @@ def DownloadUrlFilenameMap(FilenameMap, Segments):
                 # better have dictionary dict[ID] => obj
                 ## not del Segments[segment_id]
                 Segments[segment_list_id].ErrorMessages[i_nth_image] = ERROR_MESSAGE_NOT_FOUND #404
-            elif (md5_code == QUOTA_EXCEEDED_CHECKSUM):
+            elif (md5_code == QUOTA_EXCEEDED_CHECKSUM or md5_code == QUOTA_EXCEEDED_CHECKSUM_billing_msg):
                 # SUSPECTED QUOTA REACHED
                 isLoaded = False
                 print "Daily download quota (25,000) exceeded."

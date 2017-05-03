@@ -31,7 +31,7 @@ def LoadDataFile(name):
     print "Loaded |", len(Segments), "| segments."
     return Segments
 
-def MarkSegmentsWithImagesOfMD5(Segments, MD5, MARKERR):
+def MarkBadSegments(Segments, MD5_list, MARKERR):
     '''
     Used to manually mark bad segments after they are downloaded (using the rest of the set and not having to
     re-download it all).
@@ -43,7 +43,7 @@ def MarkSegmentsWithImagesOfMD5(Segments, MD5, MARKERR):
     #SaveDataFile(DATASTRUCTUREFILE, Segments)
 
     :param Segments: Input segments (remember to save them after! and possibly back them up before)
-    :param MD5: we are looking for certain md5 of the image - for example "b2328ec7ff935944a85723daddf0e8b7" was quota
+    :param MD5_list: we are looking for certain md5 of the image - for example "b2328ec7ff935944a85723daddf0e8b7" was quota
     :param MARKERR: we want to mark the *bad* segments - we will thus force all the photos related to one Segment to redownload
     :return: Edited Segments, remember to save them.
     '''
@@ -56,11 +56,15 @@ def MarkSegmentsWithImagesOfMD5(Segments, MD5, MARKERR):
                 # md5 img
                 md5_img = md5(image_url)
                 # print md5_img
-
-                # compare and mark segment errorneous
-                if md5_img == MD5:
+                if md5_img == -1:
                     segment.ErrorMessages[i_th_image] = MARKERR
                     counter += 1
+                else:
+                    for MD5 in MD5_list:
+                        # compare and mark segment errorneous
+                        if md5_img == MD5:
+                            segment.ErrorMessages[i_th_image] = MARKERR
+                            counter += 1
     print "Marked with error <", MARKERR, "> - ", counter, "images."
     return Segments
 
