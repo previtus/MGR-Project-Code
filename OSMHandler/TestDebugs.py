@@ -18,7 +18,7 @@ def testCheckingSegments():
 
     #path_to_segments_file = '/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/StreetViewData/50_rewritingObj_299x299/SegmentsData.dump'
     #path_to_segments_file = '/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/StreetViewData/50_rewritingObj_299x299/SegmentsData_marked.dump'
-    path_to_segments_file = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/1200x_markable_640x640/SegmentsData.dump'
+    path_to_segments_file = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_markable_640x640/SegmentsData.dump'
     Segments = Downloader.DataOperations.LoadDataFile(path_to_segments_file)
 
     #Segments = Segments[0:3]
@@ -34,7 +34,7 @@ def testCheckingSegments():
     allright = Checker.Check(Segments)
     print "checks out as ", allright
 
-    path2 = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/1200x_markable_640x640/SegmentsData_marked_R100.dump'
+    path2 = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_markable_640x640/SegmentsData_marked_R100.dump'
     Segments = Downloader.DataOperations.SaveDataFile(path2, Segments)
 
 
