@@ -17,7 +17,7 @@ def determineUniqueId(dataset_nickname, desired_number,seed):
 
 def prepareDataset(path, dims, desired_number, seed):
     dataset = Dataset()
-    dataset.init_from_segments(path, dims[0], dims[1])
+    dataset.init_from_segments(path, img_width=dims[0], img_height=dims[1])
     if desired_number is None:
         return dataset
 

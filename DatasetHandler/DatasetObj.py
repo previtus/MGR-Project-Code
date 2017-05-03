@@ -25,6 +25,7 @@ class Dataset:
 
     __list_of_images = []
     __labels = []
+    __osm = []
     img_width = -1
     img_height = -1
     num_of_images = 0
@@ -33,20 +34,21 @@ class Dataset:
     def __init__(self):
         return None
 
-    def init_from_lists(self, list_of_images, labels, img_width, img_height):
+    def init_from_lists(self, list_of_images, labels, osm, img_width, img_height):
         self.img_width = img_width
         self.img_height = img_height
         self.__list_of_images = list_of_images
         self.__labels = labels
+        self.__osm = osm
         self.num_of_images = len(self.__list_of_images)
 
     def init_from_segments(self, path_to_segments_file, img_width, img_height):
         # Segments are not used apart from initialization
         Segments = DataOperations.LoadDataFile(path_to_segments_file)
         segments_dir = os.path.dirname(path_to_segments_file) + '/'
-        __list_of_images, __labels = KerasPreparation.LoadDataFromSegments(Segments, has_score=True, path_to_images=segments_dir)
+        __list_of_images, __labels, __osm = KerasPreparation.LoadDataFromSegments(Segments, has_score=True, path_to_images=segments_dir)
 
-        self.init_from_lists(__list_of_images, __labels, img_width, img_height)
+        self.init_from_lists(__list_of_images, __labels, __osm, img_width, img_height)
 
     # Data access: ---------------------------------------------------------------------------------------------
 
@@ -63,6 +65,12 @@ class Dataset:
 
         x, y, x_val, y_val = KerasPreparation.split_data(x, y, validation_split)
         return [x, y, x_val, y_val]
+
+    def getDataLabels_split_with_osm(self, resize=None, validation_split=0.2):
+        [x, y, x_val, y_val] = self.getDataLabels_split(resize, validation_split)
+        osm, osm_val = KerasPreparation.split_osm(self.__osm,validation_split)
+
+        return [x, y, x_val, y_val, osm, osm_val]
 
     # Dataset reporting: ---------------------------------------------------------------------------------------------
 
@@ -176,9 +184,10 @@ class Dataset:
 
         sel_imgs = [self.__list_of_images[i] for i in indices]
         sel_labels = [self.__labels[i] for i in indices]
+        sel_osm = [self.__osm[i] for i in indices]
 
         newDataset = Dataset()
-        newDataset.init_from_lists(sel_imgs, sel_labels, self.img_width, self.img_height)
+        newDataset.init_from_lists(sel_imgs, sel_labels, sel_osm, self.img_width, self.img_height)
 
         return newDataset
 

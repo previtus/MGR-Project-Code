@@ -14,7 +14,7 @@ def TestModel(model, local_folder, path_to_images, output_model_img=True, output
         Segments = LoadDataFile(path_to_images + 'SegmentsData.dump')
 
         # 3 labels_from_segments
-        list_of_images, labels_from_segments = LoadDataFromSegments(Segments, has_score=True)
+        list_of_images, labels_from_segments, _ = LoadDataFromSegments(Segments, has_score=True)
         if (path_to_images is not None):
             list_of_images = [(path_to_images + x) for x in list_of_images]
 

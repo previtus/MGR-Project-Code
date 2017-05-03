@@ -25,6 +25,16 @@ def split_data(x,y,validation_split=0.2):
     #print "Split", len(x), "images into", len(x_test), "test and", len(x_val), "validation sets."
     return x_test,y_test,x_val, y_val
 
+def split_osm(osm,validation_split=0.2):
+    if not(0 < validation_split < 1):
+        print "Choose validation_split in between 0 and 1. Setting the default value of 0.2"
+        validation_split = 0.2
+
+    split_at = int(len(osm) * (1 - validation_split))
+    osm_test = osm[0:split_at]
+    osm_val = osm[split_at:]
+    return osm_test, osm_val
+
 def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
     '''
     Turns loaded segments into data we will need for keras.
@@ -34,6 +44,7 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
     '''
     list_of_images = []
     labels = []
+    osm_vectors = []
 
     for Segment in Segments:
 
@@ -45,12 +56,21 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
                     list_of_images.append(Segment.getImageFilename(i_th_image))
                     labels.append(Segment.getScore())
 
+                if Segment.Segment_OSM_MARKING_VERSION == OSM_MARKING_VERSION:
+                    # only if we have one - checkOSMVersion could be used too
+
+                    # Aaardwark, fix Segment.getNearbyVector(i_th_image) in Segment.LocationsIndex(i_th_image) -> Segment.LocationsIndex[i_th_image]
+                    index = Segment.LocationsIndex[i_th_image]
+                    osm = Segment.DistinctNearbyVector[index]
+
+                    osm_vectors.append(osm)
+
     # If the path to images is specific, modify it from simple "Data/images/" with putting path_to_images before it.
     if (path_to_images is not None):
         # for example to ['images/000.jpg', ...] it will add "DifferentPath/" -> ['DifferentPath/images/000.jpg', ...]
         list_of_images = [(path_to_images+x) for x in list_of_images]
 
-    return list_of_images, labels
+    return list_of_images, labels, osm_vectors
 
 def LoadActualImages(list_of_images, resize=None, dim_ordering='default'):
     x = load_images_with_keras(list_of_images, target_size=resize, dim_ordering=dim_ordering)
@@ -70,7 +90,7 @@ def Prepare_DataLabels_nosplit(Segments, img_width, img_height, path_to_images=N
         print "Downloaded images are of (PIXELS_X, PIXELS_Y):",PIXELS_X, PIXELS_Y, ", while we want (img_width, img_height)", img_width, img_height
 
     StatisticsSegments(Segments)
-    list_of_images, y = LoadDataFromSegments(Segments, has_score=True, path_to_images=path_to_images)
+    list_of_images, y, _ = LoadDataFromSegments(Segments, has_score=True, path_to_images=path_to_images)
 
     # TODO: figure out a way of seleting correct sizes. Ideally we want to download biggest images possible and them crop bits out of them.
     x = preprocess_image_batch(list_of_images, img_size=(PIXELS_X, PIXELS_Y), crop_size=(img_width, img_height))
