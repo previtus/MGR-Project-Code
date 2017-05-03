@@ -1,0 +1,2 @@
+qstat -u previtus
+
