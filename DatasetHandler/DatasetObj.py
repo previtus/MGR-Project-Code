@@ -184,7 +184,11 @@ class Dataset:
 
         sel_imgs = [self.__list_of_images[i] for i in indices]
         sel_labels = [self.__labels[i] for i in indices]
-        sel_osm = [self.__osm[i] for i in indices]
+
+        if self.__osm == []:
+            sel_osm = []
+        else:
+            sel_osm = [self.__osm[i] for i in indices]
 
         newDataset = Dataset()
         newDataset.init_from_lists(sel_imgs, sel_labels, sel_osm, self.img_width, self.img_height)

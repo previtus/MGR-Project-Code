@@ -10,12 +10,13 @@ import datetime
 
 def main(set, PIXELS):
     log_folders = ['/home/ekmek/Desktop/Project II/MGR-Project-Code/Logs/',
-                   '/home/ekmek/Vitek/Logs/',
-                     '/storage/brno2/home/previtus/Logs/']
+                    '/home/ekmek/Vitek/Logs/',
+                    '/storage/brno2/home/previtus/Logs/',
+                    ] #'/home/ekmek/Vitek/Logs-VALID ONE-run of 1200x set on 299x299 imgs/'
     local_folder = use_path_which_exists(log_folders)
     make_folder_ifItDoesntExist(local_folder+'shared/')
 
-    dataset = CreateDataset.load_custom(set, PIXELS, desired_number=5, seed=42)
+    dataset = CreateDataset.load_custom(set, PIXELS, desired_number=None, seed=42)
 
     list_of_features = CookADataset(dataset, local_folder=local_folder)
     histories = []
@@ -40,5 +41,6 @@ def main(set, PIXELS):
     visualize_histories(histories, histories_names, show=False, save=True, save_path=img)
 
 #main()
-main(set='1200x_markable_640x640', PIXELS=640)
+#main(set='1200x_markable_640x640', PIXELS=640)
 #main(set='1200x_markable_299x299', PIXELS=299)
+main(set='5556x_mark_res_299x299', PIXELS=299)
