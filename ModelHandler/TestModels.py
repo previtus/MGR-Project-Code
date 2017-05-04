@@ -40,7 +40,3 @@ def main(set, PIXELS):
     img = local_folder + specific_folder_name + "_all_PX"+str(PIXELS)
     visualize_histories(histories, histories_names, show=False, save=True, save_path=img)
 
-#main()
-#main(set='1200x_markable_640x640', PIXELS=640)
-#main(set='1200x_markable_299x299', PIXELS=299)
-main(set='5556x_mark_res_299x299', PIXELS=299)
