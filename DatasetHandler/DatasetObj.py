@@ -72,19 +72,44 @@ class Dataset:
 
         return [x, y, x_val, y_val, osm, osm_val]
 
-    def generator_from_paths(self, paths, resize=None, validation_split=0.2):
-        return 0
+    def generator_images_scores(self, order, image_paths, scores, resize=None):
 
-    def getGenerators(self, validation_split):
-        #[x, y, x_val, y_val] = self.getDataLabels_split(validation_split=validation_split)
+        while True:
+            for index in order:
+                img_path = image_paths[index]
 
+                image = KerasPreparation.LoadActualImages([img_path], resize=resize,
+                                                      dim_ordering=Downloader.Defaults.KERAS_SETTING_DIMENSIONS)  # th or tf
+                score = scores[index]
+                yield (image, score)
+
+    def generator_features_osm_scores(self, order, all_features, osm_vectors, scores, resize=None):
+
+        while True:
+            for index in order:
+                score = scores[index]
+                features = all_features[index]
+                osm_vector = osm_vectors[index]
+                yield ([osm_vector, features], score)
+
+    def getImageGenerator(self, validation_split, resize=None):
         # idea:
         # take the lists on images and their labels - split these two arrays by the validation split
         # from both of the tuples (img_names, scores) create generator, which simply iterates through them...
 
-        #[test_generator, val_generator, number_in_test, number_in_val]
-        return 0
+        order = range(self.num_of_images)
+        # MIX IT UP
 
+        image_generator = self.generator_images_scores(order, image_paths=self.__list_of_images, scores=self.__labels, resize=resize)
+
+        return [order, image_generator]
+
+        # [test_generator, val_generator, number_in_test, number_in_val]
+
+
+    def getFeatureGenerator(self, order, validation_split, all_features, resize=None):
+        feature_generator = self.generator_features_osm_scores(order, all_features, osm_vectors=self.__osm, scores=self.__labels, resize=resize)
+        return [order, feature_generator]
 
     # Dataset reporting: ---------------------------------------------------------------------------------------------
 
