@@ -11,7 +11,7 @@ def TestTopModel(dataset, model_name, filename_features_train, filename_features
     # Try top models - regular with fixed size or the "heatmap"
     model = build_top_model(train_data.shape[1:], 3)
 
-    epochs = 150
+    epochs = 20 #150
     save_img_name = model_name
     history = train_top_model(model, train_data, train_labels, epochs, validation_data, validation_labels, save_img_name=None)
 
