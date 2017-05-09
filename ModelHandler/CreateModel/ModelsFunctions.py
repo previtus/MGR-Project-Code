@@ -10,6 +10,18 @@ def doWeNeedToCook(filename_features_train, filename_features_test):
     return not(os.path.exists(filename_features_train) and os.path.getsize(filename_features_train) > 0
         and os.path.exists(filename_features_test) and os.path.getsize(filename_features_test) > 0)
 
+def predict_from_generators(test_generator, val_generator, number_in_test, number_in_val, filename_features_train, filename_features_test, model):
+    # generators should yield:
+    #   ((3,x_dim, y_dim), score), ideally all of them eventually
+
+    # ps maybe this one cannot get the scores ? test it...
+
+    bottleneck_features_train = model.predict_generator(test_generator, steps=number_in_test,verbose=1)
+    np.save(open(filename_features_train, 'w'), bottleneck_features_train)
+    bottleneck_features_validation = model.predict_generator(val_generator, steps=number_in_val,verbose=1)
+    np.save(open(filename_features_test, 'w'), bottleneck_features_validation)
+
+
 def predict_and_save_features(x, y, x_val, y_val, filename_features_train, filename_features_test, model):
     # dimensions of x are (num,3,x_dim, y_dim) = (75, 3, 150, 150)
     # VGG16 network
@@ -44,6 +56,10 @@ def train_top_model(model, train_data, train_labels, epochs, validation_data, va
     history = model.fit(train_data, train_labels,
               epochs=epochs, batch_size=32,
               validation_data=(validation_data, validation_labels))
+
+    #history = model.fit_generator(generator_train, steps_per_epoch, epochs=epochs,
+    #                              validation_data=(generator_valid), validation_steps)
+
     return history.history
 
 def save_model_history(history, filename_history, filename_image):

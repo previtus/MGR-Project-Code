@@ -72,6 +72,20 @@ class Dataset:
 
         return [x, y, x_val, y_val, osm, osm_val]
 
+    def generator_from_paths(self, paths, resize=None, validation_split=0.2):
+        return 0
+
+    def getGenerators(self, validation_split):
+        #[x, y, x_val, y_val] = self.getDataLabels_split(validation_split=validation_split)
+
+        # idea:
+        # take the lists on images and their labels - split these two arrays by the validation split
+        # from both of the tuples (img_names, scores) create generator, which simply iterates through them...
+
+        #[test_generator, val_generator, number_in_test, number_in_val]
+        return 0
+
+
     # Dataset reporting: ---------------------------------------------------------------------------------------------
 
     def statistics(self):

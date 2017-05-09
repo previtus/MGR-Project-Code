@@ -1,6 +1,6 @@
 import ModelHandler.CreateModel.KerasApplicationsModels as Models
 
-from ModelHandler.CreateModel.functions_for_vgg16 import doWeNeedToCook, predict_and_save_features, load_features, build_top_model
+from ModelHandler.CreateModel.functions_for_vgg16 import doWeNeedToCook, predict_and_save_features, load_features, build_top_model, predict_from_generators
 
 def CookADataset(dataset, local_folder):
     '''
@@ -32,9 +32,14 @@ def CookADataset(dataset, local_folder):
         if doWeNeedToCook(filename_features_train, filename_features_test):
             if x==None:
                 [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=0.25)
+                #[test_generator, val_generator, number_in_test, number_in_val] = dataset.getGenerators(validation_split=0.25)
 
             model_cnn = Models.get_model(model_name)
+
+            #predict_from_generators(test_generator, val_generator, number_in_test, number_in_val, filename_features_train, filename_features_test, model_cnn)
+
             predict_and_save_features(x, y, x_val, y_val, filename_features_train, filename_features_test, model_cnn)
+
 
         list_of_feature_files.append([model_name, filename_features_train, filename_features_test])
 

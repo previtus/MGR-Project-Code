@@ -3,6 +3,8 @@ from Downloader.ImageHelpers import len_
 
 def TestTopModel(dataset, model_name, filename_features_train, filename_features_test, filename_history, img_name):
     [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=0.25)
+    #[test_generator, val_generator, number_in_test, number_in_val] = dataset.getGenerators(validation_split=0.25)
+
     [train_data, train_labels, validation_data, validation_labels] = load_features(filename_features_train, filename_features_test, y, y_val)
 
     print "input shape of features", len_(train_data), "and labels", len_(train_labels)
