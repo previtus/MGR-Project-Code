@@ -40,3 +40,12 @@ def main(set, PIXELS):
     img = local_folder + specific_folder_name + "_all_PX"+str(PIXELS)
     visualize_histories(histories, histories_names, show=False, save=True, save_path=img)
 
+def test_generators(set, PIXELS):
+    dataset = CreateDataset.load_custom(set, PIXELS, desired_number=5, seed=42)
+
+    [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=0.25)
+
+    # Nespadne toto na velkych datech?
+    # (Save and load features)
+
+    return 3
