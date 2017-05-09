@@ -89,8 +89,9 @@ class Dataset:
             for index in order:
                 score = scores[index]
                 features = all_features[index]
-                osm_vector = osm_vectors[index]
-                yield ([osm_vector, features], score)
+                #osm_vector = osm_vectors[index]
+                #yield ([osm_vector, features], score)
+                yield (features, score)
 
     def getImageGenerator(self, validation_split, resize=None):
         # idea:
@@ -101,8 +102,9 @@ class Dataset:
         # MIX IT UP
 
         image_generator = self.generator_images_scores(order, image_paths=self.__list_of_images, scores=self.__labels, resize=resize)
+        size = self.num_of_images
 
-        return [order, image_generator]
+        return [order, image_generator, size]
 
         # [test_generator, val_generator, number_in_test, number_in_val]
 

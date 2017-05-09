@@ -1,9 +1,12 @@
 import DatasetHandler.CreateDataset as CreateDataset
 
 from DatasetHandler.FileHelperFunc import use_path_which_exists, make_folder_ifItDoesntExist
+from ModelHandler.CreateModel.ModelsFunctions import load_features, build_top_model, train_top_model, save_model_history
+
 from ModelHandler.CreateModel.ModelCooking import CookADataset
 from ModelHandler.CreateModel.TopModel import TestTopModel
-from Downloader.VisualizeHistory import visualize_histories
+from Downloader.VisualizeHistory import visualize_histories, visualize_history
+import ModelHandler.CreateModel.KerasApplicationsModels as Models
 
 import datetime
 # Test functions to handle models
@@ -43,9 +46,31 @@ def main(set, PIXELS):
 def test_generators(set, PIXELS):
     dataset = CreateDataset.load_custom(set, PIXELS, desired_number=5, seed=42)
 
-    [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=0.25)
+    validation_split = 0.25
+    [order, image_generator, size] = dataset.getImageGenerator(validation_split, resize=None)
+    print order, image_generator, size
 
-    # Nespadne toto na velkych datech?
-    # (Save and load features)
+    model_cnn = Models.resnet50()
+
+    features_train = model_cnn.predict_generator(image_generator, steps=size,verbose=1)
+    print features_train
+
+    all_features = features_train
+    [order, feature_generator] = dataset.getFeatureGenerator(order, validation_split, all_features, resize=None)
+    print features_train.shape[1:]
+
+    model = build_top_model(features_train.shape[1:], 3)
+    model.summary()
+
+    model.compile(optimizer='rmsprop', loss='mean_squared_error', metrics=['mean_absolute_error'])
+
+    epochs = 50
+    # history = model.fit_generator(feature_generator, steps_per_epoch=size, epochs=epochs) # HAS A PROBLEM
+
+    # visualize_history(history)
 
     return 3
+
+name = '1200x_markable_299x299'
+pix = 299
+test_generators(name, pix)
