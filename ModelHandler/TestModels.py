@@ -1,10 +1,8 @@
 import DatasetHandler.CreateDataset as CreateDataset
-
-from DatasetHandler.FileHelperFunc import use_path_which_exists, make_folder_ifItDoesntExist
+import ModelOI, ModelGenerator
 from ModelHandler.ModelGenerator import build_top_model
 from keras.utils import plot_model
 
-from ModelHandler.CreateModel.ModelCooking import CookADataset
 from ModelHandler.ModelTester import TestTopModel
 from Downloader.VisualizeHistory import visualize_histories, visualize_history
 import ModelHandler.CreateModel.KerasApplicationsModels as Models
@@ -12,17 +10,30 @@ import ModelHandler.CreateModel.KerasApplicationsModels as Models
 import datetime
 # Manually writen experiments
 
-def main(set, PIXELS):
-    log_folders = ['/home/ekmek/Desktop/Project II/MGR-Project-Code/Logs/',
-                    '/home/ekmek/Vitek/Logs/',
-                    '/storage/brno2/home/previtus/Logs/',
-                    ] #'/home/ekmek/Vitek/Logs-VALID ONE-run of 1200x set on 299x299 imgs/'
-    local_folder = use_path_which_exists(log_folders)
-    make_folder_ifItDoesntExist(local_folder+'shared/')
+def main(set, pixels, model_name='resnet50'):
+    #TODO: Ideological skeleton
+    '''
+    # logically this should be:
+    dataset = ModelOI.load_dataset(set, pixels, desired_size_of_images)
+    cnn_models = ModelGenerator.get_cnn_models(model_names)
+    cnn_model = ModelGenerator.get_cnn_model(model_name)
+    top_models = ModelGenerator.get_top_models(...)
+    top_model = ModelGenerator.get_top_model(...)
 
-    dataset = CreateDataset.load_custom(set, PIXELS, desired_number=5, seed=42)
+    ModelOI.cook_a_dataset(dataset) // ModelTester.prepare_cnn_model()
 
-    list_of_features = CookADataset(dataset, local_folder=local_folder)
+    visualization_filename = ModelOI.get_visualization_filename()
+    ModelOI.save_visualization(cnn_model, top_model, visualization_filename)
+
+    history = ModelTester.test_model(cnn_model, top_model, dataset) // [img_features, osm_features] = ModelOI.get_features(dataset)
+    history_filename = ModelOI.get_history_filename()
+    ModelOI.save_history(history, history_filename)
+    '''
+
+    local_folder = ModelOI.getLogDirectory()
+    dataset = CreateDataset.load_custom(set, pixels, desired_number=5, seed=42)
+    list_of_features = ModelOI.getFeaturesLists(dataset)
+
     histories = []
     histories_names = []
     specific_folder_name = 'size240imgs-pixelCountsVersus'
@@ -31,21 +42,21 @@ def main(set, PIXELS):
         [model_name, filename_features_train, filename_features_test] = features
 
         now = datetime.datetime.now()
-        specific_folder_name = str(now.day) + 'th' + '-' + str(now.hour) + '-' + str(now.minute) + '_' + model_name+"-"+str(PIXELS) # <day>th-hour-minute_experimentName
+        specific_folder_name = str(now.day) + 'th' + '-' + str(now.hour) + '-' + str(now.minute) + '_' + model_name+"-"+str(pixels) # <day>th-hour-minute_experimentName
         target_folder = local_folder + specific_folder_name + '/'
         filename_history = target_folder + 'history_' + model_name + '.npy'
-        img = local_folder + specific_folder_name+"-"+str(PIXELS)
+        img = local_folder + specific_folder_name+"-"+str(pixels)
 
         print filename_history
         history = TestTopModel(dataset, model_name, filename_features_train, filename_features_test, filename_history, img)
         histories.append(history)
         histories_names.append(model_name)
 
-    img = local_folder + specific_folder_name + "_all_PX"+str(PIXELS)
+    img = local_folder + specific_folder_name + "_all_PX"+str(pixels)
     visualize_histories(histories, histories_names, show=False, save=True, save_path=img)
 
 def test_generators(set, PIXELS):
-    dataset = CreateDataset.load_custom(set, PIXELS, desired_number=None, seed=42)
+    dataset = CreateDataset.load_custom(set, PIXELS, desired_number=10, seed=42)
 
     validation_split = 0.25
     [order, order_val, image_generator, size, image_generator_val, size_val] = dataset.getImageGenerator(validation_split, resize=None)
@@ -58,12 +69,7 @@ def test_generators(set, PIXELS):
     features_val = model_cnn.predict_generator(image_generator_val, steps=size_val, verbose=1)
 
     ### PATH NAMES
-    log_folders = ['/home/ekmek/Desktop/Project II/MGR-Project-Code/Logs/',
-                    '/home/ekmek/Vitek/Logs/',
-                    '/storage/brno2/home/previtus/Logs/',
-                    ] #'/home/ekmek/Vitek/Logs-VALID ONE-run of 1200x set on 299x299 imgs/'
-    local_folder = use_path_which_exists(log_folders)
-    make_folder_ifItDoesntExist(local_folder+'shared/')
+    local_folder = ModelOI.getLogDirectory()
     dataset_uid = dataset.unique_id+'GEN'
     model_name = 'resnet50'
     filename_features_train = local_folder + 'shared/' + 'features_train_' + dataset_uid + '_' + model_name + '.npy'
