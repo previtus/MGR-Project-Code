@@ -45,22 +45,38 @@ def main(set, PIXELS):
     visualize_histories(histories, histories_names, show=False, save=True, save_path=img)
 
 def test_generators(set, PIXELS):
-    dataset = CreateDataset.load_custom(set, PIXELS, desired_number=5, seed=42)
+    dataset = CreateDataset.load_custom(set, PIXELS, desired_number=None, seed=42)
 
     validation_split = 0.25
     [order, order_val, image_generator, size, image_generator_val, size_val] = dataset.getImageGenerator(validation_split, resize=None)
-    print order, order_val, image_generator, size, image_generator_val, size_val
+    #print order, order_val, image_generator, size, image_generator_val, size_val
+    print image_generator, size, image_generator_val, size_val
 
     model_cnn = Models.resnet50()
 
     features = model_cnn.predict_generator(image_generator, steps=size, verbose=1)
     features_val = model_cnn.predict_generator(image_generator_val, steps=size_val, verbose=1)
 
+    ### PATH NAMES
+    log_folders = ['/home/ekmek/Desktop/Project II/MGR-Project-Code/Logs/',
+                    '/home/ekmek/Vitek/Logs/',
+                    '/storage/brno2/home/previtus/Logs/',
+                    ] #'/home/ekmek/Vitek/Logs-VALID ONE-run of 1200x set on 299x299 imgs/'
+    local_folder = use_path_which_exists(log_folders)
+    make_folder_ifItDoesntExist(local_folder+'shared/')
+    dataset_uid = dataset.unique_id
+    model_name = 'resnet50'
+    filename_features_train = local_folder + 'shared/' + 'features_train_' + dataset_uid + '_' + model_name + '.npy'
+    filename_features_test = local_folder + 'shared/' + 'features_validation_' + dataset_uid + '_' + model_name + '.npy'
+    print filename_features_train
+    print filename_features_test
+    ### END OF PATH NAMES
+
     import numpy as np
-    np.save(open('del_test.npy', 'w'), features)
-    np.save(open('del_val.npy', 'w'), features_val)
-    features = np.load(open('del_test.npy'))
-    features_val = np.load(open('del_val.npy'))
+    np.save(open(filename_features_train, 'w'), features)
+    np.save(open(filename_features_test, 'w'), features_val)
+    features = np.load(open(filename_features_train))
+    features_val = np.load(open(filename_features_test))
 
     #[feature_generator, feature_generator_val, size, size_val] = dataset.getFeatureGenerator(order, order_val,
     #                                                validation_split, features, features_val)
@@ -83,10 +99,12 @@ def test_generators(set, PIXELS):
     #                              validation_data=feature_generator_val, validation_steps=size_val)
 
     history = history.history
-    visualize_history(history)
+
+    img = local_folder + "_graph_resnet50_via_gens_"+str(PIXELS)
+    visualize_history(history, show=False, save=True, save_path=img)
 
     return 3
 
-name = '1200x_markable_299x299'
-pix = 299
-test_generators(name, pix)
+#name = '1200x_markable_299x299'
+#pix = 299
+#test_generators(name, pix)
