@@ -85,3 +85,37 @@ def main_vgg16(name_of_the_experiment = '-nameMe', TMP_size_of_dataset=100, TMP_
     start = time.time()
     train_top_model(x, y, x_val, y_val, filename_features_train, filename_features_test, filename_history, TMP_num_of_epochs)
     print "### 2nd step TIME ", format(time.time() - start, '.2f'), " sec."
+
+import sys
+import time
+
+from ModelHandler.CreateModel.functions_for_vgg16 import *
+
+# DEFAULT VALUES:
+TMP_size_of_dataset=5
+TMP_num_of_epochs=1
+name_of_the_experiment = '-test'
+
+# python python_script.py var1 var2 var3
+if len(sys.argv) > 3:
+    TMP_size_of_dataset = int(sys.argv[1])  # var1
+    TMP_num_of_epochs = int(sys.argv[2])  # var2
+    name_of_the_experiment = sys.argv[3]  # var3
+else:
+    print "Using default values. Please run as: python_script.py sizeOfDataset numOfEpochs nameOfExp"
+
+print "[Setting] python_script.py", TMP_size_of_dataset, TMP_num_of_epochs, name_of_the_experiment
+
+
+#d = load_8376_resized_150x150(desired_number=10)
+#d.statistics()
+
+start = time.time()
+print time.ctime()
+
+main_vgg16(TMP_size_of_dataset=TMP_size_of_dataset, TMP_num_of_epochs=TMP_num_of_epochs, name_of_the_experiment = name_of_the_experiment)
+
+end = time.time()
+print time.ctime()
+
+print "### TOTAL TIME ", format(end - start, '.2f'), " sec."

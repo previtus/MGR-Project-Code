@@ -1,6 +1,7 @@
+from ModelHandler.CreateModel.ModelsFunctions import doWeNeedToCook, predict_and_save_features
+
 import ModelHandler.CreateModel.KerasApplicationsModels as Models
 
-from ModelHandler.CreateModel.functions_for_vgg16 import doWeNeedToCook, predict_and_save_features, load_features, build_top_model, predict_from_generators
 
 def CookADataset(dataset, local_folder):
     '''

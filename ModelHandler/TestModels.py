@@ -5,7 +5,7 @@ from ModelHandler.CreateModel.ModelsFunctions import load_features, build_top_mo
 from keras.utils import plot_model
 
 from ModelHandler.CreateModel.ModelCooking import CookADataset
-from ModelHandler.CreateModel.TopModel import TestTopModel
+from ModelHandler.ModelTester import TestTopModel
 from Downloader.VisualizeHistory import visualize_histories, visualize_history
 import ModelHandler.CreateModel.KerasApplicationsModels as Models
 
