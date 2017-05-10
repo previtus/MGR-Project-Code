@@ -61,7 +61,7 @@ def load_settings_from_file(file, verbose=False):
 
     return Settings
 
-#load_settings_from_file('setting_example.py')
+#load_settings_from_file('setting_example.py', verbose=True)
 
 # EXAMPLE OF SETTINGS FILE <setting_example.py>:
 '''
