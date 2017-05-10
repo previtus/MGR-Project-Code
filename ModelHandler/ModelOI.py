@@ -35,6 +35,11 @@ def getLogDirectory():
     return local_folder
 
 def load_dataset(Settings):
+    '''
+    Loads dataset according to the Settings parameters "dataset_name", "pixels", "number_of_images", "seed"
+    :param Settings:
+    :return:
+    '''
     dataset = DatasetHandler.CreateDataset.load_custom(Settings["dataset_name"], Settings["pixels"],
                     desired_number=Settings["number_of_images"], seed=Settings["seed"])
     return dataset

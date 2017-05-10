@@ -52,10 +52,14 @@ def print_settings(Settings, ignore_default_values = True):
 def load_settings_from_file(file=None, verbose=False):
     Settings, DefaultModel = load_default_settings()
 
+    import os.path
     if file is not None:
-        import imp
-        foo = imp.load_source('Setup', file)
-        Settings = foo.Setup(Settings,DefaultModel)
+        if os.path.isfile(file):
+            import imp
+            foo = imp.load_source('Setup', file)
+            Settings = foo.Setup(Settings,DefaultModel)
+        else:
+            print "Couldn't find Settings file '", file, "' using the Default Settings instead"
 
     if verbose:
         print_settings(Settings, ignore_default_values=True)
