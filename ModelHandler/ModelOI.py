@@ -5,7 +5,6 @@
 
 from DatasetHandler.FileHelperFunc import use_path_which_exists, make_folder_ifItDoesntExist
 import os
-from ModelHandler.ModelTester import predict_and_save_features
 import ModelHandler.CreateModel.KerasApplicationsModels as Models
 import DatasetHandler.CreateDataset
 
@@ -54,9 +53,21 @@ def getFeaturesLists(dataset):
     return list_of_features
 
 # Cooking
-def doWeNeedToCook(filename_features_train, filename_features_test):
+def do_we_need_to_cook(filename_features_train, filename_features_test):
     return not(os.path.exists(filename_features_train) and os.path.getsize(filename_features_train) > 0
         and os.path.exists(filename_features_test) and os.path.getsize(filename_features_test) > 0)
+
+def get_feature_file_names(local_folder, dataset_uid, model_name):
+    '''
+    :param local_folder: taken from getLogDirectory()
+    :param dataset_uid: taken from dataset.unique_id
+    :param model_name: can be 'resnet50'
+    :return:
+    '''
+    filename_features_train = local_folder+'shared/'+'features_train_'+dataset_uid+'_'+model_name+'.npy'
+    filename_features_test = local_folder+'shared/'+'features_validation_'+dataset_uid+'_'+model_name+'.npy'
+    return [filename_features_train, filename_features_test]
+
 
 def CookADataset(dataset, with_models, local_folder):
     '''
@@ -77,11 +88,9 @@ def CookADataset(dataset, with_models, local_folder):
 
     for model_name in with_models:
         #print model_name
+        [filename_features_train, filename_features_test] = get_feature_file_names(local_folder, dataset_uid, model_name)
 
-        filename_features_train = local_folder+'shared/'+'features_train_'+dataset_uid+'_'+model_name+'.npy'
-        filename_features_test = local_folder+'shared/'+'features_validation_'+dataset_uid+'_'+model_name+'.npy'
-
-        if doWeNeedToCook(filename_features_train, filename_features_test):
+        if do_we_need_to_cook(filename_features_train, filename_features_test):
             if x==None:
                 [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=0.25)
                 #[test_generator, val_generator, number_in_test, number_in_val] = dataset.getGenerators(validation_split=0.25)
@@ -90,7 +99,8 @@ def CookADataset(dataset, with_models, local_folder):
 
             #predict_from_generators(test_generator, val_generator, number_in_test, number_in_val, filename_features_train, filename_features_test, model_cnn)
 
-            predict_and_save_features(x, y, x_val, y_val, filename_features_train, filename_features_test, model_cnn)
+            #import ModelHandler.ModelTester
+            #ModelHandler.ModelTester.predict_and_save_features(x, y, x_val, y_val, filename_features_train, filename_features_test, model_cnn)
 
         list_of_feature_files.append([model_name, filename_features_train, filename_features_test])
 

@@ -11,6 +11,42 @@ import numpy as np
 from keras.utils import plot_model
 from Downloader.VisualizeHistory import saveHistory, visualize_history
 
+def cook_features(models, dataset, Settings):
+    '''
+    Makes sure that we have features available for the duo of model-dataset in our shared feature folder.
+    If not, we will cook them.
+    :param models: list of models (currently without their tops)
+    :param dataset: dataset object
+    :param Settings: settings
+    :return:
+    '''
+    index = 0
+    for model in models:
+        model_settings = Settings["models"][index]
+        from ModelHandler.ModelOI import get_feature_file_names, do_we_need_to_cook
+        #ps: if this is in the header of the file, it causes mutual import of each other - and TF yells...
+
+        [filename_features_train, filename_features_test] = get_feature_file_names(
+            local_folder=Settings["folders"]["local_folder"], dataset_uid=dataset.unique_id, model_name=model_settings["cnn_model"])
+
+        print [filename_features_train, filename_features_test]
+        do_we_need_to_cook_bool = do_we_need_to_cook(filename_features_train, filename_features_test)
+
+        if do_we_need_to_cook_bool:
+            model_cnn = model[0]
+
+            '''
+            if x==None:
+                [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=0.25)
+                #[test_generator, val_generator, number_in_test, number_in_val] = dataset.getGenerators(validation_split=0.25)
+            #predict_from_generators(test_generator, val_generator, number_in_test, number_in_val, filename_features_train, filename_features_test, model_cnn)
+            predict_and_save_features(x, y, x_val, y_val, filename_features_train, filename_features_test, model_cnn)
+            '''
+
+        index += 1
+    return 1
+
+
 # Generate Feature files = Predict
 def predict_from_generators(test_generator, val_generator, number_in_test, number_in_val, filename_features_train, filename_features_test, model):
     # generators should yield:
@@ -61,6 +97,7 @@ def TestTopModel(dataset, model_name, filename_features_train, filename_features
     # Report feature output sizes
 
     # Try top models - regular with fixed size or the "heatmap"
+
     model = build_top_model(train_data.shape[1:], 3)
 
     epochs = 20 #150
