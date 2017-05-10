@@ -17,7 +17,7 @@ visualize_history(loadHistory('tmp_saved_history.npy'))
 
 '''
 
-def visualize_history(hi, show=True, save=False, save_path='', show_also=''):
+def visualize_history(hi, show=True, save=False, save_path='', show_also='', custom_title=None):
 
     # list all data in history
     print(hi.keys())
@@ -29,7 +29,11 @@ def visualize_history(hi, show=True, save=False, save_path='', show_also=''):
         plt.plot(hi[show_also], linestyle='dotted')
         plt.plot(hi['val_'+show_also], linestyle='dotted')
 
-    plt.title('model loss')
+    if custom_title is None:
+        plt.title('model loss')
+    else:
+        plt.title(custom_title)
+
     plt.ylabel('loss')
     plt.xlabel('epoch')
 
@@ -56,7 +60,7 @@ def visualize_history(hi, show=True, save=False, save_path='', show_also=''):
     plt.clf()
     return plt
 
-def visualize_histories(histories, names, plotvalues='loss', show=True, save=False, save_path=''):
+def visualize_histories(histories, names, plotvalues='loss', show=True, save=False, save_path='', custom_title=None, just_val=False):
 
     import matplotlib.pyplot as plt
 
@@ -68,6 +72,11 @@ def visualize_histories(histories, names, plotvalues='loss', show=True, save=Fal
         h2 = loadHistory('history2.npy')
         visualize_histories([h1, h2], ['history1', 'history2'])
     '''
+    if custom_title is None:
+        custom_title = 'model ' + plotvalues
+    if just_val:
+        custom_title = custom_title + ' (just validation results)'
+
     i = 0
     leg = []
     for hi in histories:
@@ -75,15 +84,18 @@ def visualize_histories(histories, names, plotvalues='loss', show=True, save=Fal
         # list all data in history
         print(hi.keys())
         # summarize history for loss
-        plt.plot(hi[plotvalues])
+        if not just_val:
+            plt.plot(hi[plotvalues])
         plt.plot(hi['val_'+plotvalues])
-        plt.title('model '+plotvalues)
+        plt.title(custom_title)
         plt.ylabel('loss')
         plt.xlabel('epoch')
-        leg.append(n + '_train')
-        leg.append(n + '_test')
+        if not just_val:
+            leg.append(n + '')
+        leg.append(n + '_val')
         i += 1
-    plt.legend(leg, loc='upper left')
+    #plt.legend(leg, loc='lower left')
+    plt.legend(leg, loc='best')
     if save:
         plt.savefig(save_path+plotvalues+'.png')
     if show:
