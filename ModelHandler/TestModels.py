@@ -2,6 +2,7 @@ import DatasetHandler.CreateDataset as CreateDataset
 
 from DatasetHandler.FileHelperFunc import use_path_which_exists, make_folder_ifItDoesntExist
 from ModelHandler.CreateModel.ModelsFunctions import load_features, build_top_model, train_top_model, save_model_history
+from keras.utils import plot_model
 
 from ModelHandler.CreateModel.ModelCooking import CookADataset
 from ModelHandler.CreateModel.TopModel import TestTopModel
@@ -47,27 +48,42 @@ def test_generators(set, PIXELS):
     dataset = CreateDataset.load_custom(set, PIXELS, desired_number=5, seed=42)
 
     validation_split = 0.25
-    [order, image_generator, size] = dataset.getImageGenerator(validation_split, resize=None)
-    print order, image_generator, size
+    [order, order_val, image_generator, size, image_generator_val, size_val] = dataset.getImageGenerator(validation_split, resize=None)
+    print order, order_val, image_generator, size, image_generator_val, size_val
 
     model_cnn = Models.resnet50()
 
-    features_train = model_cnn.predict_generator(image_generator, steps=size,verbose=1)
-    print features_train
+    features = model_cnn.predict_generator(image_generator, steps=size, verbose=1)
+    features_val = model_cnn.predict_generator(image_generator_val, steps=size_val, verbose=1)
 
-    all_features = features_train
-    [order, feature_generator] = dataset.getFeatureGenerator(order, validation_split, all_features, resize=None)
-    print features_train.shape[1:]
+    import numpy as np
+    np.save(open('del_test.npy', 'w'), features)
+    np.save(open('del_val.npy', 'w'), features_val)
+    features = np.load(open('del_test.npy'))
+    features_val = np.load(open('del_val.npy'))
 
-    model = build_top_model(features_train.shape[1:], 3)
-    model.summary()
+    #[feature_generator, feature_generator_val, size, size_val] = dataset.getFeatureGenerator(order, order_val,
+    #                                                validation_split, features, features_val)
+    #print feature_generator, feature_generator_val, size, size_val
+
+    model = build_top_model(features.shape[1:], 3)
+    #model.summary()
+    #plot_model(model, to_file='tst.png', show_shapes=True)
 
     model.compile(optimizer='rmsprop', loss='mean_squared_error', metrics=['mean_absolute_error'])
-
     epochs = 50
-    # history = model.fit_generator(feature_generator, steps_per_epoch=size, epochs=epochs) # HAS A PROBLEM
 
-    # visualize_history(history)
+    # HAS A PROBLEM # TRY JUST FIT AND NO GENERATOR
+    [y, y_val] = dataset.getJustLabels(validation_split)
+    history = model.fit(features, y,
+              epochs=epochs, batch_size=32,
+              validation_data=(features_val, y_val))
+
+    #history = model.fit_generator(feature_generator, steps_per_epoch=size, epochs=epochs,
+    #                              validation_data=feature_generator_val, validation_steps=size_val)
+
+    history = history.history
+    visualize_history(history)
 
     return 3
 

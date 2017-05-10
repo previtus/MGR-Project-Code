@@ -51,10 +51,13 @@ class Dataset:
         self.init_from_lists(__list_of_images, __labels, __osm, img_width, img_height)
 
     # Data access: ---------------------------------------------------------------------------------------------
+    def getJustLabels(self, validation_split=0.2):
+        y, y_val = KerasPreparation.split_one_array(self.__labels, validation_split)
+        return [y, y_val]
 
     def getDataLabels(self, resize=None):
         # ([x],[y]) as image data and labels
-        x = KerasPreparation.LoadActualImages(self.__list_of_images, resize=resize)
+        x = KerasPreparation.LoadActualImages(self.__list_of_images, resize=resize, dim_ordering=Downloader.Defaults.KERAS_SETTING_DIMENSIONS)
         y = self.__labels
         return [x, y]
 
@@ -72,46 +75,65 @@ class Dataset:
 
         return [x, y, x_val, y_val, osm, osm_val]
 
+    # For generators
     def generator_images_scores(self, order, image_paths, scores, resize=None):
 
         while True:
             for index in order:
                 img_path = image_paths[index]
 
-                image = KerasPreparation.LoadActualImages([img_path], resize=resize,
-                                                      dim_ordering=Downloader.Defaults.KERAS_SETTING_DIMENSIONS)  # th or tf
+                image = KerasPreparation.LoadActualImages([img_path], resize=resize)
                 score = scores[index]
                 yield (image, score)
 
-    def generator_features_osm_scores(self, order, all_features, osm_vectors, scores, resize=None):
+    def generator_features_osm_scores(self, order, all_features, osm_vectors, scores):
 
         while True:
             for index in order:
                 score = scores[index]
                 features = all_features[index]
+
                 #osm_vector = osm_vectors[index]
                 #yield ([osm_vector, features], score)
-                yield (features, score)
+                #yield np.asarray(features), np.asarray(score)
+                yield [features, score]
+
+                #yield (features, score)
+                #yield (np.array([features]), score)
 
     def getImageGenerator(self, validation_split, resize=None):
         # idea:
         # take the lists on images and their labels - split these two arrays by the validation split
-        # from both of the tuples (img_names, scores) create generator, which simply iterates through them...
+        images_paths, scores, images_paths_val, scores_val = KerasPreparation.split_data(self.__list_of_images, self.__labels, validation_split)
 
-        order = range(self.num_of_images)
-        # MIX IT UP
+        size = len(scores)
+        size_val = len(scores_val)
 
-        image_generator = self.generator_images_scores(order, image_paths=self.__list_of_images, scores=self.__labels, resize=resize)
-        size = self.num_of_images
+        order = range(size)
+        order_val = range(size_val)
+        # We can mix up the orders, but then we need to mix the future data too
 
-        return [order, image_generator, size]
+        image_generator = self.generator_images_scores(order, image_paths=images_paths, scores=scores, resize=resize)
+        image_generator_val = self.generator_images_scores(order_val, image_paths=images_paths_val, scores=scores_val, resize=resize)
+
+        return [order, order_val, image_generator, size, image_generator_val, size_val]
 
         # [test_generator, val_generator, number_in_test, number_in_val]
 
+    def getFeatureGenerator(self, order, order_val, validation_split, features, features_val):
+        #osm, osm_val = KerasPreparation.split_one_array(self.__osm, validation_split)
+        osm=[]
+        osm_val=[]
+        scores, scores_val = KerasPreparation.split_one_array(self.__labels, validation_split)
 
-    def getFeatureGenerator(self, order, validation_split, all_features, resize=None):
-        feature_generator = self.generator_features_osm_scores(order, all_features, osm_vectors=self.__osm, scores=self.__labels, resize=resize)
-        return [order, feature_generator]
+        feature_generator = self.generator_features_osm_scores(order, features, osm_vectors=osm, scores=scores)
+
+        feature_generator_val = self.generator_features_osm_scores(order_val, features_val, osm_vectors=osm_val,
+                                                               scores=scores_val)
+
+        size = len(scores)
+        size_val = len(scores_val)
+        return [feature_generator, feature_generator_val, size, size_val]
 
     # Dataset reporting: ---------------------------------------------------------------------------------------------
 
