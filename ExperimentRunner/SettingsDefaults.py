@@ -34,7 +34,7 @@ def load_default_settings():
     return DefaultSettings, DefaultModel
 
 def print_settings(Settings, ignore_default_values = True):
-    print "## Reporting on Settings"
+    print "## Loaded Settings:"
     t = ' '
     DefaultSettings, DefaultModel = load_default_settings()
     for key in Settings.keys():
@@ -49,12 +49,13 @@ def print_settings(Settings, ignore_default_values = True):
                 print t,t,subkey, model[subkey]
 
 
-def load_settings_from_file(file, verbose=False):
+def load_settings_from_file(file=None, verbose=False):
     Settings, DefaultModel = load_default_settings()
 
-    import imp
-    foo = imp.load_source('Setup', file)
-    Settings = foo.Setup(Settings,DefaultModel)
+    if file is not None:
+        import imp
+        foo = imp.load_source('Setup', file)
+        Settings = foo.Setup(Settings,DefaultModel)
 
     if verbose:
         print_settings(Settings, ignore_default_values=True)

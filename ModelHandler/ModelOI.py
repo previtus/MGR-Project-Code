@@ -7,7 +7,22 @@ from DatasetHandler.FileHelperFunc import use_path_which_exists, make_folder_ifI
 import os
 from ModelHandler.ModelTester import predict_and_save_features
 import ModelHandler.CreateModel.KerasApplicationsModels as Models
+import DatasetHandler.CreateDataset
 
+def prepare_folders(Settings):
+    '''
+    Figures folder paths which will be used in experiment (local folder with history file, graphs, model file and also
+    the shared folder where features are saved.
+    Saves these paths into Settings.
+    :param Settings: This is a travelling dictionary with all the settings, we will add folder settings there
+    :return:
+    '''
+    folders = {}
+    folders["local_folder"] = getLogDirectory()
+    folders["features_folder"] = folders["local_folder"] + 'shared/'
+
+    Settings["folders"] = folders
+    return Settings
 
 def getLogDirectory():
     log_folders = ['/home/ekmek/Desktop/Project II/MGR-Project-Code/Logs/',
@@ -19,6 +34,12 @@ def getLogDirectory():
 
     return local_folder
 
+def load_dataset(Settings):
+    dataset = DatasetHandler.CreateDataset.load_custom(Settings["dataset_name"], Settings["pixels"],
+                    desired_number=Settings["number_of_images"], seed=Settings["seed"])
+    return dataset
+
+##############################################
 def getFeaturesLists(dataset):
     local_folder = getLogDirectory()
     #with_models = Models.all_model_names()
