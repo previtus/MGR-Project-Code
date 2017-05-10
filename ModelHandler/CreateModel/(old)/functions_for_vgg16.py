@@ -2,7 +2,6 @@ import DatasetHandler.CreateDataset as CreateDataset
 from Downloader.ImageHelpers import len_
 from Downloader.VisualizeHistory import visualize_history, saveHistory
 from keras.utils import plot_model
-from ModelHandler.CreateModel.ModelsFunctions import *
 
 from keras.applications.vgg16 import VGG16
 import time

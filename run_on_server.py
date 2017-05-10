@@ -1,8 +1,8 @@
 from ModelHandler.TestModels import main, test_generators
 import sys
 
-name = '5556x_markable_640x640'
-pix = 640
+name = '1200x_markable_299x299'
+pix = 299
 
 if len(sys.argv) > 2:
     name = (sys.argv[1])  # var1

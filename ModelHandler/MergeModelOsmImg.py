@@ -1,5 +1,5 @@
 import DatasetHandler.CreateDataset as CreateDataset
-from ModelHandler.CreateModel.ModelsFunctions import load_features, build_top_model, train_top_model, save_model_history
+from ModelHandler.ModelTester import load_features
 from Downloader.ImageHelpers import len_
 
 # image features file

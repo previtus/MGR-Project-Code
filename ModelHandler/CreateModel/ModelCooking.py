@@ -1,7 +1,11 @@
-from ModelHandler.CreateModel.ModelsFunctions import doWeNeedToCook, predict_and_save_features
+import os
+from ModelHandler.ModelTester import predict_and_save_features
 
 import ModelHandler.CreateModel.KerasApplicationsModels as Models
 
+def doWeNeedToCook(filename_features_train, filename_features_test):
+    return not(os.path.exists(filename_features_train) and os.path.getsize(filename_features_train) > 0
+        and os.path.exists(filename_features_test) and os.path.getsize(filename_features_test) > 0)
 
 def CookADataset(dataset, local_folder):
     '''

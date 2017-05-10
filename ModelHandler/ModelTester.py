@@ -5,9 +5,51 @@
 # - train top > finetune CNN > finetune everything
 # Can perform the more precise k-fold cross validation
 
-
-from ModelHandler.CreateModel.ModelsFunctions import load_features, build_top_model, train_top_model, save_model_history
+from ModelHandler.ModelGenerator import build_top_model
 from Downloader.ImageHelpers import len_
+import numpy as np
+from keras.utils import plot_model
+from Downloader.VisualizeHistory import saveHistory, visualize_history
+
+# Generate Feature files = Predict
+def predict_from_generators(test_generator, val_generator, number_in_test, number_in_val, filename_features_train, filename_features_test, model):
+    # generators should yield:
+    bottleneck_features_train = model.predict_generator(test_generator, steps=number_in_test,verbose=1)
+    np.save(open(filename_features_train, 'w'), bottleneck_features_train)
+    bottleneck_features_validation = model.predict_generator(val_generator, steps=number_in_val,verbose=1)
+    np.save(open(filename_features_test, 'w'), bottleneck_features_validation)
+
+def predict_and_save_features(x, y, x_val, y_val, filename_features_train, filename_features_test, model):
+    # dimensions of x are (num,3,x_dim, y_dim) = (75, 3, 150, 150)
+    bottleneck_features_train = model.predict(x,verbose=1)
+    np.save(open(filename_features_train, 'w'), bottleneck_features_train)
+    bottleneck_features_validation = model.predict(x_val,verbose=1)
+    np.save(open(filename_features_test, 'w'), bottleneck_features_validation)
+
+def load_features(filename_features_train, filename_features_test, y, y_val):
+    train_data = np.load(open(filename_features_train))
+    train_labels = np.array(y)
+
+    validation_data = np.load(open(filename_features_test))
+    validation_labels = np.array(y_val)
+    return [train_data, train_labels, validation_data, validation_labels]
+
+
+# Test Whole model = Fit
+def train_top_model(model, train_data, train_labels, epochs, validation_data, validation_labels, save_img_name=None):
+
+    model.compile(optimizer='rmsprop', loss='mean_squared_error', metrics=['mean_absolute_error'])
+    if save_img_name is not None:
+        plot_model(model, to_file=save_img_name+'.png', show_shapes=True)
+
+    history = model.fit(train_data, train_labels,
+              epochs=epochs, batch_size=32,
+              validation_data=(validation_data, validation_labels))
+
+    #history = model.fit_generator(generator_train, steps_per_epoch, epochs=epochs,
+    #                              validation_data=(generator_valid), validation_steps)
+
+    return history.history
 
 def TestTopModel(dataset, model_name, filename_features_train, filename_features_test, filename_history, img_name):
     [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=0.25)
@@ -29,3 +71,6 @@ def TestTopModel(dataset, model_name, filename_features_train, filename_features
 
     return history
 
+def save_model_history(history, filename_history, filename_image):
+    saveHistory(history, filename_history)
+    visualize_history(history, show=False, save=True, save_path=filename_image)

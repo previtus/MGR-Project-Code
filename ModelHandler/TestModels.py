@@ -1,7 +1,7 @@
 import DatasetHandler.CreateDataset as CreateDataset
 
 from DatasetHandler.FileHelperFunc import use_path_which_exists, make_folder_ifItDoesntExist
-from ModelHandler.CreateModel.ModelsFunctions import load_features, build_top_model, train_top_model, save_model_history
+from ModelHandler.ModelGenerator import build_top_model
 from keras.utils import plot_model
 
 from ModelHandler.CreateModel.ModelCooking import CookADataset
