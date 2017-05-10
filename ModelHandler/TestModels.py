@@ -10,7 +10,7 @@ from Downloader.VisualizeHistory import visualize_histories, visualize_history
 import ModelHandler.CreateModel.KerasApplicationsModels as Models
 
 import datetime
-# Test functions to handle models
+# Manually writen experiments
 
 def main(set, PIXELS):
     log_folders = ['/home/ekmek/Desktop/Project II/MGR-Project-Code/Logs/',
