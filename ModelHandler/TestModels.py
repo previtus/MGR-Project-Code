@@ -64,7 +64,7 @@ def test_generators(set, PIXELS):
                     ] #'/home/ekmek/Vitek/Logs-VALID ONE-run of 1200x set on 299x299 imgs/'
     local_folder = use_path_which_exists(log_folders)
     make_folder_ifItDoesntExist(local_folder+'shared/')
-    dataset_uid = dataset.unique_id
+    dataset_uid = dataset.unique_id+'GEN'
     model_name = 'resnet50'
     filename_features_train = local_folder + 'shared/' + 'features_train_' + dataset_uid + '_' + model_name + '.npy'
     filename_features_test = local_folder + 'shared/' + 'features_validation_' + dataset_uid + '_' + model_name + '.npy'
