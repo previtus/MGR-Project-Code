@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.misc import imread, imresize, imsave
 from keras.preprocessing.image import *
-
+from Downloader.Defaults import KERAS_SETTING_DIMENSIONS
 
 # Helper functions for loading of images
 
@@ -16,12 +16,12 @@ def list_images(folder):
 def len_(L):
     return np.array(L).shape
 
-def load_image_with_keras(img_path, target_size=None, dim_ordering='default'):
+def load_image_with_keras(img_path, target_size=None, dim_ordering=KERAS_SETTING_DIMENSIONS):
     pil_img = load_img(img_path, target_size)
     arr = img_to_array(pil_img, dim_ordering)
     return arr
 
-def load_images_with_keras(img_paths, target_size=None, dim_ordering='default'):
+def load_images_with_keras(img_paths, target_size=None, dim_ordering=KERAS_SETTING_DIMENSIONS):
     imgs_arr = []
     for img_path in img_paths:
         arr = load_image_with_keras(img_path, target_size, dim_ordering)

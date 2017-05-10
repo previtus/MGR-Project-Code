@@ -5,6 +5,16 @@ from Defaults import *
 from DataOperations import *
 from PreprocessData.SegmentsManipulators import *
 
+def split_one_array(arr,validation_split=0.2):
+    if not(0 < validation_split < 1):
+        print "Choose validation_split in between 0 and 1. Setting the default value of 0.2"
+        validation_split = 0.2
+
+    split_at = int(len(arr) * (1 - validation_split))
+    arr_test = arr[0:split_at]
+    arr_val = arr[split_at:]
+    return arr_test,arr_val
+
 def split_data(x,y,validation_split=0.2):
     '''
     :param x: Dataset, can be paths to images or directly the image data for example (?, 3,222,222)
@@ -72,7 +82,7 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
 
     return list_of_images, labels, osm_vectors
 
-def LoadActualImages(list_of_images, resize=None, dim_ordering='default'):
+def LoadActualImages(list_of_images, resize=None, dim_ordering=KERAS_SETTING_DIMENSIONS):
     x = load_images_with_keras(list_of_images, target_size=resize, dim_ordering=dim_ordering)
 
     #x = preprocess_image_batch(list_of_images, img_size=resize)
