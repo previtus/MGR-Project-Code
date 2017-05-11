@@ -5,8 +5,8 @@
 # - train top > finetune CNN > finetune everything
 # Can perform the more precise k-fold cross validation
 
-from ModelHandler.ModelGenerator import build_top_model
-from Downloader.ImageHelpers import len_
+from ModelHandler.ModelGenerator import build_simple_top_model
+from Omnipresent import len_
 import numpy as np
 from keras.utils import plot_model
 from Downloader.VisualizeHistory import saveHistory, visualize_history
@@ -29,43 +29,79 @@ def cook_features(models, dataset, Settings):
         from ModelHandler.ModelOI import get_feature_file_names, do_we_need_to_cook
         #ps: if this is in the header of the file, it causes mutual import of each other - and TF yells...
 
-        are_we_using_generators = (model_settings["cooking_method"] == 'generators')
-        [filename_features_train, filename_features_test] = get_feature_file_names(
-            local_folder=Settings["folders"]["local_folder"], dataset_uid=dataset.unique_id, model_name=model_settings["cnn_model"],
-            are_we_using_generators=are_we_using_generators)
-
-        print [filename_features_train, filename_features_test]
+        filename_features_train = model_settings["filename_features_train"]
+        filename_features_test = model_settings["filename_features_test"]
         do_we_need_to_cook_bool = do_we_need_to_cook(filename_features_train, filename_features_test)
 
         if do_we_need_to_cook_bool:
             model_cnn = model[0]
-
             cooking_method = model_settings["cooking_method"]
 
             print "We need to cook, chosen method is", cooking_method
             #if True:
             if cooking_method == 'direct':
-
                 if x is None:
                     [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=Settings["validation_split"])
                     print len_(x)
 
-                predict_and_save_features(x, y, x_val, y_val, filename_features_train+'1', filename_features_test+'1', model_cnn)
+                predict_and_save_features(x, y, x_val, y_val, filename_features_train, filename_features_test, model_cnn)
 
             #if True:
             elif cooking_method == 'generators':
                 [order, order_val, image_generator, size, image_generator_val, size_val] = dataset.getImageGenerator(validation_split=Settings["validation_split"])
                 print len_(order)
 
-                predict_from_generators(image_generator, image_generator_val, size, size_val, filename_features_train+'2', filename_features_test+'2', model_cnn)
+                predict_from_generators(image_generator, image_generator_val, size, size_val, filename_features_train, filename_features_test, model_cnn)
 
         else:
             print "No need to cook, the files already exist"
 
-
         index += 1
     return index
 
+def test_models(models, dataset, Settings):
+    '''
+    Runs test on all model - dataset pairs from models.
+    :param models: array of models to run
+    :param dataset:
+    :param Settings:
+    :return:
+    '''
+    number_of_models = len(Settings["models"])
+    print "## Testing",number_of_models,"models."
+
+    histories = []
+    index = 0
+    for model in models:
+        model_settings = Settings["models"][index]
+        history = test_model(model, dataset, Settings, model_settings)
+        histories.append(history)
+
+        index += 1
+    return histories
+
+def test_model(model, dataset, Settings, model_settings):
+    history = None
+    if model_settings["model_type"] is 'simple_cnn_with_top':
+
+        filename_features_train = model_settings["filename_features_train"]
+        filename_features_test = model_settings["filename_features_test"]
+
+        [y, y_val] = dataset.getDataLabels_split_only_y(validation_split=Settings["validation_split"])
+        [train_data, train_labels, validation_data, validation_labels] = load_features(filename_features_train, filename_features_test, y, y_val)
+
+        print "input shape of features", len_(train_data), "and labels", len_(train_labels)
+
+        save_img_name = model_settings["model_image_name"]
+        epochs = model_settings["epochs"]
+
+        top_model = model[1]
+        history = train_top_model(top_model, train_data, train_labels, epochs, validation_data, validation_labels, save_img_name=save_img_name)
+
+    else:
+        print "Yet to be programmed."
+
+    return history
 
 # Generate Feature files = Predict
 def predict_from_generators(test_generator, val_generator, number_in_test, number_in_val, filename_features_train, filename_features_test, model):
@@ -90,6 +126,18 @@ def load_features(filename_features_train, filename_features_test, y, y_val):
     validation_labels = np.array(y_val)
     return [train_data, train_labels, validation_data, validation_labels]
 
+def load_feature_file(path):
+    '''
+    Just loads the features stored in one file.
+    :param path:
+    :return:
+    '''
+    try:
+        data = np.load(open(path))
+        return data
+    except:
+        print "Failed to load file", path
+        return 0
 
 # Test Whole model = Fit
 def train_top_model(model, train_data, train_labels, epochs, validation_data, validation_labels, save_img_name=None):
@@ -118,7 +166,7 @@ def TestTopModel(dataset, model_name, filename_features_train, filename_features
 
     # Try top models - regular with fixed size or the "heatmap"
 
-    model = build_top_model(train_data.shape[1:], 3)
+    model = build_simple_top_model(train_data.shape[1:], 3)
 
     epochs = 20 #150
     save_img_name = model_name

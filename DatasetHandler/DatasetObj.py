@@ -69,6 +69,11 @@ class Dataset:
         x, y, x_val, y_val = KerasPreparation.split_data(x, y, validation_split)
         return [x, y, x_val, y_val]
 
+    def getDataLabels_split_only_y(self, resize=None, validation_split=0.2):
+        y = self.__labels
+        y, y_val = KerasPreparation.split_one_array(y, validation_split)
+        return [y, y_val]
+
     def getDataLabels_split_with_osm(self, resize=None, validation_split=0.2):
         [x, y, x_val, y_val] = self.getDataLabels_split(resize, validation_split)
         osm, osm_val = KerasPreparation.split_osm(self.__osm,validation_split)

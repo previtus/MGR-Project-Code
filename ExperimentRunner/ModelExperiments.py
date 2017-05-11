@@ -3,22 +3,29 @@ This is the main Experiment runner with Models
 '''
 
 import ExperimentRunner.SettingsDefaults as SettingsDefaults
-import ModelHandler.ModelOI
-import ModelHandler.ModelGenerator
-import ModelHandler.ModelTester
+import ModelHandler.ModelOI as ModelOI
+import ModelHandler.ModelGenerator as ModelGenerator
+import ModelHandler.ModelTester as ModelTester
+from Omnipresent import len_
 
 def run_many_models(settings_file=None):
     Settings = SettingsDefaults.load_settings_from_file(settings_file, verbose=False)
 
     # preparation
-    Settings = ModelHandler.ModelOI.prepare_folders(Settings)
-    dataset = ModelHandler.ModelOI.load_dataset(Settings)
-    models = ModelHandler.ModelGenerator.get_cnn_models(Settings)
+    dataset = ModelOI.load_dataset(Settings)
+    Settings = ModelOI.prepare_folders(Settings, dataset)
+    models = ModelGenerator.get_cnn_models(Settings)
+
+    # cooking
+    ModelTester.cook_features(models, dataset, Settings)
+    models = ModelGenerator.get_top_models(models, Settings)
 
     # tests
-    ModelHandler.ModelTester.cook_features(models, dataset, Settings)
+    histories = ModelTester.test_models(models, dataset, Settings)
+    print len_(histories)
+    print histories
 
-    #models = ModelGenerator.get_top_models(models, Settings)
+    #ModelOI.save_visualizations(models, Settings)
 
 
 run_many_models('setting_example.py')

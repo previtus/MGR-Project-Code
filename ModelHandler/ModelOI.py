@@ -8,11 +8,11 @@ import os
 import ModelHandler.CreateModel.KerasApplicationsModels as Models
 import DatasetHandler.CreateDataset
 
-def prepare_folders(Settings):
+def prepare_folders(Settings, dataset):
     '''
     Figures folder paths which will be used in experiment (local folder with history file, graphs, model file and also
-    the shared folder where features are saved.
-    Saves these paths into Settings.
+    the shared folder where features are saved. Also the paths for filename_features_train, filename_features_test for
+    for each model. Saves these paths into Settings.
     :param Settings: This is a travelling dictionary with all the settings, we will add folder settings there
     :return:
     '''
@@ -21,6 +21,18 @@ def prepare_folders(Settings):
     folders["features_folder"] = folders["local_folder"] + 'shared/'
 
     Settings["folders"] = folders
+
+    for model_settings in Settings["models"]:
+        are_we_using_generators = (model_settings["cooking_method"] == 'generators')
+
+        [filename_features_train, filename_features_test] = get_feature_file_names(
+            local_folder=Settings["folders"]["local_folder"], dataset_uid=dataset.unique_id, model_name=model_settings["cnn_model"],
+            are_we_using_generators=are_we_using_generators)
+
+        model_settings["filename_features_train"] = filename_features_train
+        model_settings["filename_features_test"] = filename_features_test
+        model_settings["model_image_name"] = filename_features_test + '.png'
+
     return Settings
 
 def getLogDirectory():

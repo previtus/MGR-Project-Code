@@ -1,6 +1,6 @@
 import DatasetHandler.CreateDataset as CreateDataset
 import ModelOI, ModelGenerator
-from ModelHandler.ModelGenerator import build_top_model
+from ModelHandler.ModelGenerator import build_simple_top_model
 from keras.utils import plot_model
 
 from ModelHandler.ModelTester import TestTopModel
@@ -88,7 +88,7 @@ def test_generators(set, PIXELS):
     #                                                validation_split, features, features_val)
     #print feature_generator, feature_generator_val, size, size_val
 
-    model = build_top_model(features.shape[1:], 3)
+    model = build_simple_top_model(features.shape[1:], 3)
     #model.summary()
     #plot_model(model, to_file='tst.png', show_shapes=True)
 
