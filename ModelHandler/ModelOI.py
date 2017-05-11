@@ -43,15 +43,6 @@ def load_dataset(Settings):
                     desired_number=Settings["number_of_images"], seed=Settings["seed"])
     return dataset
 
-##############################################
-def getFeaturesLists(dataset):
-    local_folder = getLogDirectory()
-    #with_models = Models.all_model_names()
-    with_models = ['resnet50']
-    list_of_features = CookADataset(dataset, with_models, local_folder=local_folder)
-
-    return list_of_features
-
 # Cooking
 def do_we_need_to_cook(filename_features_train, filename_features_test):
     return not(os.path.exists(filename_features_train) and os.path.getsize(filename_features_train) > 0
@@ -72,8 +63,20 @@ def get_feature_file_names(local_folder, dataset_uid, model_name, are_we_using_g
     filename_features_test = local_folder+'shared/'+'features_validation_'+dataset_uid+'_'+model_name+add+'.npy'
     return [filename_features_train, filename_features_test]
 
+##############################################
+
+def getFeaturesLists(dataset):
+    # TODO: DEL
+
+    local_folder = getLogDirectory()
+    #with_models = Models.all_model_names()
+    with_models = ['resnet50']
+    list_of_features = CookADataset(dataset, with_models, local_folder=local_folder)
+
+    return list_of_features
 
 def CookADataset(dataset, with_models, local_folder):
+    # TODO: DEL
     '''
     Will cook all feature files for a dataset
     :param dataset: dataset object
