@@ -29,7 +29,7 @@ def get_top_models(models, Settings):
     :return:
     '''
     number_of_models = len(Settings["models"])
-    print "## Processing",number_of_models,"models with TOP models."
+    print "## Adding ",number_of_models," top models."
 
     index = 0
     for model_settings in Settings["models"]:
@@ -43,7 +43,7 @@ def get_top_models(models, Settings):
             train_data = load_feature_file(filename_features_train)
             input_shape = train_data.shape[1:]
             model[1] = build_simple_top_model(input_shape=input_shape, number_of_repeats=model_settings["top_repeat_FC_block"])
-            print model
+            print model_settings["unique_id"], model
         else:
             print "Yet to be programmed."
 

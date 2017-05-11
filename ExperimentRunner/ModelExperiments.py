@@ -19,13 +19,14 @@ def run_many_models(settings_file=None):
     # cooking
     ModelTester.cook_features(models, dataset, Settings)
     models = ModelGenerator.get_top_models(models, Settings)
+    ModelOI.save_visualizations(models, Settings)
 
     # tests
     histories = ModelTester.test_models(models, dataset, Settings)
-    print len_(histories)
-    print histories
 
-    ModelOI.save_visualizations(models, Settings)
+    # save results
+    ModelOI.save_histories(histories, Settings)
+    ModelOI.graph_histories(histories, Settings)
 
 
 

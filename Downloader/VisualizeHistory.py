@@ -101,6 +101,7 @@ def visualize_histories(histories, names, plotvalues='loss', show=True, save=Fal
     if show:
         plt.show()
 
+    plt.clf()
     return plt
 
 def saveHistory(history_dict, filename):

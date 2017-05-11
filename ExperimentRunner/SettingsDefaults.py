@@ -4,6 +4,7 @@ def load_default_settings():
     DefaultSettings = {}
 
     # dataset settings
+    DefaultSettings["experiment_name"] = "basic"
     DefaultSettings["dataset_name"] = "1200x_markable_299x299"
     DefaultSettings["pixels"] = 299
     DefaultSettings["number_of_images"] = 10
@@ -34,7 +35,7 @@ def load_default_settings():
 
     DefaultSettings["models"].append(DefaultModel)
 
-    DefaultSettings["graph_histories"] = ['all',[]] #['all',[],[0,2]]
+    DefaultSettings["graph_histories"] = ['all','together',[]] #['all',[],[0,2]]
 
     return DefaultSettings, DefaultModel
 

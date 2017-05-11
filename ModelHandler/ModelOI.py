@@ -19,6 +19,8 @@ def prepare_folders(Settings, dataset):
     folders = {}
     folders["local_folder"] = getLogDirectory()
     folders["features_folder"] = folders["local_folder"] + 'shared/'
+    folders["together_graph_file"] = folders["local_folder"] + Settings["experiment_name"] + '-' + Settings["dataset_name"] + '.png'
+    folders["together_graph_title"] = Settings["experiment_name"] + '-' + Settings["dataset_name"]
 
     Settings["folders"] = folders
 
@@ -33,6 +35,9 @@ def prepare_folders(Settings, dataset):
         model_settings["filename_features_test"] = filename_features_test
         # TODO: have its own nice path
         model_settings["model_image_name"] = filename_features_test + '.png'
+        history_file = folders["local_folder"] + 'history_' + model_settings["cnn_model"] + model_settings["unique_id"] + '.npy'
+        model_settings["history_file"] = history_file
+        model_settings["history_graph"] = history_file + '.png'
 
     return Settings
 
@@ -96,6 +101,88 @@ def save_visualizations(models, Settings):
             plot_model(top_model, to_file=model_settings["model_image_name"], show_shapes=True)
 
         index += 1
+
+def save_histories(histories, Settings):
+    '''
+    Save histories into .npy files, which can be used to reproduce the results.
+    :param histories:
+    :param Settings:
+    :return:
+    '''
+    index = 0
+
+    for history in histories:
+        model_settings = Settings["models"][index]
+        from Downloader.VisualizeHistory import saveHistory
+        saveHistory(history, model_settings["history_file"])
+        index += 1
+
+        print "history saved >>", model_settings["history_file"]
+
+def graph_histories(histories, Settings):
+    '''
+    Graphs histories according to Settings["graph_histories"] ~ ['all',[]] #['all',[],[0,2]]
+    :param histories:
+    :param Settings:
+    :return:
+    '''
+
+    for setting in Settings["graph_histories"]:
+        from Downloader.VisualizeHistory import visualize_history, visualize_histories
+
+        if setting == 'all':
+            # graph each of them into their own image
+            print 'all'
+
+            index = 0
+            for history in histories:
+                model_settings = Settings["models"][index]
+                graph_file = model_settings["history_graph"]
+
+                custom_title = 'One:' + model_settings["unique_id"]
+                visualize_history(history, show=False, save=True, save_path=graph_file, custom_title=custom_title)
+                index +=1
+
+                print "graph saved >>", graph_file
+
+        elif setting == 'together':
+            # graph all of them into one image
+            print 'together'
+
+            names = []
+            index = 0
+            for history in histories:
+                custom_name = Settings["models"][index]["unique_id"]
+                names.append(custom_name)
+                index +=1
+
+            graph_file = Settings["folders"]["together_graph_file"]
+            custom_title = 'All:' + Settings["folders"]["together_graph_title"]
+            visualize_histories(histories, names, plotvalues='loss', show=False, save=True, save_path=graph_file, custom_title=custom_title)
+
+            print "graph saved >>", graph_file
+
+        elif setting == []:
+            continue
+        else:
+            # graph combination ~ [0,1]
+            print 'combination'
+            histories_subset = []
+            subset_names = []
+            combination_txt = ' '
+            for i in setting:
+                if i >= 0 and i < len(histories):
+                    histories_subset.append(histories[i])
+                    custom_name = Settings["models"][i]["unique_id"]
+                    subset_names.append(custom_name)
+                    combination_txt += str(i)+' '
+
+            graph_file = Settings["folders"]["together_graph_file"] + 'Combination [' + combination_txt + '] ' + '.png'
+            custom_title = 'Combination [' + combination_txt + ']: ' + Settings["folders"]["together_graph_title"]
+            visualize_histories(histories_subset, subset_names, plotvalues='loss', show=False, save=True, save_path=graph_file, custom_title=custom_title)
+            print "graph saved >>", graph_file
+
+    return 0
 
 ##############################################
 

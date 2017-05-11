@@ -74,6 +74,7 @@ def test_models(models, dataset, Settings):
     index = 0
     for model in models:
         model_settings = Settings["models"][index]
+        print "Testing", model_settings["unique_id"], model
         history = test_model(model, dataset, Settings, model_settings)
         histories.append(history)
 
@@ -154,6 +155,7 @@ def train_top_model(model, model_settings, train_data, train_labels, validation_
     return history.history
 
 def TestTopModel(dataset, model_name, filename_features_train, filename_features_test, filename_history, img_name):
+    # TODO: DEL
     [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=0.25)
     #[test_generator, val_generator, number_in_test, number_in_val] = dataset.getGenerators(validation_split=0.25)
 
