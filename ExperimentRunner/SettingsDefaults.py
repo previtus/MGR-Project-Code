@@ -23,6 +23,9 @@ def load_default_settings():
 
     # Train and Test specifics
     DefaultModel["epochs"] = 150
+    DefaultModel["optimizer"] = 'rmsprop' # 'rmsprop' or 'adam' etc.
+    DefaultModel["loss_func"] = 'mean_squared_error' # 'mean_squared_error' or 'mean_absolute_error' etc.
+    DefaultModel["metrics"] = ['mean_absolute_error'] # list of 'mean_squared_error' or 'mean_absolute_error' etc.
     DefaultModel["train_top"] = True
     DefaultModel["finetune_cnn"] = False
     DefaultModel["finetune_cnn_last"] = 10

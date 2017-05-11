@@ -96,7 +96,7 @@ def test_model(model, dataset, Settings, model_settings):
         epochs = model_settings["epochs"]
 
         top_model = model[1]
-        history = train_top_model(top_model, train_data, train_labels, epochs, validation_data, validation_labels, save_img_name=save_img_name)
+        history = train_top_model(top_model, model_settings, train_data, train_labels, validation_data, validation_labels)
 
     else:
         print "Yet to be programmed."
@@ -140,14 +140,12 @@ def load_feature_file(path):
         return 0
 
 # Test Whole model = Fit
-def train_top_model(model, train_data, train_labels, epochs, validation_data, validation_labels, save_img_name=None):
+def train_top_model(model, model_settings, train_data, train_labels, validation_data, validation_labels):
 
-    model.compile(optimizer='rmsprop', loss='mean_squared_error', metrics=['mean_absolute_error'])
-    if save_img_name is not None:
-        plot_model(model, to_file=save_img_name+'.png', show_shapes=True)
+    model.compile(optimizer=model_settings["optimizer"], loss=model_settings["loss_func"], metrics=model_settings["metrics"])
 
     history = model.fit(train_data, train_labels,
-              epochs=epochs, batch_size=32,
+              epochs=model_settings["epochs"], batch_size=32,
               validation_data=(validation_data, validation_labels))
 
     #history = model.fit_generator(generator_train, steps_per_epoch, epochs=epochs,
@@ -170,7 +168,8 @@ def TestTopModel(dataset, model_name, filename_features_train, filename_features
 
     epochs = 20 #150
     save_img_name = model_name
-    history = train_top_model(model, train_data, train_labels, epochs, validation_data, validation_labels, save_img_name=None)
+    # now we use Settings #history = train_top_model(model, train_data, train_labels, epochs, validation_data, validation_labels)
+    history = None
 
     save_model_history(history, filename_history, img_name)
 

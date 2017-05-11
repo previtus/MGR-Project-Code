@@ -76,6 +76,27 @@ def get_feature_file_names(local_folder, dataset_uid, model_name, are_we_using_g
     filename_features_test = local_folder+'shared/'+'features_validation_'+dataset_uid+'_'+model_name+add+'.npy'
     return [filename_features_train, filename_features_test]
 
+# Outputs
+
+def save_visualizations(models, Settings):
+    '''
+    Save visualizations of the models, if we have set it in Settings
+    :param models:
+    :param Settings:
+    :return:
+    '''
+    index = 0
+    for model in models:
+        model_settings = Settings["models"][index]
+        if model_settings["save_visualization"]:
+            from keras.utils import plot_model
+            #cnn_model = model[0]
+            #plot_model(cnn_model, to_file=model_settings["model_image_name"]+'_cnn.png', show_shapes=True)
+            top_model = model[1]
+            plot_model(top_model, to_file=model_settings["model_image_name"], show_shapes=True)
+
+        index += 1
+
 ##############################################
 
 def getFeaturesLists(dataset):

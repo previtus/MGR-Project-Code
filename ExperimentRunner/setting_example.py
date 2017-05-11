@@ -1,5 +1,6 @@
 def Setup(Settings,DefaultModel):
     Settings["number_of_images"] = 500
+    Settings["models"][0]["epochs"] = 20
     Settings["models"][0]["cooking_method"] = 'generators' # 'direct' or 'generators'
 
 

@@ -25,7 +25,8 @@ def run_many_models(settings_file=None):
     print len_(histories)
     print histories
 
-    #ModelOI.save_visualizations(models, Settings)
+    ModelOI.save_visualizations(models, Settings)
+
 
 
 run_many_models('setting_example.py')
