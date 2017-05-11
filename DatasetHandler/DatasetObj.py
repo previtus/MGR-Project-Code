@@ -77,6 +77,7 @@ class Dataset:
 
     # For generators
     def generator_images_scores(self, order, image_paths, scores, resize=None):
+        # possibly: change it to give batches of predefined sizes, like batch_size = 32
 
         while True:
             for index in order:

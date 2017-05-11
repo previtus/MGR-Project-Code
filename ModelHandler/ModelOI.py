@@ -57,15 +57,19 @@ def do_we_need_to_cook(filename_features_train, filename_features_test):
     return not(os.path.exists(filename_features_train) and os.path.getsize(filename_features_train) > 0
         and os.path.exists(filename_features_test) and os.path.getsize(filename_features_test) > 0)
 
-def get_feature_file_names(local_folder, dataset_uid, model_name):
+def get_feature_file_names(local_folder, dataset_uid, model_name, are_we_using_generators=False):
     '''
     :param local_folder: taken from getLogDirectory()
     :param dataset_uid: taken from dataset.unique_id
     :param model_name: can be 'resnet50'
     :return:
     '''
-    filename_features_train = local_folder+'shared/'+'features_train_'+dataset_uid+'_'+model_name+'.npy'
-    filename_features_test = local_folder+'shared/'+'features_validation_'+dataset_uid+'_'+model_name+'.npy'
+    add = ''
+    if are_we_using_generators:
+        add = '_GEN'
+
+    filename_features_train = local_folder+'shared/'+'features_train_'+dataset_uid+'_'+model_name+add+'.npy'
+    filename_features_test = local_folder+'shared/'+'features_validation_'+dataset_uid+'_'+model_name+add+'.npy'
     return [filename_features_train, filename_features_test]
 
 

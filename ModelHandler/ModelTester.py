@@ -18,16 +18,21 @@ def cook_features(models, dataset, Settings):
     :param models: list of models (currently without their tops)
     :param dataset: dataset object
     :param Settings: settings
-    :return:
+    :return: number of ready models
     '''
+    # cooking shared data
+    [x, y, x_val, y_val] = [None, None, None, None]
+
     index = 0
     for model in models:
         model_settings = Settings["models"][index]
         from ModelHandler.ModelOI import get_feature_file_names, do_we_need_to_cook
         #ps: if this is in the header of the file, it causes mutual import of each other - and TF yells...
 
+        are_we_using_generators = (model_settings["cooking_method"] == 'generators')
         [filename_features_train, filename_features_test] = get_feature_file_names(
-            local_folder=Settings["folders"]["local_folder"], dataset_uid=dataset.unique_id, model_name=model_settings["cnn_model"])
+            local_folder=Settings["folders"]["local_folder"], dataset_uid=dataset.unique_id, model_name=model_settings["cnn_model"],
+            are_we_using_generators=are_we_using_generators)
 
         print [filename_features_train, filename_features_test]
         do_we_need_to_cook_bool = do_we_need_to_cook(filename_features_train, filename_features_test)
@@ -35,16 +40,31 @@ def cook_features(models, dataset, Settings):
         if do_we_need_to_cook_bool:
             model_cnn = model[0]
 
-            '''
-            if x==None:
-                [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=0.25)
-                #[test_generator, val_generator, number_in_test, number_in_val] = dataset.getGenerators(validation_split=0.25)
-            #predict_from_generators(test_generator, val_generator, number_in_test, number_in_val, filename_features_train, filename_features_test, model_cnn)
-            predict_and_save_features(x, y, x_val, y_val, filename_features_train, filename_features_test, model_cnn)
-            '''
+            cooking_method = model_settings["cooking_method"]
+
+            print "We need to cook, chosen method is", cooking_method
+            #if True:
+            if cooking_method == 'direct':
+
+                if x is None:
+                    [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=Settings["validation_split"])
+                    print len_(x)
+
+                predict_and_save_features(x, y, x_val, y_val, filename_features_train+'1', filename_features_test+'1', model_cnn)
+
+            #if True:
+            elif cooking_method == 'generators':
+                [order, order_val, image_generator, size, image_generator_val, size_val] = dataset.getImageGenerator(validation_split=Settings["validation_split"])
+                print len_(order)
+
+                predict_from_generators(image_generator, image_generator_val, size, size_val, filename_features_train+'2', filename_features_test+'2', model_cnn)
+
+        else:
+            print "No need to cook, the files already exist"
+
 
         index += 1
-    return 1
+    return index
 
 
 # Generate Feature files = Predict
