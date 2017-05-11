@@ -31,6 +31,7 @@ def prepare_folders(Settings, dataset):
 
         model_settings["filename_features_train"] = filename_features_train
         model_settings["filename_features_test"] = filename_features_test
+        # TODO: have its own nice path
         model_settings["model_image_name"] = filename_features_test + '.png'
 
     return Settings
