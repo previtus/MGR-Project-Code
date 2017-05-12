@@ -33,4 +33,5 @@ def run_many_models(settings_file=None):
     ModelOI.save_models(models, Settings)
 
 
-run_many_models('setting_example.py')
+#run_many_models('../Settings/1200x-vs-5556x.py')
+run_many_models('../Settings/top_number_of_fc_blocks.py')
