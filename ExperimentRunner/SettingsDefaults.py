@@ -5,15 +5,19 @@ def load_default_settings():
 
     # dataset settings
     DefaultSettings["experiment_name"] = "basic"
-    DefaultSettings["dataset_name"] = "1200x_markable_299x299"
-    DefaultSettings["pixels"] = 299
-    DefaultSettings["number_of_images"] = 10
-    DefaultSettings["seed"] = 42
-    DefaultSettings["validation_split"] = 0.25
 
     DefaultSettings["models"] = []
 
     DefaultModel = {}
+
+    # dataset setting
+    DefaultModel["dataset_pointer"] = -1 # if = -1, then create new dataset, otherwise use dataset of model of this index
+    DefaultModel["dataset_name"] = "1200x_markable_299x299"
+    DefaultModel["pixels"] = 299
+    DefaultModel["number_of_images"] = 10
+    DefaultModel["seed"] = 42
+    DefaultModel["validation_split"] = 0.25
+
     DefaultModel["unique_id"] = 'resnet50_top3FC_top150ep_10imgs_299px'
     DefaultModel["cnn_model"] = 'resnet50'
     DefaultModel["cooking_method"] = 'direct' # 'direct' or 'generators'

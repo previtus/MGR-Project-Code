@@ -79,7 +79,7 @@ def load_custom(folder, pixels, desired_number=None, seed=None):
     # folder should be name of the dir, like 50x_markable_350x350
     unique_id = determineUniqueId(folder+str(pixels),desired_number,seed)
     path = ABS_PATH_TO_PRJ+'Data/StreetViewData/'+folder+'/SegmentsData.dump'
-    print "## Loading dataset at", path
+    print "#  Loading dataset at", path
 
     dataset = prepareDataset(path, [pixels, pixels], desired_number, seed)
 

@@ -11,12 +11,12 @@ import numpy as np
 from keras.utils import plot_model
 from Downloader.VisualizeHistory import saveHistory, visualize_history
 
-def cook_features(models, dataset, Settings):
+def cook_features(models, datasets, Settings):
     '''
     Makes sure that we have features available for the duo of model-dataset in our shared feature folder.
     If not, we will cook them.
     :param models: list of models (currently without their tops)
-    :param dataset: dataset object
+    :param datasets: list of dataset object
     :param Settings: settings
     :return: number of ready models
     '''
@@ -26,6 +26,7 @@ def cook_features(models, dataset, Settings):
     index = 0
     for model in models:
         model_settings = Settings["models"][index]
+        dataset = datasets[ model_settings["dataset_pointer"] ]
         from ModelHandler.ModelOI import get_feature_file_names, do_we_need_to_cook
         #ps: if this is in the header of the file, it causes mutual import of each other - and TF yells...
 
@@ -42,14 +43,14 @@ def cook_features(models, dataset, Settings):
             #if True:
             if cooking_method == 'direct':
                 if x is None:
-                    [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=Settings["validation_split"])
+                    [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=model_settings["validation_split"])
                     print len_(x)
 
                 predict_and_save_features(x, y, x_val, y_val, filename_features_train, filename_features_test, model_cnn)
 
             #if True:
             elif cooking_method == 'generators':
-                [order, order_val, image_generator, size, image_generator_val, size_val] = dataset.getImageGenerator(validation_split=Settings["validation_split"])
+                [order, order_val, image_generator, size, image_generator_val, size_val] = dataset.getImageGenerator(validation_split=model_settings["validation_split"])
                 print len_(order)
 
                 predict_from_generators(image_generator, image_generator_val, size, size_val, filename_features_train, filename_features_test, model_cnn)
@@ -60,7 +61,7 @@ def cook_features(models, dataset, Settings):
         index += 1
     return index
 
-def test_models(models, dataset, Settings):
+def test_models(models, datasets, Settings):
     '''
     Runs test on all model - dataset pairs from models.
     :param models: array of models to run
@@ -75,21 +76,23 @@ def test_models(models, dataset, Settings):
     index = 0
     for model in models:
         model_settings = Settings["models"][index]
+        dataset = datasets[ model_settings["dataset_pointer"] ]
+
         print "Testing", model_settings["unique_id"], model
-        history = test_model(model, dataset, Settings, model_settings)
+        history = test_model(model, dataset, model_settings)
         histories.append(history)
 
         index += 1
     return histories
 
-def test_model(model, dataset, Settings, model_settings):
+def test_model(model, dataset, model_settings):
     history = None
     if model_settings["model_type"] is 'simple_cnn_with_top':
 
         filename_features_train = model_settings["filename_features_train"]
         filename_features_test = model_settings["filename_features_test"]
 
-        [y, y_val] = dataset.getDataLabels_split_only_y(validation_split=Settings["validation_split"])
+        [y, y_val] = dataset.getDataLabels_split_only_y(validation_split=model_settings["validation_split"])
         [train_data, train_labels, validation_data, validation_labels] = load_features(filename_features_train, filename_features_test, y, y_val)
 
         print "input shape of features", len_(train_data), "and labels", len_(train_labels)

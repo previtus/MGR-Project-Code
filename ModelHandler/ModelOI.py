@@ -8,7 +8,7 @@ import os
 import ModelHandler.CreateModel.KerasApplicationsModels as Models
 import DatasetHandler.CreateDataset
 
-def prepare_folders(Settings, dataset, verbose=False):
+def prepare_folders(Settings, datasets, verbose=False):
     '''
     Figures folder paths which will be used in experiment (local folder with history file, graphs, model file and also
     the shared folder where features are saved. Also the paths for filename_features_train, filename_features_test for
@@ -39,24 +39,22 @@ def prepare_folders(Settings, dataset, verbose=False):
 
     folders["shared_features_folder"] = getSharedDirectory()
 
-    folders["together_graph_filename"] = folders["local_logs_folder"] + "graph_together_" + experiment_name + '-' + Settings["dataset_name"] + '.png'
-    num_of_images = str(Settings["number_of_images"])
-    if Settings["number_of_images"] is None:
-        num_of_images = 'full set of '
-    folders["together_graph_title"] = experiment_name + '-' + Settings["dataset_name"] + "-" + num_of_images + "images"
+    folders["together_graph_filename"] = folders["local_logs_folder"] + "graph_together_" + experiment_name + '.png'
+    folders["together_graph_title"] = experiment_name + " together graph"
 
     folders["report_file"] = folders["local_logs_folder"] + "report.txt"
 
     Settings["folders"] = folders
 
     for model_settings in Settings["models"]:
+        dataset = datasets[ model_settings["dataset_pointer"] ]
         [filename_features_train, filename_features_test] = get_feature_file_names(
             shared_folder=Settings["folders"]["shared_features_folder"], dataset_uid=dataset.unique_id, model_name=model_settings["cnn_model"])
 
         model_settings["filename_features_train"] = filename_features_train
         model_settings["filename_features_test"] = filename_features_test
 
-        model_identificator = Settings["dataset_name"]+"_"+model_settings["unique_id"]+"_"+str(model_settings["epochs"])
+        model_identificator = model_settings["dataset_name"]+"_"+model_settings["unique_id"]+"_"+str(model_settings["epochs"])
         model_settings["history_filename"] = Settings["folders"]["history_folder"] + model_identificator+".npy"
         model_settings["graph_filename"] = Settings["folders"]["local_logs_folder"] + "graph_" + model_identificator+".png"
 
@@ -110,13 +108,34 @@ def getSharedDirectory():
 
 def load_dataset(Settings):
     '''
-    Loads dataset according to the Settings parameters "dataset_name", "pixels", "number_of_images", "seed"
+    Loads datasets according to the Settings parameters "dataset_name", "pixels", "number_of_images", "seed"
     :param Settings:
     :return:
     '''
-    dataset = DatasetHandler.CreateDataset.load_custom(Settings["dataset_name"], Settings["pixels"],
-                    desired_number=Settings["number_of_images"], seed=Settings["seed"])
-    return dataset
+    datasets = []
+    index = 0
+
+    num = 0
+    for model_setting in Settings["models"]:
+        if model_setting["dataset_pointer"] == -1:
+            num+=1
+    print "## Loading", num, " unique datasets:"
+    debug_ptrs = []
+
+    for model_setting in Settings["models"]:
+        ptr = model_setting["dataset_pointer"]
+        if ptr == -1:
+            dataset = DatasetHandler.CreateDataset.load_custom(model_setting["dataset_name"], model_setting["pixels"],
+                    desired_number=model_setting["number_of_images"], seed=model_setting["seed"])
+            datasets.append(dataset)
+            model_setting["dataset_pointer"] = index
+
+            debug_ptrs.append(index)
+            index += 1
+
+    print "Datasets:", debug_ptrs, datasets
+
+    return datasets
 
 # Cooking
 def do_we_need_to_cook(filename_features_train, filename_features_test):
@@ -248,14 +267,12 @@ def save_report(Settings):
     with open(Settings["folders"]["report_file"], "w") as text_file:
         text_file.write("Experiment [%s] report: \n" % (Settings["experiment_name"]))
 
-        num_of_images = str(Settings["number_of_images"])
-        if Settings["number_of_images"] is None:
-            num_of_images = 'full set of '
-
-        text_file.write("Used dataset: %s with %s images \n" % (Settings["dataset_name"], num_of_images))
         text_file.write("With %s models: \n" % (len(Settings["models"])))
         for model_settings in Settings["models"]:
-            text_file.write(" -  %s for %s epochs with %s optimizer \n" % (model_settings["unique_id"], model_settings["epochs"], model_settings["optimizer"]))
+            text_file.write("%s \n" % (model_settings["unique_id"]))
+            text_file.write("Trained for %s epochs with %s optimizer \n" % (model_settings["epochs"], model_settings["optimizer"]))
+            text_file.write("Used dataset: %s with %s images \n" % (model_settings["dataset_name"], model_settings["number_of_images"]))
+            text_file.write("\n")
 
     print "report saved >>", Settings["folders"]["report_file"]
 

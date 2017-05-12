@@ -12,17 +12,18 @@ def run_many_models(settings_file=None):
     Settings = SettingsDefaults.load_settings_from_file(settings_file, verbose=False)
 
     # preparation
-    dataset = ModelOI.load_dataset(Settings)
-    Settings = ModelOI.prepare_folders(Settings, dataset, verbose=True)
+    datasets = ModelOI.load_dataset(Settings)
+
+    Settings = ModelOI.prepare_folders(Settings, datasets, verbose=True)
     models = ModelGenerator.get_cnn_models(Settings)
 
     # cooking
-    ModelTester.cook_features(models, dataset, Settings)
+    ModelTester.cook_features(models, datasets, Settings)
     models = ModelGenerator.get_top_models(models, Settings)
     ModelOI.save_visualizations(models, Settings)
 
     # tests
-    histories = ModelTester.test_models(models, dataset, Settings)
+    histories = ModelTester.test_models(models, datasets, Settings)
 
     # save results
     ModelOI.save_histories(histories, Settings)
