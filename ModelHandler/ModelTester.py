@@ -32,6 +32,7 @@ def cook_features(models, dataset, Settings):
         filename_features_train = model_settings["filename_features_train"]
         filename_features_test = model_settings["filename_features_test"]
         do_we_need_to_cook_bool = do_we_need_to_cook(filename_features_train, filename_features_test)
+        print "Looking up files:", filename_features_train, filename_features_test
 
         if do_we_need_to_cook_bool:
             model_cnn = model[0]
@@ -92,9 +93,6 @@ def test_model(model, dataset, Settings, model_settings):
         [train_data, train_labels, validation_data, validation_labels] = load_features(filename_features_train, filename_features_test, y, y_val)
 
         print "input shape of features", len_(train_data), "and labels", len_(train_labels)
-
-        save_img_name = model_settings["model_image_name"]
-        epochs = model_settings["epochs"]
 
         top_model = model[1]
         history = train_top_model(top_model, model_settings, train_data, train_labels, validation_data, validation_labels)

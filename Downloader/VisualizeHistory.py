@@ -44,11 +44,11 @@ def visualize_history(hi, show=True, save=False, save_path='', show_also='', cus
 
 
     if save:
-        filename = save_path+'loss.png'
+        filename = save_path #+'loss.png'
         if not os.path.exists(os.path.dirname(filename)):
             try:
                 os.makedirs(os.path.dirname(filename))
-            except OSError as exc: # Guard against race condition
+            except OSError as exc:
                 if exc.errno != errno.EEXIST:
                     raise
 
@@ -97,7 +97,7 @@ def visualize_histories(histories, names, plotvalues='loss', show=True, save=Fal
     #plt.legend(leg, loc='lower left')
     plt.legend(leg, loc='best')
     if save:
-        plt.savefig(save_path+plotvalues+'.png')
+        plt.savefig(save_path) #+plotvalues+'.png')
     if show:
         plt.show()
 

@@ -13,7 +13,7 @@ def run_many_models(settings_file=None):
 
     # preparation
     dataset = ModelOI.load_dataset(Settings)
-    Settings = ModelOI.prepare_folders(Settings, dataset)
+    Settings = ModelOI.prepare_folders(Settings, dataset, verbose=True)
     models = ModelGenerator.get_cnn_models(Settings)
 
     # cooking
@@ -28,6 +28,8 @@ def run_many_models(settings_file=None):
     ModelOI.save_histories(histories, Settings)
     ModelOI.graph_histories(histories, Settings)
 
+    ModelOI.save_report(Settings)
+    ModelOI.save_models(models, Settings)
 
 
 run_many_models('setting_example.py')
