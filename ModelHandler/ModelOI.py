@@ -326,12 +326,9 @@ def send_mail_with_graph(Settings):
     send_mail(subject, message, attachment_path)
 
 def save_metacentrum_report(Settings):
-    job_id = '1398409.arien-pro.ics.muni.cz'
-
-    save_job_report_page(Settings["folders"]["report_html_file"], job_id)
-
-
-
+    job_id = Settings["job_id"]
+    if job_id <> '':
+        save_job_report_page(Settings["folders"]["report_html_file"], job_id)
 
 ##############################################
 

@@ -8,8 +8,10 @@ import ModelHandler.ModelGenerator as ModelGenerator
 import ModelHandler.ModelTester as ModelTester
 from Omnipresent import len_
 
-def run_many_models(settings_file=None):
+def run_many_models(settings_file=None, job_id=''):
     Settings = SettingsDefaults.load_settings_from_file(settings_file, verbose=False)
+    if Settings["interrupt"]:
+        return 365
 
     # preparation
     datasets = ModelOI.load_dataset(Settings)
@@ -33,8 +35,8 @@ def run_many_models(settings_file=None):
     ModelOI.save_models(models, Settings)
 
     ModelOI.send_mail_with_graph(Settings)
-    #ModelOI.save_metacentrum_report(Settings)
+    ModelOI.save_metacentrum_report(Settings)
 
 
 #run_many_models('../Settings/1200x-vs-5556x.py')
-run_many_models('../Settings/top_number_of_fc_blocks.py')
+#run_many_models('../Settings/top_number_of_fc_blocks.py')

@@ -5,7 +5,7 @@ def load_default_settings():
 
     # dataset settings
     DefaultSettings["experiment_name"] = "basic"
-
+    DefaultSettings["interrupt"] = False
     DefaultSettings["models"] = []
 
     DefaultModel = {}
@@ -59,8 +59,9 @@ def print_settings(Settings, ignore_default_values = True):
                 print t,t,subkey, model[subkey]
 
 
-def load_settings_from_file(file=None, verbose=False):
+def load_settings_from_file(file=None, job_id='', verbose=False):
     Settings, DefaultModel = load_default_settings()
+    Settings["job_id"] = job_id
 
     import os.path
     if file is not None:
@@ -70,6 +71,7 @@ def load_settings_from_file(file=None, verbose=False):
             Settings = foo.Setup(Settings,DefaultModel)
         else:
             print "Couldn't find Settings file '", file, "' using the Default Settings instead"
+            Settings["interrupt"] = True
 
     if verbose:
         print_settings(Settings, ignore_default_values=True)
