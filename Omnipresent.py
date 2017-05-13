@@ -4,7 +4,7 @@ import urllib2
 def len_(L):
     return np.array(L).shape
 
-def send_main(subject, message, attachment_path = None):
+def send_mail(subject, message, attachment_path = None):
     try:
         import smtplib, os
         from email.mime.multipart import MIMEMultipart
@@ -52,7 +52,7 @@ def send_main(subject, message, attachment_path = None):
         return False
 
 
-#send_main('automatic mail', 'test', '/home/ekmek/Vitek/Logs/Number_of_FC_blocks_test/graph_together_Number_of_FC_blocks_test.png')
+#send_mail('automatic mail', 'test', '/home/ekmek/Vitek/Logs/Number_of_FC_blocks_test/graph_together_Number_of_FC_blocks_test.png')
 
 def save_job_report_page(folder_path, job_id, cut = True):
     try:

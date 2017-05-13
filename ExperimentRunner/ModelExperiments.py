@@ -32,6 +32,9 @@ def run_many_models(settings_file=None):
     ModelOI.save_report(Settings)
     ModelOI.save_models(models, Settings)
 
+    ModelOI.send_mail_with_graph(Settings)
+    #ModelOI.save_metacentrum_report(Settings)
+
 
 #run_many_models('../Settings/1200x-vs-5556x.py')
 run_many_models('../Settings/top_number_of_fc_blocks.py')

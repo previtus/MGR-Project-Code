@@ -7,6 +7,8 @@ from DatasetHandler.FileHelperFunc import use_path_which_exists, make_folder_ifI
 import os
 import ModelHandler.CreateModel.KerasApplicationsModels as Models
 import DatasetHandler.CreateDataset
+from Omnipresent import save_job_report_page, send_mail
+
 
 def prepare_folders(Settings, datasets, verbose=False):
     '''
@@ -42,7 +44,8 @@ def prepare_folders(Settings, datasets, verbose=False):
     folders["together_graph_filename"] = folders["local_logs_folder"] + "graph_together_" + experiment_name + '.png'
     folders["together_graph_title"] = experiment_name + " together graph"
 
-    folders["report_file"] = folders["local_logs_folder"] + "report.txt"
+    folders["report_txt_file"] = folders["local_logs_folder"] + "report.txt"
+    folders["report_html_file"] = folders["local_logs_folder"] + "report_"
 
     Settings["folders"] = folders
 
@@ -68,7 +71,7 @@ def prepare_folders(Settings, datasets, verbose=False):
         print "Folder paths dump:"
         print Settings["folders"]["shared_features_folder"]
         print Settings["folders"]["local_logs_folder"]
-        print Settings["folders"]["report_file"]
+        print Settings["folders"]["report_txt_file"]
 
         print Settings["folders"]["together_graph_filename"]
         for model_settings in Settings["models"]:
@@ -199,7 +202,6 @@ def graph_histories(histories, Settings):
     :param Settings:
     :return:
     '''
-
     for setting in Settings["graph_histories"]:
         from Downloader.VisualizeHistory import visualize_history, visualize_histories
 
@@ -257,6 +259,17 @@ def graph_histories(histories, Settings):
 
     return 0
 
+def generate_report_string(Settings):
+    text = ''
+    text += ("Experiment [%s] report: \n" % (Settings["experiment_name"]))
+    text += ("With %s models: \n" % (len(Settings["models"])))
+    for model_settings in Settings["models"]:
+        text += ("%s \n" % (model_settings["unique_id"]))
+        text += ("Trained for %s epochs with %s optimizer \n" % (model_settings["epochs"], model_settings["optimizer"]))
+        text += ("Used dataset: %s with %s images \n" % (model_settings["dataset_name"], model_settings["number_of_images"]))
+        text += ("\n")
+    return text
+
 def save_report(Settings):
     '''
     Saves report of the most important settings.
@@ -264,17 +277,10 @@ def save_report(Settings):
     :param Settings:
     :return:
     '''
-    with open(Settings["folders"]["report_file"], "w") as text_file:
-        text_file.write("Experiment [%s] report: \n" % (Settings["experiment_name"]))
+    with open(Settings["folders"]["report_txt_file"], "w") as text_file:
+        text_file.write(generate_report_string(Settings))
 
-        text_file.write("With %s models: \n" % (len(Settings["models"])))
-        for model_settings in Settings["models"]:
-            text_file.write("%s \n" % (model_settings["unique_id"]))
-            text_file.write("Trained for %s epochs with %s optimizer \n" % (model_settings["epochs"], model_settings["optimizer"]))
-            text_file.write("Used dataset: %s with %s images \n" % (model_settings["dataset_name"], model_settings["number_of_images"]))
-            text_file.write("\n")
-
-    print "report saved >>", Settings["folders"]["report_file"]
+    print "report saved >>", Settings["folders"]["report_txt_file"]
 
 
 def save_models(models, Settings):
@@ -305,6 +311,26 @@ def save_models(models, Settings):
 def load_model(path):
     from keras.models import load_model
     return load_model(path)
+
+
+# Further potentially useful reports
+
+def send_mail_with_graph(Settings):
+    subject='Report of Experiment finishing'
+    message=generate_report_string(Settings)
+    attachment_path=None
+
+    if 'together' in Settings["graph_histories"]:
+        attachment_path = Settings["folders"]["together_graph_filename"]
+
+    send_mail(subject, message, attachment_path)
+
+def save_metacentrum_report(Settings):
+    job_id = '1398409.arien-pro.ics.muni.cz'
+
+    save_job_report_page(Settings["folders"]["report_html_file"], job_id)
+
+
 
 
 ##############################################
