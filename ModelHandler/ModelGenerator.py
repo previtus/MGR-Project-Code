@@ -20,6 +20,11 @@ def build_simple_top_model(input_shape, number_of_repeats):
     model.add(Dense(1, activation='sigmoid'))
     return model
 
+def build_osm_only_model(input_shape, number_of_repeats):
+
+
+    return None
+
 # Generate Whole Models
 def get_top_models(models, Settings):
     '''
@@ -33,7 +38,7 @@ def get_top_models(models, Settings):
 
     index = 0
     for model_settings in Settings["models"]:
-        # More complicated models to be added
+        # TODO: MODEL_TYPE_SPLIT
 
         if model_settings["model_type"] is 'simple_cnn_with_top':
             filename_features_train = model_settings["filename_features_train"]
@@ -43,6 +48,12 @@ def get_top_models(models, Settings):
             train_data = load_feature_file(filename_features_train)
             input_shape = train_data.shape[1:]
             model[1] = build_simple_top_model(input_shape=input_shape, number_of_repeats=model_settings["top_repeat_FC_block"])
+            print model_settings["unique_id"], model
+
+        elif model_settings["model_type"] is 'osm_only':
+            model = models[index]
+
+            model[0] = build_simple_top_model()
             print model_settings["unique_id"], model
         else:
             print "Yet to be programmed."
@@ -61,16 +72,23 @@ def get_cnn_models(Settings):
     print "## Loading",number_of_models,"models with their CNNs."
 
     for model_settings in Settings["models"]:
-        cnn_model = model_settings["cnn_model"]
-        model_cnn = Models.get_model(cnn_model)
-        #DefaultModel["cut_cnn"]
 
-        # More complicated models to be added
+        # TODO: MODEL_TYPE_SPLIT
 
         if model_settings["model_type"] is 'simple_cnn_with_top':
+            cnn_model = model_settings["cnn_model"]
+            model_cnn = Models.get_model(cnn_model)
+            #DefaultModel["cut_cnn"]
+
             top = [] #build_top_model(input_shape=None, number_of_repeats=model["top_repeat_FC_block"])
 
             models.append([model_cnn, top])
+
+        elif model_settings["model_type"] is 'osm_only':
+            # No need to preload or cook features from images in this case
+            osm_top = []
+            models.append([osm_top])
+
         else:
             print "Yet to be programmed."
 

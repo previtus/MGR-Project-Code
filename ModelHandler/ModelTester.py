@@ -26,38 +26,45 @@ def cook_features(models, datasets, Settings):
     index = 0
     for model in models:
         model_settings = Settings["models"][index]
-        dataset = datasets[ model_settings["dataset_pointer"] ]
-        from ModelHandler.ModelOI import get_feature_file_names, do_we_need_to_cook
-        #ps: if this is in the header of the file, it causes mutual import of each other - and TF yells...
 
-        filename_features_train = model_settings["filename_features_train"]
-        filename_features_test = model_settings["filename_features_test"]
-        do_we_need_to_cook_bool = do_we_need_to_cook(filename_features_train, filename_features_test)
-        print "Looking up files:", filename_features_train, filename_features_test
+        # TODO: MODEL_TYPE_SPLIT
 
-        if do_we_need_to_cook_bool:
-            model_cnn = model[0]
-            cooking_method = model_settings["cooking_method"]
+        if model_settings["model_type"] is 'simple_cnn_with_top':
 
-            print "We need to cook, chosen method is", cooking_method
-            #if True:
-            if cooking_method == 'direct':
-                if x is None:
-                    [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=model_settings["validation_split"])
-                    print len_(x)
+            dataset = datasets[ model_settings["dataset_pointer"] ]
+            from ModelHandler.ModelOI import get_feature_file_names, do_we_need_to_cook
+            #ps: if this is in the header of the file, it causes mutual import of each other - and TF yells...
 
-                predict_and_save_features(x, y, x_val, y_val, filename_features_train, filename_features_test, model_cnn)
+            filename_features_train = model_settings["filename_features_train"]
+            filename_features_test = model_settings["filename_features_test"]
+            do_we_need_to_cook_bool = do_we_need_to_cook(filename_features_train, filename_features_test)
+            print "Looking up files:", filename_features_train, filename_features_test
 
-            #if True:
-            elif cooking_method == 'generators':
-                [order, order_val, image_generator, size, image_generator_val, size_val] = dataset.getImageGenerator(validation_split=model_settings["validation_split"])
-                print len_(order)
+            if do_we_need_to_cook_bool:
+                model_cnn = model[0]
+                cooking_method = model_settings["cooking_method"]
 
-                predict_from_generators(image_generator, image_generator_val, size, size_val, filename_features_train, filename_features_test, model_cnn)
+                print "We need to cook, chosen method is", cooking_method
+                #if True:
+                if cooking_method == 'direct':
+                    if x is None:
+                        [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=model_settings["validation_split"])
+                        print len_(x)
 
-        else:
-            print "No need to cook, the files already exist"
+                    predict_and_save_features(x, y, x_val, y_val, filename_features_train, filename_features_test, model_cnn)
 
+                #if True:
+                elif cooking_method == 'generators':
+                    [order, order_val, image_generator, size, image_generator_val, size_val] = dataset.getImageGenerator(validation_split=model_settings["validation_split"])
+                    print len_(order)
+
+                    predict_from_generators(image_generator, image_generator_val, size, size_val, filename_features_train, filename_features_test, model_cnn)
+
+            else:
+                print "No need to cook, the files already exist"
+        elif model_settings["model_type"] is 'osm_only':
+            # No need to cook features from images in this case
+            print "Chosen model type (osm_only) doesn't require features to be cooked and loaded."
         index += 1
     return index
 
@@ -87,6 +94,8 @@ def test_models(models, datasets, Settings):
 
 def test_model(model, dataset, model_settings):
     history = None
+    # TODO: MODEL_TYPE_SPLIT
+
     if model_settings["model_type"] is 'simple_cnn_with_top':
 
         filename_features_train = model_settings["filename_features_train"]
@@ -99,6 +108,8 @@ def test_model(model, dataset, model_settings):
 
         top_model = model[1]
         history = train_top_model(top_model, model_settings, train_data, train_labels, validation_data, validation_labels)
+    elif model_settings["model_type"] is 'osm_only':
+        print 'kekekek'
 
     else:
         print "Yet to be programmed."

@@ -294,6 +294,7 @@ def save_models(models, Settings):
     index = 0
     for model in models:
         model_settings = Settings["models"][index]
+        # TODO: MODEL_TYPE_SPLIT
 
         if model_settings["model_type"] is 'simple_cnn_with_top':
             if model_settings["model_save"] > 0:
