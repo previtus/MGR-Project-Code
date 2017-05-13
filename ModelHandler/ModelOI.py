@@ -174,7 +174,7 @@ def save_visualizations(models, Settings):
             # TODO: MODEL_TYPE_SPLIT
             from keras.utils import plot_model
 
-            if model_settings["model_type"] is 'simple_cnn_with_top':
+            if model_settings["model_type"] is 'simple_cnn_with_top' or model_settings["model_type"] is 'img_osm_mix':
                 #cnn_model = model[0]
                 #plot_model(cnn_model, to_file=model_settings["model_image_name"]+'_cnn.png', show_shapes=True)
                 top_model = model[1]
@@ -306,7 +306,7 @@ def save_models(models, Settings):
         model_settings = Settings["models"][index]
         # TODO: MODEL_TYPE_SPLIT
 
-        if model_settings["model_type"] is 'simple_cnn_with_top':
+        if model_settings["model_type"] is 'simple_cnn_with_top' or model_settings["model_type"] is 'img_osm_mix':
             if model_settings["model_save"] > 0:
                 model[1].save(model_settings["model_filename"]+'_top.h5')  # creates a HDF5 file
                 print "model saved >>", model_settings["model_filename"]+'_top.h5'

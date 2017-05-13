@@ -41,6 +41,23 @@ def build_osm_only_model(input_shape, number_of_repeats):
     model = Model(inputs=osm_features_input, outputs=output)
     return model
 
+def build_img_osm_mix_model(input_shape_img, input_shape_osm, number_of_repeats):
+    osm_features_input = Input(shape=input_shape_osm)
+    osm_features = Dense(256, activation='relu')(osm_features_input)
+    osm_features = Dropout(0.5)(osm_features)
+
+    img_features_input = Input(shape=input_shape_img)
+    img_features = Flatten()(img_features_input)
+
+    top = concatenate([osm_features, img_features])
+    for i in range(0,number_of_repeats):
+        top = Dense(256, activation='relu')(top)
+        top = Dropout(0.5)(top)
+    top = Dense(1, activation='sigmoid')(top)
+
+    model = Model(inputs=[osm_features_input, img_features_input], outputs=top)
+    return model
+
 # Generate Whole Models
 def get_top_models(models, datasets, Settings):
     '''
@@ -55,15 +72,33 @@ def get_top_models(models, datasets, Settings):
     index = 0
     for model_settings in Settings["models"]:
         # TODO: MODEL_TYPE_SPLIT
+        from ModelHandler.ModelTester import load_feature_file
 
         if model_settings["model_type"] is 'simple_cnn_with_top':
             filename_features_train = model_settings["filename_features_train"]
             model = models[index]
 
-            from ModelHandler.ModelTester import load_feature_file
             train_data = load_feature_file(filename_features_train)
             input_shape = train_data.shape[1:]
             model[1] = build_simple_top_model(input_shape=input_shape, number_of_repeats=model_settings["top_repeat_FC_block"])
+            print model_settings["unique_id"], model
+
+        elif model_settings["model_type"] is 'img_osm_mix':
+            filename_features_train = model_settings["filename_features_train"]
+            model = models[index]
+
+            train_data = load_feature_file(filename_features_train)
+            input_shape_img = train_data.shape[1:]
+
+            dataset = datasets[ model_settings["dataset_pointer"] ]
+
+            if not dataset.has_osm_loaded:
+                print "For this model type, we need OSM vectors, choose dataset accordingly."
+                Settings["interrupt"] = True
+                return None
+            input_shape_osm = dataset.getShapeOfOsm()
+
+            model[1] = build_img_osm_mix_model(input_shape_img, input_shape_osm, number_of_repeats=model_settings["top_repeat_FC_block"])
             print model_settings["unique_id"], model
 
         elif model_settings["model_type"] is 'osm_only':
@@ -100,7 +135,7 @@ def get_cnn_models(Settings):
 
         # TODO: MODEL_TYPE_SPLIT
 
-        if model_settings["model_type"] is 'simple_cnn_with_top':
+        if model_settings["model_type"] is 'simple_cnn_with_top' or model_settings["model_type"] is 'img_osm_mix':
             cnn_model = model_settings["cnn_model"]
             model_cnn = Models.get_model(cnn_model)
             #DefaultModel["cut_cnn"]

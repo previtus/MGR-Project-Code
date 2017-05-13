@@ -32,9 +32,8 @@ print input_shape_osm, input_shape_img
 
 number_of_repeats = 3
 
-from keras.models import Model
-from keras.layers import Dense, Input, concatenate
-'''
+from keras.models import Sequential, Model
+from keras.layers import Concatenate, Dense, LSTM, Input, concatenate
 osm_features_input = Input(shape=input_shape_osm)
 osm_features = Dense(256, activation='relu')(osm_features_input)
 osm_features = Dropout(0.5)(osm_features)
@@ -43,29 +42,20 @@ img_features_input = Input(shape=input_shape_img)
 img_features = Flatten()(img_features_input)
 
 top = concatenate([osm_features, img_features])
-'''
-
-osm_features_input = Input(shape=input_shape_osm)
-top = Dense(256, activation='relu')(osm_features_input)
-top = Dropout(0.5)(top)
 for i in range(0,number_of_repeats):
     top = Dense(256, activation='relu')(top)
     top = Dropout(0.5)(top)
 top = Dense(1, activation='sigmoid')(top)
 
-#model = Model(inputs=[osm_features_input, img_features_input], outputs=top)
-model = Model(inputs=osm_features_input, outputs=top)
+model = Model(inputs=[osm_features_input, img_features_input], outputs=top)
 model.compile(optimizer='rmsprop', loss='mean_squared_error', metrics=['mean_absolute_error'])
-plot_model(model, to_file='onlyOsm-250.png', show_shapes=True)
+plot_model(model, to_file='v1-250.png', show_shapes=True)
 
 epochs = 250
-#history = model.fit([osm, train_data], train_labels,
-#              epochs=epochs, batch_size=32,
-#              validation_data=([osm_val, validation_data], validation_labels))
-history = model.fit(osm, train_labels,
+history = model.fit([osm, train_data], train_labels,
               epochs=epochs, batch_size=32,
-              validation_data=(osm_val, validation_labels))
+              validation_data=([osm_val, validation_data], validation_labels))
 history = history.history
 
-name = '/home/ekmek/Vitek/MGR-Project-Code/ModelHandler/onlyOSM-'+str(number_of_repeats)+"repeats"+str(epochs)+"epochs---v1-250"
+name = '/home/ekmek/Vitek/MGR-Project-Code/ModelHandler/concat-'+str(number_of_repeats)+"repeats"+str(epochs)+"epochs---v1-250"
 visualize_history(history, show=True, save=True, save_path=name)
