@@ -8,7 +8,7 @@ import os
 import ModelHandler.CreateModel.KerasApplicationsModels as Models
 import DatasetHandler.CreateDataset
 from Omnipresent import save_job_report_page, send_mail
-
+import Downloader.VisualizeHistory
 
 def prepare_folders(Settings, datasets, verbose=False):
     '''
