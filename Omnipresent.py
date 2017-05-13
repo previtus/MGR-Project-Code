@@ -1,8 +1,8 @@
 import numpy as np
+import urllib2
 
 def len_(L):
     return np.array(L).shape
-
 
 def send_main(subject, message, attachment_path = None):
 
@@ -46,3 +46,23 @@ def send_main(subject, message, attachment_path = None):
 
 #send_main('automatic mail', 'test', '/home/ekmek/Vitek/Logs/Number_of_FC_blocks_test/graph_together_Number_of_FC_blocks_test.png')
 
+def save_job_report_page(folder_path, job_id, cut = True):
+    url = 'https://metavo.metacentrum.cz/pbsmon2/job/' + job_id
+
+    response = urllib2.urlopen(url)
+    webContent = response.read()
+
+    if cut:
+        substr = 'Job '+job_id
+        index = webContent.replace(substr,'ignore', 1).find(substr)
+        offset = 18
+        webContent = webContent[index+offset:-1]
+
+    #print(webContent)
+
+    f = open(folder_path + job_id+'.html', 'w')
+    f.write(webContent)
+    f.close()
+
+
+#save_job_report_page(folder_path='',job_id='1398409.arien-pro.ics.muni.cz')
