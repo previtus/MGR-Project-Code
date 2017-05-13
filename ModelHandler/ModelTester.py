@@ -64,7 +64,7 @@ def cook_features(models, datasets, Settings):
                 print "No need to cook, the files already exist"
         elif model_settings["model_type"] is 'osm_only':
             # No need to cook features from images in this case
-            print "Chosen model type (osm_only) doesn't require features to be cooked and loaded."
+            print "Chosen model type (", model_settings["model_type"] ,") doesn't require features to be cooked and loaded."
         index += 1
     return index
 
@@ -109,7 +109,12 @@ def test_model(model, dataset, model_settings):
         top_model = model[1]
         history = train_top_model(top_model, model_settings, train_data, train_labels, validation_data, validation_labels)
     elif model_settings["model_type"] is 'osm_only':
-        print 'kekekek'
+
+        [osm, osm_val] = dataset.getDataLabels_split_only_osm(validation_split=model_settings["validation_split"])
+        [y, y_val] = dataset.getDataLabels_split_only_y(validation_split=model_settings["validation_split"])
+
+        osm_model = model[0]
+        history = train_top_model(osm_model, model_settings, osm, y, osm_val, y_val)
 
     else:
         print "Yet to be programmed."

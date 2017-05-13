@@ -30,6 +30,7 @@ class Dataset:
     img_height = -1
     num_of_images = 0
     unique_id = ''
+    has_osm_loaded = False
 
     def __init__(self):
         return None
@@ -41,6 +42,8 @@ class Dataset:
         self.__labels = labels
         self.__osm = osm
         self.num_of_images = len(self.__list_of_images)
+
+        self.has_osm_loaded = (len(self.__osm)>0)
 
     def init_from_segments(self, path_to_segments_file, img_width, img_height):
         # Segments are not used apart from initialization
@@ -74,11 +77,21 @@ class Dataset:
         y, y_val = KerasPreparation.split_one_array(y, validation_split)
         return [y, y_val]
 
+    def getDataLabels_split_only_osm(self, validation_split=0.2):
+        osm, osm_val = KerasPreparation.split_one_array(self.__osm, validation_split)
+        osm = np.asarray(osm)
+        osm_val = np.asarray(osm_val)
+
+        return [osm, osm_val]
+
     def getDataLabels_split_with_osm(self, resize=None, validation_split=0.2):
         [x, y, x_val, y_val] = self.getDataLabels_split(resize, validation_split)
         osm, osm_val = KerasPreparation.split_osm(self.__osm,validation_split)
 
         return [x, y, x_val, y_val, osm, osm_val]
+
+    def getShapeOfOsm(self):
+        return np.asarray(self.__osm).shape[1:]
 
     # For generators
     def generator_images_scores(self, order, image_paths, scores, resize=None):

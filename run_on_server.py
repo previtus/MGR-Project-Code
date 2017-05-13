@@ -1,7 +1,7 @@
 from ExperimentRunner.ModelExperiments import run_many_models
 import sys
 
-settings_file = 'Settings/top_number_of_fc_blocks.py'
+settings_file = 'Settings/osm_only_model.py'
 job_id = ''
 
 if len(sys.argv) > 2:

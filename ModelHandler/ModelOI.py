@@ -119,19 +119,19 @@ def load_dataset(Settings):
     index = 0
 
     num = 0
-    for model_setting in Settings["models"]:
-        if model_setting["dataset_pointer"] == -1:
+    for model_settings in Settings["models"]:
+        if model_settings["dataset_pointer"] == -1:
             num+=1
     print "## Loading", num, " unique datasets:"
     debug_ptrs = []
 
-    for model_setting in Settings["models"]:
-        ptr = model_setting["dataset_pointer"]
+    for model_settings in Settings["models"]:
+        ptr = model_settings["dataset_pointer"]
         if ptr == -1:
-            dataset = DatasetHandler.CreateDataset.load_custom(model_setting["dataset_name"], model_setting["pixels"],
-                    desired_number=model_setting["number_of_images"], seed=model_setting["seed"])
+            dataset = DatasetHandler.CreateDataset.load_custom(model_settings["dataset_name"], model_settings["pixels"],
+                    desired_number=model_settings["number_of_images"], seed=model_settings["seed"])
             datasets.append(dataset)
-            model_setting["dataset_pointer"] = index
+            model_settings["dataset_pointer"] = index
 
             debug_ptrs.append(index)
             index += 1
@@ -170,11 +170,21 @@ def save_visualizations(models, Settings):
     for model in models:
         model_settings = Settings["models"][index]
         if model_settings["save_visualization"]:
+
+            # TODO: MODEL_TYPE_SPLIT
             from keras.utils import plot_model
-            #cnn_model = model[0]
-            #plot_model(cnn_model, to_file=model_settings["model_image_name"]+'_cnn.png', show_shapes=True)
-            top_model = model[1]
-            plot_model(top_model, to_file=model_settings["model_shape_filename"], show_shapes=True)
+
+            if model_settings["model_type"] is 'simple_cnn_with_top':
+                #cnn_model = model[0]
+                #plot_model(cnn_model, to_file=model_settings["model_image_name"]+'_cnn.png', show_shapes=True)
+                top_model = model[1]
+                plot_model(top_model, to_file=model_settings["model_shape_filename"], show_shapes=True)
+
+            elif model_settings["model_type"] is 'osm_only':
+                plot_model(model[0], to_file=model_settings["model_shape_filename"], show_shapes=True)
+
+            else:
+                print "Yet to be programmed."
 
         index += 1
 
@@ -303,7 +313,10 @@ def save_models(models, Settings):
             if model_settings["model_save"] > 1:
                 model[0].save(model_settings["model_filename"]+'_cnn.h5')  # creates a HDF5 file
                 print "model saved >>", model_settings["model_filename"]+'_cnn.h5'
-
+        elif model_settings["model_type"] is 'osm_only':
+            if model_settings["model_save"] > 0:
+                model[0].save(model_settings["model_filename"]+'_osmtop.h5')  # creates a HDF5 file
+                print "model saved >>", model_settings["model_filename"]+'_osmtop.h5'
         else:
             print "Yet to be programmed."
 

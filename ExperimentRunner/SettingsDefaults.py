@@ -14,7 +14,7 @@ def load_default_settings():
     DefaultModel["dataset_pointer"] = -1 # if = -1, then create new dataset, otherwise use dataset of model of this index
     DefaultModel["dataset_name"] = "1200x_markable_299x299"
     DefaultModel["pixels"] = 299
-    DefaultModel["number_of_images"] = 10
+    DefaultModel["number_of_images"] = None
     DefaultModel["seed"] = 42
     DefaultModel["validation_split"] = 0.25
 

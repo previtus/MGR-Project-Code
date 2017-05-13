@@ -21,7 +21,10 @@ def run_many_models(settings_file=None, job_id=''):
 
     # cooking
     ModelTester.cook_features(models, datasets, Settings)
-    models = ModelGenerator.get_top_models(models, Settings)
+    models = ModelGenerator.get_top_models(models, datasets, Settings)
+    if Settings["interrupt"]:
+        return 365
+
     ModelOI.save_visualizations(models, Settings)
 
     # tests

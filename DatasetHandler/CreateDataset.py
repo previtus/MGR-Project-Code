@@ -1,6 +1,7 @@
 from DatasetObj import Dataset
 from DatasetVizualizators import GenerateAverageImagesFromDictionary
 import random
+import os.path
 from FileHelperFunc import get_project_folder
 
 ABS_PATH_TO_PRJ = get_project_folder()
@@ -78,7 +79,13 @@ def load_1200x_marked_299x299(desired_number=None, seed=None):
 def load_custom(folder, pixels, desired_number=None, seed=None):
     # folder should be name of the dir, like 50x_markable_350x350
     unique_id = determineUniqueId(folder+str(pixels),desired_number,seed)
+
+    path_r100 = ABS_PATH_TO_PRJ+'Data/StreetViewData/'+folder+'/SegmentsData_marked_R100.dump'
     path = ABS_PATH_TO_PRJ+'Data/StreetViewData/'+folder+'/SegmentsData.dump'
+
+    if os.path.isfile(path_r100):
+        path = path_r100
+
     print "#  Loading dataset at", path
 
     dataset = prepareDataset(path, [pixels, pixels], desired_number, seed)
