@@ -6,7 +6,7 @@ job_id = ''
 
 if len(sys.argv) > 2:
     settings_file = (sys.argv[1])  # var1
-    job_id = int(sys.argv[2])  # var2
+    job_id = (sys.argv[2])  # var2
 
 #main()
 #main(set='1200x_markable_640x640', PIXELS=640)

@@ -9,5 +9,5 @@ cd /auto/brno2/home/previtus/MGR-Project-Code/
 #python run_example.py > ../Logs/log_${PBS_JOBID}.txt
 #python run_example.py > ../Logs/log.txt
 
-python run_on_server.py Settings/top_number_of_fc_blocks.py $PBS_JOBNAME
+python run_on_server.py Settings/top_number_of_fc_blocks.py $PBS_JOBID
 
