@@ -16,5 +16,6 @@ if len(sys.argv) > 2:
 # 5556x_mark_res_299x299 299
 # 5556x_markable_640x640 640
 
+print "job_id = ",job_id
 
 run_many_models(settings_file, job_id)

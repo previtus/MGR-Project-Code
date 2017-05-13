@@ -9,7 +9,7 @@ import ModelHandler.ModelTester as ModelTester
 from Omnipresent import len_
 
 def run_many_models(settings_file=None, job_id=''):
-    Settings = SettingsDefaults.load_settings_from_file(settings_file, verbose=False)
+    Settings = SettingsDefaults.load_settings_from_file(settings_file, job_id, verbose=False)
     if Settings["interrupt"]:
         return 365
 
