@@ -1,9 +1,11 @@
 def Setup(Settings,DefaultModel):
     Settings["experiment_name"] = "Number_of_FC_blocks_test"
 
-
+    Settings["graph_histories"] = ['together'] #['all','together',[],[1,0],[0,0,0],[]]
     Settings["models"][0]["dataset_name"] = "1200x_markable_299x299"
     Settings["models"][0]["number_of_images"] = None
+    Settings["models"][0]["epochs"] = 1
+    '''
     Settings["models"][0]["epochs"] = 150
     Settings["models"][0]["unique_id"] = '1fc'
     Settings["models"][0]["top_repeat_FC_block"] = 1
@@ -25,8 +27,7 @@ def Setup(Settings,DefaultModel):
     Settings["models"][2]["epochs"] = 150
     Settings["models"][2]["unique_id"] = '3fc'
     Settings["models"][2]["top_repeat_FC_block"] = 3
-
-    Settings["graph_histories"] = ['together'] #['all','together',[],[1,0],[0,0,0],[]]
+    '''
 
 
     return Settings
