@@ -323,12 +323,17 @@ def send_mail_with_graph(Settings):
     if 'together' in Settings["graph_histories"]:
         attachment_path = Settings["folders"]["together_graph_filename"]
 
+    print "## Sending report mail with attachment ", attachment_path
     send_mail(subject, message, attachment_path)
 
 def save_metacentrum_report(Settings):
     job_id = Settings["job_id"]
     if job_id <> '':
+        print "## Downloading ", job_id+'.html'
         save_job_report_page(Settings["folders"]["report_html_file"], job_id)
+    else:
+        print "## Downloading of job page failed, we don't know job_id", job_id
+
 
 ##############################################
 

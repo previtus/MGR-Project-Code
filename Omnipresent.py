@@ -13,7 +13,6 @@ def send_mail(subject, message, attachment_path = None):
         from email import encoders
 
         from mail_secrets import fromaddr, toaddr, passwrd
-        print "Sending report mail to", toaddr
 
         msg = MIMEMultipart()
 
@@ -56,7 +55,6 @@ def send_mail(subject, message, attachment_path = None):
 
 def save_job_report_page(folder_path, job_id, cut = True):
     try:
-        print "Downloading ", job_id+'.html'
 
         url = 'https://metavo.metacentrum.cz/pbsmon2/job/' + job_id
 

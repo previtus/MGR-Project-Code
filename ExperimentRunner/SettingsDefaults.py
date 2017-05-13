@@ -60,6 +60,8 @@ def print_settings(Settings, ignore_default_values = True):
 
 
 def load_settings_from_file(file=None, job_id='', verbose=False):
+    print "## Job: ", job_id," Loading Settings from ",file
+
     Settings, DefaultModel = load_default_settings()
     Settings["job_id"] = job_id
 
