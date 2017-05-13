@@ -75,22 +75,3 @@ def get_cnn_models(Settings):
             print "Yet to be programmed."
 
     return models
-
-    ''' ps settings has there params:
-    DefaultModel = {}
-    DefaultModel["unique_id"] = 'resnet50_top3FC_top150ep_10imgs_299px'
-    DefaultModel["cnn_model"] = 'resnet50'
-    DefaultModel["cut_cnn"] = 0
-    DefaultModel["model_type"] = 'simple_cnn_with_top'
-    DefaultModel["top_repeat_FC_block"] = 3
-    DefaultModel["save_visualization"] = True
-
-    # Train and Test specifics
-    DefaultModel["epochs"] = 150
-    DefaultModel["train_top"] = True
-    DefaultModel["finetune_cnn"] = False
-    DefaultModel["finetune_cnn_last"] = 10
-    DefaultModel["finetune_all"] = False
-    DefaultModel["finetune_all_last"] = 10
-
-    '''

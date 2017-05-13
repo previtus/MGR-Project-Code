@@ -154,30 +154,3 @@ def train_top_model(model, model_settings, train_data, train_labels, validation_
     #                              validation_data=(generator_valid), validation_steps)
 
     return history.history
-
-def TestTopModel(dataset, model_name, filename_features_train, filename_features_test, filename_history, img_name):
-    # TODO: DEL
-    [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=0.25)
-    #[test_generator, val_generator, number_in_test, number_in_val] = dataset.getGenerators(validation_split=0.25)
-
-    [train_data, train_labels, validation_data, validation_labels] = load_features(filename_features_train, filename_features_test, y, y_val)
-
-    print "input shape of features", len_(train_data), "and labels", len_(train_labels)
-    # Report feature output sizes
-
-    # Try top models - regular with fixed size or the "heatmap"
-
-    model = build_simple_top_model(train_data.shape[1:], 3)
-
-    epochs = 20 #150
-    save_img_name = model_name
-    # now we use Settings #history = train_top_model(model, train_data, train_labels, epochs, validation_data, validation_labels)
-    history = None
-
-    save_model_history(history, filename_history, img_name)
-
-    return history
-
-def save_model_history(history, filename_history, filename_image):
-    saveHistory(history, filename_history)
-    visualize_history(history, show=False, save=True, save_path=filename_image)
