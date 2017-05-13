@@ -1,12 +1,12 @@
-from ModelHandler.TestModels import main, test_generators
+from ExperimentRunner.ModelExperiments import run_many_models
 import sys
 
-name = '1200x_markable_299x299'
-pix = 299
+settings_file = 'Settings/top_number_of_fc_blocks.py'
+job_id = ''
 
 if len(sys.argv) > 2:
-    name = (sys.argv[1])  # var1
-    pix = int(sys.argv[2])  # var2
+    settings_file = (sys.argv[1])  # var1
+    job_id = int(sys.argv[2])  # var2
 
 #main()
 #main(set='1200x_markable_640x640', PIXELS=640)
@@ -17,4 +17,4 @@ if len(sys.argv) > 2:
 # 5556x_markable_640x640 640
 
 
-test_generators(set=name, PIXELS=pix)
+run_many_models(settings_file, job_id)
