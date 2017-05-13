@@ -21,4 +21,5 @@ Downloader/ModelImplementations/2_VGG16_no_finetuning/now1/*
 *(backup)*
 WHOLE_MODEL_VGG16_WITH_CUSTOM_TOP.png
 secrets.py
+mail_secrets.py
 ConnectionSettingsSecrets.py
