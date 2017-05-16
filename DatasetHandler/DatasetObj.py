@@ -141,6 +141,21 @@ class Dataset:
                 #yield (features, score)
                 #yield (np.array([features]), score)
 
+    def generator_triple_with_enhancement(self, order, image_paths, scores, osms, resize=None):
+        # yield ([image, osm], score)
+
+        # Somehow include datagen = ImageDataGenerator(...)
+        # batches = datagen.flow( ... ) so it gives us all what we need
+
+        while True:
+            for index in order:
+                img_path = image_paths[index]
+
+                image = KerasPreparation.LoadActualImages([img_path], resize=resize)
+                score = scores[index]
+                osm = osms[index]
+                yield ([image, osm], score)
+
     def getImageGenerator(self, validation_split, resize=None):
         # idea:
         # take the lists on images and their labels - split these two arrays by the validation split

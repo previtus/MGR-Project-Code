@@ -111,15 +111,28 @@ def test_model(model, dataset, model_settings):
 
     elif model_settings["model_type"] is 'img_osm_mix':
 
-        filename_features_train = model_settings["filename_features_train"]
-        filename_features_test = model_settings["filename_features_test"]
+        if (model_settings["special_case"] is 'hack_dont_use_features'):
+            # 0 Get data
+            # ps: be careful about their order when enhancing...
+            # ImageGenerator for multiple inputs
+            # check - https://github.com/fchollet/keras/issues/3386
+            # >> DatasetObj >> generator_triple_with_enhancement
 
-        [osm, osm_val] = dataset.getDataLabels_split_only_osm(validation_split=model_settings["validation_split"])
-        [y, y_val] = dataset.getDataLabels_split_only_y(validation_split=model_settings["validation_split"])
-        [train_data, _, validation_data, _] = load_features(filename_features_train, filename_features_test, y, y_val)
+            # 1 Build whole model now
 
-        top_model = model[1]
-        history = train_top_model(top_model, model_settings, [osm, train_data], y, [osm_val, validation_data], y_val)
+            # 2 Train (which will take some time now...)
+            print "foo"
+        else:
+
+            filename_features_train = model_settings["filename_features_train"]
+            filename_features_test = model_settings["filename_features_test"]
+
+            [osm, osm_val] = dataset.getDataLabels_split_only_osm(validation_split=model_settings["validation_split"])
+            [y, y_val] = dataset.getDataLabels_split_only_y(validation_split=model_settings["validation_split"])
+            [train_data, _, validation_data, _] = load_features(filename_features_train, filename_features_test, y, y_val)
+
+            top_model = model[1]
+            history = train_top_model(top_model, model_settings, [osm, train_data], y, [osm_val, validation_data], y_val)
 
     elif model_settings["model_type"] is 'osm_only':
 

@@ -37,8 +37,11 @@ def load_default_settings():
     DefaultModel["finetune_all"] = False
     DefaultModel["finetune_all_last"] = 10
 
+    # Hurray for shuffling
     DefaultModel["shuffle_dataset"] = True
 
+    # Special case HACKS
+    DefaultModel["special_case"] = '' # by default no hack # hack_dont_use_features, is not yet prepared
 
     DefaultSettings["models"].append(DefaultModel)
 
