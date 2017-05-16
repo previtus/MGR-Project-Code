@@ -108,8 +108,8 @@ def getLogDirectory():
 def getSharedDirectory():
     shared_folders = ['/home/ekmek/Desktop/Project II/MGR-Project-Code/Logs/',
                     '/home/ekmek/Vitek/Logs/',
-                    '/storage/brno2/home/previtus/Logs/'
-                    ]
+                    '/storage/plzen1/home/previtus/Logs/'
+                    ] # /storage/brno2/home/previtus/Logs/
     shared_folder = use_path_which_exists(shared_folders)
     make_folder_ifItDoesntExist(shared_folder+'shared/')
     shared_folder += 'shared/'
