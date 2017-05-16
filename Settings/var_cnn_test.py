@@ -1,4 +1,6 @@
 def Setup(Settings,DefaultModel):
+    # var_cnn_test.py
+    
     Settings["experiment_name"] = "Comparison_of_CNNs_used"
 
     Settings["graph_histories"] = ['together', [0,1], [1,4], [2,3]] #['all','together',[],[1,0],[0,0,0],[]]
