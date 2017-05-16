@@ -6,7 +6,7 @@ def Setup(Settings,DefaultModel):
     Settings["models"][0]["model_type"] = 'img_osm_mix'
     Settings["models"][0]["unique_id"] = 'mix'
     Settings["models"][0]["top_repeat_FC_block"] = 2
-    Settings["models"][0]["epochs"] = 300
+    Settings["models"][0]["epochs"] = 500
 
     Settings["models"].append(DefaultModel.copy())
 
@@ -14,7 +14,7 @@ def Setup(Settings,DefaultModel):
     Settings["models"][1]["model_type"] = 'osm_only'
     Settings["models"][1]["unique_id"] = 'osm_only'
     Settings["models"][1]["top_repeat_FC_block"] = 2
-    Settings["models"][0]["epochs"] = 300
+    Settings["models"][0]["epochs"] = 500
 
     Settings["models"].append(DefaultModel.copy())
 
@@ -22,6 +22,6 @@ def Setup(Settings,DefaultModel):
     Settings["models"][2]["model_type"] = 'simple_cnn_with_top'
     Settings["models"][2]["unique_id"] = 'img_only'
     Settings["models"][2]["top_repeat_FC_block"] = 2
-    Settings["models"][0]["epochs"] = 300
+    Settings["models"][0]["epochs"] = 500
 
     return Settings
