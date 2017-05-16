@@ -136,6 +136,10 @@ def load_dataset(Settings):
         if ptr == -1:
             dataset = DatasetHandler.CreateDataset.load_custom(model_settings["dataset_name"], model_settings["pixels"],
                     desired_number=model_settings["number_of_images"], seed=model_settings["seed"])
+
+            if model_settings["shuffle_dataset"]:
+                dataset.randomize_all_list_order_deterministically(model_settings["seed"])
+
             datasets.append(dataset)
             model_settings["dataset_pointer"] = index
 
@@ -143,6 +147,7 @@ def load_dataset(Settings):
             index += 1
 
     print "Datasets:", debug_ptrs, datasets
+
 
     return datasets
 

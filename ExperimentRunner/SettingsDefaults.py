@@ -37,6 +37,9 @@ def load_default_settings():
     DefaultModel["finetune_all"] = False
     DefaultModel["finetune_all_last"] = 10
 
+    DefaultModel["shuffle_dataset"] = True
+
+
     DefaultSettings["models"].append(DefaultModel)
 
     DefaultSettings["graph_histories"] = ['all','together',[]] #['all',[],[0,2]]

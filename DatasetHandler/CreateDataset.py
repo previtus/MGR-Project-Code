@@ -22,6 +22,7 @@ def prepareDataset(path, dims, desired_number, seed):
     if desired_number is None:
         return dataset
 
+    # CAREFUL! when we want the whole dataset, we are not shuffling the arrays here...
     if seed is not None:
         random.seed(seed)
 

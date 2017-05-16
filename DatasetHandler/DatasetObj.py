@@ -35,6 +35,26 @@ class Dataset:
     def __init__(self):
         return None
 
+    def randomize_all_list_order_deterministically(self, local_seed):
+        '''
+        According to a chosen seed number will shuffle contents of lists (of urls, of scores, of osm) so they are kept
+         intact.
+        :return:
+        '''
+
+        a = self.__list_of_images
+        b = self.__labels
+        c = self.__osm
+
+        lists = list(zip(a, b, c))
+        random.Random(local_seed).shuffle(lists)
+
+        a, b, c = zip(*lists)
+        self.__list_of_images = a
+        self.__labels = np.array(b)
+        self.__osm = c
+
+
     def init_from_lists(self, list_of_images, labels, osm, img_width, img_height):
         self.img_width = img_width
         self.img_height = img_height
@@ -55,25 +75,26 @@ class Dataset:
 
     # Data access: ---------------------------------------------------------------------------------------------
     def getJustLabels(self, validation_split=0.2):
-        y, y_val = KerasPreparation.split_one_array(self.__labels, validation_split)
+        y = np.array(self.__labels)
+        y, y_val = KerasPreparation.split_one_array(y, validation_split)
         return [y, y_val]
 
     def getDataLabels(self, resize=None):
         # ([x],[y]) as image data and labels
         x = KerasPreparation.LoadActualImages(self.__list_of_images, resize=resize, dim_ordering=Downloader.Defaults.KERAS_SETTING_DIMENSIONS)
-        y = self.__labels
+        y = np.array(self.__labels)
         return [x, y]
 
     def getDataLabels_split(self, resize=None, validation_split=0.2):
         # ([x],[y]) as image data and labels
         x = KerasPreparation.LoadActualImages(self.__list_of_images, resize=resize, dim_ordering=Downloader.Defaults.KERAS_SETTING_DIMENSIONS) # th or tf
-        y = self.__labels
+        y = np.array(self.__labels)
 
         x, y, x_val, y_val = KerasPreparation.split_data(x, y, validation_split)
         return [x, y, x_val, y_val]
 
     def getDataLabels_split_only_y(self, resize=None, validation_split=0.2):
-        y = self.__labels
+        y = np.array(self.__labels)
         y, y_val = KerasPreparation.split_one_array(y, validation_split)
         return [y, y_val]
 
@@ -123,7 +144,8 @@ class Dataset:
     def getImageGenerator(self, validation_split, resize=None):
         # idea:
         # take the lists on images and their labels - split these two arrays by the validation split
-        images_paths, scores, images_paths_val, scores_val = KerasPreparation.split_data(self.__list_of_images, self.__labels, validation_split)
+        y = np.array(self.__labels)
+        images_paths, scores, images_paths_val, scores_val = KerasPreparation.split_data(self.__list_of_images, y, validation_split)
 
         size = len(scores)
         size_val = len(scores_val)
@@ -143,7 +165,8 @@ class Dataset:
         #osm, osm_val = KerasPreparation.split_one_array(self.__osm, validation_split)
         osm=[]
         osm_val=[]
-        scores, scores_val = KerasPreparation.split_one_array(self.__labels, validation_split)
+        y = np.array(self.__labels)
+        scores, scores_val = KerasPreparation.split_one_array(y, validation_split)
 
         feature_generator = self.generator_features_osm_scores(order, features, osm_vectors=osm, scores=scores)
 
@@ -158,25 +181,27 @@ class Dataset:
 
     def statistics(self):
         print "Dataset of", self.num_of_images, " scored images of", self.img_width, "x", self.img_height, "resolution."
-        min = np.amin(self.__labels)
-        max = np.amax(self.__labels)
-        mean = np.mean(self.__labels)
-        q1 = np.percentile(self.__labels, 25)
-        q3 = np.percentile(self.__labels, 75)
+        labels = np.array(self.__labels)
+        min = np.amin(labels)
+        max = np.amax(labels)
+        mean = np.mean(labels)
+        q1 = np.percentile(labels, 25)
+        q3 = np.percentile(labels, 75)
         print min, "|---[", q1, "{", mean, "}", q3, "]---|", max
         print "min |---[ 25perc { mean } 75perc ]---| max"
 
-        #print self.__labels
-        #x = copy.copy(self.__labels)
+        #print labels
+        #x = copy.copy(labels)
         #x.sort(reverse=True)
         #print x
         #print len(x)
 
     def plotHistogram(self, save_to_pdf=False):
         import DatasetVizualizators
-        DatasetVizualizators.plotHistogram(self.__labels, 'Score distribution histogram')
-        DatasetVizualizators.plotWhisker(self.__labels, 'Whisker box plot')
-        DatasetVizualizators.plotX_sortValues(self.__labels, 'Distribution of score (sorted)')
+        labels = np.array(self.__labels)
+        DatasetVizualizators.plotHistogram(labels, 'Score distribution histogram')
+        DatasetVizualizators.plotWhisker(labels, 'Whisker box plot')
+        DatasetVizualizators.plotX_sortValues(labels, 'Distribution of score (sorted)')
         if save_to_pdf:
             DatasetVizualizators.saveAllPlotsToPDF()
         DatasetVizualizators.show()
