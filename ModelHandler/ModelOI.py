@@ -24,8 +24,12 @@ def prepare_folders(Settings, datasets, verbose=False):
     log_folder = getLogDirectory()
     experiment_name = Settings["experiment_name"]
     # make /<experiment>/ history and model_shapes folder structure
-    make_folder_ifItDoesntExist(log_folder+experiment_name+'/')
-    folders["local_logs_folder"] = log_folder + experiment_name+'/'
+    job_str = ''
+    if Settings["job_id"] <> '':
+        job_str = Settings["job_id"] + '_'
+
+    make_folder_ifItDoesntExist(log_folder+job_str+experiment_name+'/')
+    folders["local_logs_folder"] = log_folder + job_str + experiment_name+'/'
 
     # VERSION A - folders history and models
     folders["history_folder"] = folders["local_logs_folder"]+'history/'
