@@ -96,7 +96,7 @@ def prepare_folders(Settings, datasets, verbose=False):
 def getLogDirectory():
     log_folders = ['/home/ekmek/Desktop/Project II/MGR-Project-Code/Logs/',
                     '/home/ekmek/Vitek/Logs/',
-                    '/storage/plzen1/home/previtus'
+                    '/storage/plzen1/home/previtus/'
                     ]
                     #'/storage/brno2/home/previtus/Logs/'
                     #'/home/ekmek/Vitek/Logs-VALID ONE-run of 1200x set on 299x299 imgs/'
