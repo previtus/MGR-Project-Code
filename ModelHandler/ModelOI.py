@@ -92,8 +92,10 @@ def prepare_folders(Settings, datasets, verbose=False):
 def getLogDirectory():
     log_folders = ['/home/ekmek/Desktop/Project II/MGR-Project-Code/Logs/',
                     '/home/ekmek/Vitek/Logs/',
-                    '/storage/brno2/home/previtus/Logs/'
-                    ] #'/home/ekmek/Vitek/Logs-VALID ONE-run of 1200x set on 299x299 imgs/'
+                    '/storage/plzen1/home/previtus'
+                    ]
+                    #'/storage/brno2/home/previtus/Logs/'
+                    #'/home/ekmek/Vitek/Logs-VALID ONE-run of 1200x set on 299x299 imgs/'
     local_folder = use_path_which_exists(log_folders)
     make_folder_ifItDoesntExist(local_folder+'shared/')
 
