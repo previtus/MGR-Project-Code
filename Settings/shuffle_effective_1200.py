@@ -3,7 +3,7 @@ def Setup(Settings,DefaultModel):
     # - in this case always shuffled is better than not shuffled
     # - and then osm only val is best, osm img mix is second and last is img only
 
-    Settings["experiment_name"] = "Test_Shuffling_3 models vs 3 models_1200x_markable_299x299"
+    Settings["experiment_name"] = "Test_Shuffling_3 models vs 3 models_1200x_markable_299x299_shuffleNowInMod6"
     Settings["graph_histories"] = ['together', [0,3], [1,4], [2,5],[0,1,2],[3,4,5]]
 
 
