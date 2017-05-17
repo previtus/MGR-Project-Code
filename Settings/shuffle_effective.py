@@ -4,7 +4,6 @@ def Setup(Settings,DefaultModel):
     Settings["experiment_name"] = "Test_Shuffling_3 models vs 3 models_5556x_mark_res_299x299"
     Settings["graph_histories"] = ['together', [0,3], [1,4], [2,5],[0,1,2],[3,4,5]]
 
-
     n=0
     Settings["models"][n]["dataset_name"] = "5556x_mark_res_299x299" # "1200x_markable_299x299", "5556x_mark_res_299x299", "5556x_markable_640x640"
     Settings["models"][n]["pixels"] = 299
