@@ -58,6 +58,38 @@ def build_img_osm_mix_model(input_shape_img, input_shape_osm, number_of_repeats)
     model = Model(inputs=[osm_features_input, img_features_input], outputs=top)
     return model
 
+def build_full_mixed_model(osm_shape):
+    input_shape_osm = osm_shape
+
+    number_of_repeats = 2
+
+    input_tensor = Input(shape=(299, 299, 3))
+    from keras.applications.resnet50 import ResNet50
+    from keras.utils import plot_model
+
+
+    model_cnn = ResNet50(input_tensor=input_tensor, weights='imagenet', include_top=False)
+
+    osm_features_input = Input(shape=input_shape_osm)
+    osm_features = Dense(256, activation='relu')(osm_features_input)
+    osm_features = Dropout(0.5)(osm_features)
+
+    img_features = Flatten()(model_cnn.output)
+
+    top = concatenate([osm_features, img_features])
+    for i in range(0,number_of_repeats):
+        top = Dense(256, activation='relu')(top)
+        top = Dropout(0.5)(top)
+    top = Dense(1, activation='sigmoid')(top)
+
+    model = Model(inputs=[model_cnn.input, osm_features_input], outputs=top)
+    model.summary()
+
+    plot_model(model, to_file='TEST.png', show_shapes=True)
+
+
+    return model
+
 # Generate Whole Models
 def get_top_models(models, datasets, Settings):
     '''

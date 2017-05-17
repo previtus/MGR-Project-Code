@@ -5,7 +5,7 @@
 # - train top > finetune CNN > finetune everything
 # Can perform the more precise k-fold cross validation
 
-from ModelHandler.ModelGenerator import build_simple_top_model
+from ModelHandler.ModelGenerator import build_simple_top_model, build_full_mixed_model
 from Omnipresent import len_
 import numpy as np
 from keras.utils import plot_model
@@ -119,8 +119,16 @@ def test_model(model, dataset, model_settings):
             # >> DatasetObj >> generator_triple_with_enhancement
 
             # 1 Build whole model now
+            osm_shape = dataset.getShapeOfOsm()
+            model = build_full_mixed_model(osm_shape)
 
             # 2 Train (which will take some time now...)
+            [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=model_settings["validation_split"])
+            [osm, osm_val] = dataset.getDataLabels_split_only_osm(validation_split=model_settings["validation_split"])
+
+            history = train_top_model(model, model_settings, [x, osm], y, [x_val, osm_val], y_val)
+
+
             print "foo"
         else:
 
