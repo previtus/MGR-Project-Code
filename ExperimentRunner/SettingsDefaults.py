@@ -20,7 +20,7 @@ def load_default_settings():
 
     DefaultModel["unique_id"] = 'resnet50_top3FC_top150ep_10imgs_299px'
     DefaultModel["cnn_model"] = 'resnet50'
-    DefaultModel["cooking_method"] = 'direct' # 'direct' or 'generators'
+    DefaultModel["cooking_method"] = 'generators' # 'direct' or 'generators'
     DefaultModel["cut_cnn"] = 0
     DefaultModel["model_type"] = 'simple_cnn_with_top'
     DefaultModel["top_repeat_FC_block"] = 3
