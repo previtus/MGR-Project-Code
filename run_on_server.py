@@ -6,7 +6,7 @@ import sys
 #settings_file = 'Settings/var_cnn_test.py'
 
 #settings_file = 'Settings/models_versus.py'
-settings_file = 'Settings/shuffle_effective.py'
+settings_file = 'Settings/shuffle_effective_1200.py'
 job_id = ''
 
 if len(sys.argv) > 2:
