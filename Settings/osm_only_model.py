@@ -1,29 +1,42 @@
 def Setup(Settings,DefaultModel):
     # osm_only_model.py
 
-    Settings["experiment_name"] = "Osm_only_models"
+    Settings["experiment_name"] = "Osm_only_models_1200x-vs-5556x"
 
     Settings["graph_histories"] = ['together'] #['all','together',[],[1,0],[0,0,0],[]]
 
-    Settings["models"][0]["model_type"] = 'osm_only'
-    Settings["models"][0]["unique_id"] = '1fc'
-    Settings["models"][0]["top_repeat_FC_block"] = 1
-    Settings["models"][0]["epochs"] = 300
+    n=0
+    Settings["models"][n]["dataset_name"] = "5556x_mark_res_299x299" # "1200x_markable_299x299", "5556x_mark_res_299x299", "5556x_markable_640x640"
+    Settings["models"][n]["model_type"] = 'osm_only'
+    Settings["models"][n]["unique_id"] = '1fc_5556x'
+    Settings["models"][n]["top_repeat_FC_block"] = 1
+    Settings["models"][n]["epochs"] = 300
 
     Settings["models"].append(DefaultModel.copy())
-
-    Settings["models"][1]["dataset_pointer"] = 0 # 0 - reuse the first dataset
-    Settings["models"][1]["model_type"] = 'osm_only'
-    Settings["models"][1]["unique_id"] = '2fc'
-    Settings["models"][1]["top_repeat_FC_block"] = 2
-    Settings["models"][1]["epochs"] = 300
+    n=1
+    Settings["models"][n]["dataset_pointer"] = -1 # 0 - reuse the first dataset
+    Settings["models"][n]["dataset_name"] = "1200x_markable_299x299"
+    Settings["models"][n]["model_type"] = 'osm_only'
+    Settings["models"][n]["unique_id"] = '1fc_1200x'
+    Settings["models"][n]["top_repeat_FC_block"] = 1
+    Settings["models"][n]["epochs"] = 300
 
     Settings["models"].append(DefaultModel.copy())
+    n=2
+    Settings["models"][n]["dataset_pointer"] = 0 # 0 - reuse the first dataset
+    Settings["models"][n]["model_type"] = 'osm_only'
+    Settings["models"][n]["unique_id"] = '2fc_5556x'
+    Settings["models"][n]["top_repeat_FC_block"] = 2
+    Settings["models"][n]["epochs"] = 300
 
-    Settings["models"][2]["dataset_pointer"] = 0 # 0 - reuse the first dataset
-    Settings["models"][2]["model_type"] = 'osm_only'
-    Settings["models"][2]["unique_id"] = '3fc'
-    Settings["models"][2]["top_repeat_FC_block"] = 3
-    Settings["models"][2]["epochs"] = 300
+
+    Settings["models"].append(DefaultModel.copy())
+    n=3
+
+    Settings["models"][n]["dataset_pointer"] = 1 # 0 - reuse the first dataset
+    Settings["models"][n]["model_type"] = 'osm_only'
+    Settings["models"][n]["unique_id"] = '2fc_1200x'
+    Settings["models"][n]["top_repeat_FC_block"] = 2
+    Settings["models"][n]["epochs"] = 300
 
     return Settings

@@ -3,8 +3,10 @@ import sys
 
 #settings_file = 'Settings/mix_model.py'
 #settings_file = 'Settings/osm_only_model.py'
+#settings_file = 'Settings/var_cnn_test.py'
+
 #settings_file = 'Settings/models_versus.py'
-settings_file = 'Settings/osm_only_model.py'
+settings_file = 'Settings/shuffle_effective.py'
 job_id = ''
 
 if len(sys.argv) > 2:
