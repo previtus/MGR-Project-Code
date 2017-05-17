@@ -108,6 +108,27 @@ class Dataset:
 
         self.init_from_lists(__list_of_images, __labels, __osm, img_width, img_height)
 
+    # Osm data editation
+    def cast_osm_to_bool(self):
+        '''
+        Transforms the osm vector data to boolean values, aka i=0 -> 0, i>0 -> 1
+        :return:
+        '''
+
+        #print self.__osm[0][0:30]
+
+        def boo(x):
+            if x > 0:
+                return 1
+            else:
+                return 0
+        for i in range(len(self.__osm)):
+            for j in range(len(self.__osm[i])):
+                self.__osm[i][j] = boo(self.__osm[i][j])
+            #self.__osm[i] = [boo(x) for x in self.__osm[i]]
+
+        #print self.__osm[0][0:30]
+
     # Data access: ---------------------------------------------------------------------------------------------
     def getJustLabels(self, validation_split=0.2):
         y = np.array(self.__labels)

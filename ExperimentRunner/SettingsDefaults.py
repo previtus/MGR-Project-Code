@@ -40,6 +40,9 @@ def load_default_settings():
     # Hurray for shuffling
     DefaultModel["shuffle_dataset"] = True
 
+    # OSM data editation
+    DefaultModel["edit_osm_vec"] = '' # 'booleans', 'low-mid-high'
+
     # Special case HACKS
     DefaultModel["special_case"] = '' # by default no hack # hack_dont_use_features, is not yet prepared
 

@@ -8,7 +8,7 @@ import sys
 #settings_file = 'Settings/simple_hack.py'
 
 #settings_file = 'Settings/shuffle_effective_1200.py'
-settings_file = 'Settings/basic_models_cooking.py'
+settings_file = 'Settings/osm_only_model.py'
 job_id = ''
 
 if len(sys.argv) > 2:

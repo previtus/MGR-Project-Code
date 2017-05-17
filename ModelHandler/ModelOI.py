@@ -137,15 +137,29 @@ def load_dataset(Settings):
             dataset = DatasetHandler.CreateDataset.load_custom(model_settings["dataset_name"], model_settings["pixels"],
                     desired_number=model_settings["number_of_images"], seed=model_settings["seed"])
 
+            # Shuffling
+            #  shuffle the individual block of images from different places, to get more uniformly distributed data
+            #  but be careful not to separate [img1,osm1,vec1] and [img2,osm1,osm1] into training and valid sets
+            #  which in osm_only model would both result in same data: [_,osm1,vec1]
+            #  This would also be problematic in mixed model case.
+            # ps: different shuffle should end up with different dataset.unique_id, as the feature files are also different.
             if model_settings["shuffle_dataset"]:
                 if model_settings["special_case"] == 'hack_mix_everything_not_modulo6_cheating_osm_vec':
                     dataset.randomize_all_list_order_deterministically(model_settings["seed"])
                     dataset.unique_id = dataset.unique_id + "_shuffled_non_modulo"
                 else:
                     dataset.randomize_all_list_order_deterministically_modulo(model_settings["seed"])
-
             else:
                 dataset.unique_id = dataset.unique_id + "_notshuffled"
+
+            # OSM data projection
+            #  We can try edit the osm vectors to have nicer characteristics for CNNs
+            # ps: no need to mark this down into dataset.unique_id as this doesn't touch images
+            if model_settings["edit_osm_vec"] == 'booleans':
+                dataset.cast_osm_to_bool()
+
+            elif model_settings["edit_osm_vec"] == 'low-mid-high':
+                print "todo"
 
             datasets.append(dataset)
             model_settings["dataset_pointer"] = index
