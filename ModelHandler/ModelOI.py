@@ -139,6 +139,8 @@ def load_dataset(Settings):
 
             if model_settings["shuffle_dataset"]:
                 dataset.randomize_all_list_order_deterministically(model_settings["seed"])
+            else:
+                dataset.unique_id = dataset.unique_id + "_notshuffled"
 
             datasets.append(dataset)
             model_settings["dataset_pointer"] = index
