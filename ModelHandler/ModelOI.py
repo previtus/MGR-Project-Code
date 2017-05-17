@@ -138,7 +138,12 @@ def load_dataset(Settings):
                     desired_number=model_settings["number_of_images"], seed=model_settings["seed"])
 
             if model_settings["shuffle_dataset"]:
-                dataset.randomize_all_list_order_deterministically(model_settings["seed"])
+                if model_settings["special_case"] == 'hack_mix_everything_not_modulo6_cheating_osm_vec':
+                    dataset.randomize_all_list_order_deterministically(model_settings["seed"])
+                    dataset.unique_id = dataset.unique_id + "_shuffled_non_modulo"
+                else:
+                    dataset.randomize_all_list_order_deterministically_modulo(model_settings["seed"])
+
             else:
                 dataset.unique_id = dataset.unique_id + "_notshuffled"
 

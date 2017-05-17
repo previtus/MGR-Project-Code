@@ -54,6 +54,41 @@ class Dataset:
         self.__labels = np.array(b)
         self.__osm = c
 
+    def randomize_all_list_order_deterministically_modulo(self, local_seed):
+        '''
+        According to a chosen seed number will shuffle contents of lists (of urls, of scores, of osm) so they are kept
+         intact.
+        :return:
+        '''
+
+        images_per_segment = 6
+        n = len(self.__list_of_images)
+        indices = range(0,int(n/images_per_segment))
+        #print indices
+        #print n, self.__list_of_images
+
+
+        a = self.__list_of_images
+        b = self.__labels
+        c = self.__osm
+
+        lists = list(zip(a, b, c))
+        shuffled_lists = []
+
+        random.Random(local_seed).shuffle(indices)
+        for i in indices:
+            str_ = ''
+            for k in range(0,images_per_segment):
+                index = i*images_per_segment+k
+                str_ += str(i*images_per_segment+k)+', '
+                shuffled_lists.append(lists[index])
+            #print str_
+
+        a, b, c = zip(*shuffled_lists)
+        self.__list_of_images = a
+        self.__labels = np.array(b)
+        self.__osm = c
+
 
     def init_from_lists(self, list_of_images, labels, osm, img_width, img_height):
         self.img_width = img_width
