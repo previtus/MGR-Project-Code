@@ -8,35 +8,22 @@ def Setup(Settings,DefaultModel):
     n=0
     Settings["models"][n]["dataset_name"] = "5556x_mark_res_299x299" # "1200x_markable_299x299", "5556x_mark_res_299x299", "5556x_markable_640x640"
     Settings["models"][n]["model_type"] = 'osm_only'
-    Settings["models"][n]["unique_id"] = '1fc_5556x'
-    Settings["models"][n]["top_repeat_FC_block"] = 1
+    Settings["models"][n]["unique_id"] = '2fc_mod6'
+    Settings["models"][n]["top_repeat_FC_block"] = 2
     Settings["models"][n]["epochs"] = 300
+    Settings["models"][n]["special_case"] = 'hack_mix_in_modulo6'
+
+    Settings["models"][n]["number_of_images"] = None
+
 
     Settings["models"].append(DefaultModel.copy())
     n=1
     Settings["models"][n]["dataset_pointer"] = -1 # 0 - reuse the first dataset
-    Settings["models"][n]["dataset_name"] = "1200x_markable_299x299"
+    Settings["models"][n]["dataset_name"] = "5556x_mark_res_299x299"
     Settings["models"][n]["model_type"] = 'osm_only'
-    Settings["models"][n]["unique_id"] = '1fc_1200x'
-    Settings["models"][n]["top_repeat_FC_block"] = 1
-    Settings["models"][n]["epochs"] = 300
-
-    Settings["models"].append(DefaultModel.copy())
-    n=2
-    Settings["models"][n]["dataset_pointer"] = 0 # 0 - reuse the first dataset
-    Settings["models"][n]["model_type"] = 'osm_only'
-    Settings["models"][n]["unique_id"] = '2fc_5556x'
+    Settings["models"][n]["unique_id"] = '2fc_normaldataset'
     Settings["models"][n]["top_repeat_FC_block"] = 2
     Settings["models"][n]["epochs"] = 300
-
-
-    Settings["models"].append(DefaultModel.copy())
-    n=3
-
-    Settings["models"][n]["dataset_pointer"] = 1 # 0 - reuse the first dataset
-    Settings["models"][n]["model_type"] = 'osm_only'
-    Settings["models"][n]["unique_id"] = '2fc_1200x'
-    Settings["models"][n]["top_repeat_FC_block"] = 2
-    Settings["models"][n]["epochs"] = 300
+    Settings["models"][n]["special_case"] = ''
 
     return Settings

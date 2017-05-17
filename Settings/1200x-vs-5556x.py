@@ -1,5 +1,6 @@
 def Setup(Settings,DefaultModel):
     # 1200x-vs-5556x.py
+    # The results of 1200x vs 5556x in the case of simple_cnn_with_top is basically no change
 
     Settings["experiment_name"] = "DatasetTest-1200x-vs-5556x"
 
