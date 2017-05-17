@@ -1,7 +1,7 @@
 def Setup(Settings,DefaultModel):
     # shuffle_effective_1200.py
 
-    Settings["experiment_name"] = "Test_Shuffling_3 models vs 3 models"
+    Settings["experiment_name"] = "Test_Shuffling_3 models vs 3 models_1200x_markable_299x299"
     Settings["graph_histories"] = ['together', [0,3], [1,4], [2,5],[0,1,2],[3,4,5]]
 
 
