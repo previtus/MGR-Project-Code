@@ -12,10 +12,10 @@ def load_default_settings():
 
     # dataset setting
     DefaultModel["dataset_pointer"] = -1 # if = -1, then create new dataset, otherwise use dataset of model of this index
-    DefaultModel["dataset_name"] = "1200x_markable_299x299"
+    DefaultModel["dataset_name"] = "1200x_markable_299x299" # "1200x_markable_299x299", "5556x_mark_res_299x299", "5556x_markable_640x640"
     DefaultModel["pixels"] = 299
     DefaultModel["number_of_images"] = None
-    DefaultModel["seed"] = 42
+    DefaultModel["seed"] = 1337
     DefaultModel["validation_split"] = 0.25
 
     DefaultModel["unique_id"] = 'resnet50_top3FC_top150ep_10imgs_299px'
