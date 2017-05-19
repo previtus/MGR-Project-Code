@@ -144,6 +144,7 @@ def get_top_models(models, datasets, Settings):
                 return None
 
             input_shape = dataset.getShapeOfOsm()
+            print "model shape is: ", input_shape
 
             model[0] = build_osm_only_model(input_shape=input_shape, number_of_repeats=model_settings["top_repeat_FC_block"])
             print model_settings["unique_id"], model

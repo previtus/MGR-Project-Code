@@ -159,7 +159,7 @@ def load_dataset(Settings):
                 dataset.cast_osm_to_bool()
 
             elif model_settings["edit_osm_vec"] == 'low-mid-high':
-                print "todo"
+                dataset.cast_osm_to_one_hot_categories()
 
             datasets.append(dataset)
             model_settings["dataset_pointer"] = index

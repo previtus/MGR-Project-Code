@@ -129,6 +129,48 @@ class Dataset:
 
         #print self.__osm[0][0:30]
 
+    def cast_osm_to_one_hot_categories(self):
+
+        #print self.__osm[0][0:30]
+        if len(self.__osm) == 0:
+            return False
+
+        statistics_for_attributes = []
+
+        for attribute_id in range(len(self.__osm[0])):
+            attribute_values = []
+            for vector_id in range(len(self.__osm)):
+                val = self.__osm[vector_id][attribute_id]
+                attribute_values.append(val)
+
+            q1 = np.percentile(attribute_values, 33)
+            q3 = np.percentile(attribute_values, 66)
+
+            #print attribute_id, q1, q3
+            statistics_for_attributes.append([q1, q3])
+
+            #self.__osm[i] = [boo(x) for x in self.__osm[i]]
+
+        new_osm_vector = []
+        for vector_id in range(len(self.__osm)):
+            new_osm_vector.append([])
+            for attribute_id in range(len(self.__osm[vector_id])):
+                stats = statistics_for_attributes[attribute_id]
+                val = self.__osm[vector_id][attribute_id]
+
+                if val <= stats[0]: # value smaller than lower percentile -> "low"
+                    new_osm_vector[vector_id] += [0,0,1]
+                elif val <= stats[1]: # value in between percentiles -> "mid"
+                    new_osm_vector[vector_id] += [0,1,0]
+                else: # bigger than percentiles -> "high"
+                    new_osm_vector[vector_id] += [1,0,0]
+
+        #print len(self.__osm), len(self.__osm[0])
+        #print len(new_osm_vector), len(new_osm_vector[0])
+        #print new_osm_vector[0][0:90]
+        #print self.__osm[0][0:30]
+        self.__osm = new_osm_vector
+
     # Data access: ---------------------------------------------------------------------------------------------
     def getJustLabels(self, validation_split=0.2):
         y = np.array(self.__labels)
