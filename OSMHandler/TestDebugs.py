@@ -11,15 +11,15 @@ def testConnection():
     print len(vec_b), vec_b
 
 
-def testCheckingSegments():
+def testCheckingSegments(input_path, output_path):
     import OSMHandler.Checker as Checker
     import OSMHandler.Marker as Marker
     import Downloader.DataOperations
 
     #path_to_segments_file = '/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/StreetViewData/50_rewritingObj_299x299/SegmentsData.dump'
     #path_to_segments_file = '/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/StreetViewData/50_rewritingObj_299x299/SegmentsData_marked.dump'
-    path_to_segments_file = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_markable_640x640/SegmentsData.dump'
-    Segments = Downloader.DataOperations.LoadDataFile(path_to_segments_file)
+    #path_to_segments_file = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_markable_640x640/SegmentsData.dump'
+    Segments = Downloader.DataOperations.LoadDataFile(input_path)
 
     #Segments = Segments[0:3]
     radius = 100
@@ -34,8 +34,14 @@ def testCheckingSegments():
     allright = Checker.Check(Segments)
     print "checks out as ", allright
 
-    path2 = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_markable_640x640/SegmentsData_marked_R100.dump'
-    Segments = Downloader.DataOperations.SaveDataFile(path2, Segments)
+    Segments = Downloader.DataOperations.SaveDataFile(output_path, Segments)
 
 
-testCheckingSegments()
+input_path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/1200x_markable_299x299/SegmentsData.dump'
+output_path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/1200x_markable_299x299/SegmentsData_marked_R100_4Tables.dump'
+testCheckingSegments(input_path, output_path)
+
+input_path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_markable_640x640/SegmentsData.dump'
+output_path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_markable_640x640/SegmentsData_marked_R100_4Tables.dump'
+testCheckingSegments(input_path, output_path)
+

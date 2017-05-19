@@ -165,11 +165,12 @@ class ConnectionHandler:
                 value_index += 1
         return key_attr_pairs
 
-    def query_location(self, location, radius):
+    def query_location(self, location, radius, table_name):
         # run query to get neighborhood
         #sql_command = self.sql_cmd_everywhere(column_names = self.__distinct_keys)
-        sql_command = self.sql_cmd_radius(column_names = self.__distinct_keys, location=location, radius=radius)
-        print sql_command
+        sql_command = self.sql_cmd_radius(column_names = self.__distinct_keys, location=location, radius=radius, table_name=table_name)
+        #print sql_command
+
         [rows, colnames] = self.run_command(sql_command)
 
         all_pairs = self.extract_all_pairs(rows, colnames)
@@ -235,7 +236,7 @@ class ConnectionHandler:
         command = ''.join(list)
 
         #print ''.join(inner_select)
-        #print command
+        print command
 
         return command
 

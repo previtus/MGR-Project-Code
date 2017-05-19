@@ -32,11 +32,22 @@ def MarkSegment(Segment, radius = 50):
         print "We are in ", distinctLocation
 
         # we mark it here!
+        table_names = ["planet_osm_line", "planet_osm_point", "planet_osm_polygon", "planet_osm_roads"]
+
         global ConnHandler
-        [nearby_vector, _] = ConnHandler.query_location(location=[distinctLocation[1], distinctLocation[0]], radius=radius)
+
+        cumulative_vector = []
+        for table in table_names:
+            [nearby_vector, _] = ConnHandler.query_location(location=[distinctLocation[1], distinctLocation[0]], radius=radius, table_name=table)
+            if len(cumulative_vector) == 0:
+                cumulative_vector = nearby_vector
+            else:
+                from operator import add
+                cumulative_vector = map(add, cumulative_vector, nearby_vector)
+
         print len(nearby_vector), nearby_vector
 
-        Segment.markWithVector(nearby_vector, index, OSM_MARKING_VERSION)
+        Segment.markWithVector(cumulative_vector, index, OSM_MARKING_VERSION)
         index += 1
     print Segment
 
