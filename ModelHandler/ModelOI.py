@@ -135,7 +135,7 @@ def load_dataset(Settings):
         ptr = model_settings["dataset_pointer"]
         if ptr == -1:
             dataset = DatasetHandler.CreateDataset.load_custom(model_settings["dataset_name"], model_settings["pixels"],
-                    desired_number=model_settings["number_of_images"], seed=model_settings["seed"])
+                    desired_number=model_settings["number_of_images"], seed=model_settings["seed"], filename_override=model_settings["dump_file_override"])
 
             # Shuffling
             #  shuffle the individual block of images from different places, to get more uniformly distributed data
@@ -307,9 +307,19 @@ def generate_report_string(Settings):
     text += ("With %s models: \n" % (len(Settings["models"])))
     for model_settings in Settings["models"]:
         text += ("%s \n" % (model_settings["unique_id"]))
-        text += ("Trained for %s epochs with %s optimizer \n" % (model_settings["epochs"], model_settings["optimizer"]))
+        text += ("%s \n" % (model_settings["model_type"]))
+        text += ("Trained for %s epochs with %s optimizer and loss function %s \n" % (model_settings["epochs"], model_settings["optimizer"], model_settings["loss_func"]))
         text += ("Used dataset: %s with %s images \n" % (model_settings["dataset_name"], model_settings["number_of_images"]))
+
+        if model_settings["dump_file_override"] <> '':
+            text += ("Dump file used: %s \n" % (model_settings["dump_file_override"]))
+        if model_settings["edit_osm_vec"] <> '':
+            text += ("OSM vector edited to: %s \n" % (model_settings["edit_osm_vec"]))
+        if model_settings["special_case"] <> '':
+            text += ("Hacks emplyed: %s \n" % (model_settings["special_case"]))
+
         text += ("\n")
+
     return text
 
 def save_report(Settings):

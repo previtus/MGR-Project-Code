@@ -13,6 +13,7 @@ def load_default_settings():
     # dataset setting
     DefaultModel["dataset_pointer"] = -1 # if = -1, then create new dataset, otherwise use dataset of model of this index
     DefaultModel["dataset_name"] = "1200x_markable_299x299" # "1200x_markable_299x299", "5556x_mark_res_299x299", "5556x_markable_640x640"
+    DefaultModel["dump_file_override"] = '' # '' is default, could also be 'SegmentsData_marked_R100_4Tables.dump' ... etc
     DefaultModel["pixels"] = 299
     DefaultModel["number_of_images"] = None
     DefaultModel["seed"] = 13

@@ -77,15 +77,29 @@ def load_1200x_marked_299x299(desired_number=None, seed=None):
     dataset.unique_id = unique_id
     return dataset
 
-def load_custom(folder, pixels, desired_number=None, seed=None):
+def load_custom(folder, pixels, desired_number=None, seed=None, filename_override=''):
+    '''
+    Load dataset from ...
+    :param folder: folder name inside StreetViewData
+    :param pixels:
+    :param desired_number:
+    :param seed:
+    :param filename_override: if the name is not SegmentsData_marked_R100.dump or SegmentsData.dump
+    :return:
+    '''
     # folder should be name of the dir, like 50x_markable_350x350
     unique_id = determineUniqueId(folder+str(pixels),desired_number,seed)
 
     path_r100 = ABS_PATH_TO_PRJ+'Data/StreetViewData/'+folder+'/SegmentsData_marked_R100.dump'
     path = ABS_PATH_TO_PRJ+'Data/StreetViewData/'+folder+'/SegmentsData.dump'
 
+    path_override = ABS_PATH_TO_PRJ+'Data/StreetViewData/'+folder+'/' + filename_override
+
     if os.path.isfile(path_r100):
         path = path_r100
+
+    if filename_override <> '' and os.path.isfile(path_override):
+        path = path_override
 
     print "#  Loading dataset at", path
 
