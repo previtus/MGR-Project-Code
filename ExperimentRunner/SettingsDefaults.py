@@ -23,7 +23,7 @@ def load_default_settings():
     DefaultModel["cnn_model"] = 'resnet50'
     DefaultModel["cooking_method"] = 'generators' # 'direct' or 'generators'
     DefaultModel["cut_cnn"] = 0
-    DefaultModel["model_type"] = 'simple_cnn_with_top'
+    DefaultModel["model_type"] = 'simple_cnn_with_top' # 'simple_cnn_with_top', 'img_osm_mix', 'osm_only'
     DefaultModel["top_repeat_FC_block"] = 3
     DefaultModel["save_visualization"] = True
 
@@ -32,11 +32,13 @@ def load_default_settings():
     DefaultModel["optimizer"] = 'rmsprop' # 'rmsprop' or 'adam' etc.
     DefaultModel["loss_func"] = 'mean_squared_error' # 'mean_squared_error' or 'mean_absolute_error' etc.
     DefaultModel["metrics"] = ['mean_absolute_error'] # list of 'mean_squared_error' or 'mean_absolute_error' etc.
-    DefaultModel["train_top"] = True
-    DefaultModel["finetune_cnn"] = False
-    DefaultModel["finetune_cnn_last"] = 10
-    DefaultModel["finetune_all"] = False
-    DefaultModel["finetune_all_last"] = 10
+    DefaultModel["train_top"] = True # Always True??
+
+    DefaultModel["finetune"] = False
+    from keras import optimizers
+    DefaultModel["finetune_optimizer"] = optimizers.SGD(lr=1e-4, momentum=0.9)
+    DefaultModel["finetune_num_of_cnn_layers"] = 5
+    DefaultModel["finetune_epochs"] = 5
 
     # Hurray for shuffling
     DefaultModel["shuffle_dataset"] = True

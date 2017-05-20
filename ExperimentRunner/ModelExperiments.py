@@ -27,8 +27,8 @@ def run_many_models(settings_file=None, job_id=''):
 
     ModelOI.save_visualizations(models, Settings)
 
-    # tests
-    histories = ModelTester.test_models(models, datasets, Settings)
+    # training
+    histories = ModelTester.train_models(models, datasets, Settings)
 
     # save results
     ModelOI.save_histories(histories, Settings)

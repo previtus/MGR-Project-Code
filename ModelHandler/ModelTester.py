@@ -68,9 +68,9 @@ def cook_features(models, datasets, Settings):
         index += 1
     return index
 
-def test_models(models, datasets, Settings):
+def train_models(models, datasets, Settings):
     '''
-    Runs test on all model - dataset pairs from models.
+    Training on all models - dataset pairs from models.
     :param models: array of models to run
     :param dataset:
     :param Settings:
@@ -86,13 +86,13 @@ def test_models(models, datasets, Settings):
         dataset = datasets[ model_settings["dataset_pointer"] ]
 
         print "Testing", model_settings["unique_id"], model
-        history = test_model(model, dataset, model_settings)
+        history = train_model(model, dataset, model_settings)
         histories.append(history)
 
         index += 1
     return histories
 
-def test_model(model, dataset, model_settings):
+def train_model(model, dataset, model_settings):
     history = None
     # TODO: MODEL_TYPE_SPLIT
 
@@ -108,6 +108,66 @@ def test_model(model, dataset, model_settings):
 
         top_model = model[1]
         history = train_top_model(top_model, model_settings, train_data, train_labels, validation_data, validation_labels)
+
+        # Finetuning
+        print len_(history)
+        print history
+
+        if model_settings["finetune"]:
+
+            n = len(model[0].layers) - model_settings["finetune_num_of_cnn_layers"]
+
+            for layer in model[0].layers[:175]:
+                print layer
+                layer.trainable = False
+
+            print "----- CNN MODEL"
+            print model[0].summary()
+            print "----- TOP MODEL"
+            print model[1].summary()
+
+            # To be efficient, we should cook the features of this too O__o
+
+            # New model is made from the cnn and top model
+            model_cnn = model[0]
+            top_cnn = model[1]
+
+            from keras.models import Model
+
+            #top_cnn.input = model_cnn.output
+            test = Model(input=model_cnn.input, output=top_cnn(model_cnn.output))
+
+            print "----- test"
+            print test.summary()
+
+            plot_model(test, to_file='TEST_MODEL.png', show_shapes=True)
+
+            [x, y, x_val, y_val] = dataset.getDataLabels_split(validation_split=model_settings["validation_split"])
+
+            tmp = model_settings["epochs"]
+            model_settings["epochs"] = model_settings["finetune_epochs"]
+            #model_settings["optimizer"]
+            #model_settings["loss_func"]
+            #model_settings["metrics"]
+
+            history_to_append = train_top_model(test, model_settings, x, y, x_val, y_val)
+            model_settings["epochs"] = tmp
+
+            #img_features = Flatten()(model_cnn.output)
+
+            #finetune_model = Model(inputs=model[0].input, outputs=base_model.get_layer('block4_pool').output)
+
+            ###history_to_append = {'val_mean_absolute_error': [0.27633494684393978, 0.27673623693381116], 'loss': [0.15686354677721928, 0.12237877659907737], 'mean_absolute_error': [0.3303849070751238, 0.30686430593424935], 'val_loss': [0.10361090554317957, 0.10128958691173875]}
+
+        # Append histories
+
+        #{'val_mean_absolute_error': [0.27633494684393978, 0.27673623693381116], 'loss': [0.15686354677721928, 0.12237877659907737], 'mean_absolute_error': [0.3303849070751238, 0.30686430593424935], 'val_loss': [0.10361090554317957, 0.10128958691173875]}
+        print history
+        print history_to_append
+        for key in history.keys():
+            history[key] += history_to_append[key]
+        print history
+
 
     elif model_settings["model_type"] is 'img_osm_mix':
 

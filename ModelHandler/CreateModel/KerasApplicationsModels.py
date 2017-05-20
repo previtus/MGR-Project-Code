@@ -5,29 +5,29 @@ from keras.applications.inception_v3 import InceptionV3
 from keras.applications.xception import Xception
 
 
-def vgg16():
-    model = VGG16(weights='imagenet', include_top=False)
-    print('VGG16 partial model loaded.')
+def vgg16(input_shape=None):
+    model = VGG16(weights='imagenet', include_top=False, input_shape=input_shape)
+    print 'VGG16 partial model loaded with input shape ', input_shape
     return model
 
-def vgg19():
-    model = VGG19(weights='imagenet', include_top=False)
-    print('VGG19 partial model loaded.')
+def vgg19(input_shape=None):
+    model = VGG19(weights='imagenet', include_top=False, input_shape=input_shape)
+    print 'VGG19 partial model loaded with input shape ', input_shape
     return model
 
-def resnet50():
-    model = ResNet50(weights='imagenet', include_top=False)
-    print('ResNet50 partial model loaded.')
+def resnet50(input_shape=None):
+    model = ResNet50(weights='imagenet', include_top=False, input_shape=input_shape)
+    print 'ResNet50 partial model loaded with input shape ', input_shape
     return model
 
-def inception_v3():
-    model = InceptionV3(weights='imagenet', include_top=False)
-    print('InceptionV3 partial model loaded.')
+def inception_v3(input_shape=None):
+    model = InceptionV3(weights='imagenet', include_top=False, input_shape=input_shape)
+    print 'InceptionV3 partial model loaded with input shape ', input_shape
     return model
 
-def xception():
-    model = Xception(weights='imagenet', include_top=False)
-    print('Xception (TensorFlow only) partial model loaded.')
+def xception(input_shape=None):
+    model = Xception(weights='imagenet', include_top=False, input_shape=input_shape)
+    print 'Xception (TensorFlow only) partial model loaded with input shape ', input_shape
     return model
 
 #def all_models():
@@ -39,18 +39,18 @@ def all_model_names():
     #return [['vgg16', vgg16()]]
     return ['vgg16', 'vgg19', 'resnet50', 'inception_v3', 'xception']
 
-def get_model(name):
-    if name == 'vgg16':
-        return vgg16()
-    elif name == 'vgg19':
-        return vgg19()
-    elif name == 'resnet50':
-        return resnet50()
-    elif name == 'inception_v3':
-        return inception_v3()
-    elif name == 'xception':
-        return xception()
+def get_model(name, pixels=None):
+    input_shape=None
+    if pixels is not None:
+        input_shape=(int(pixels), int(pixels), 3)
 
-def load_model(name="vgg16"):
-    if name == "vgg16":
-        return vgg16()
+    if name == 'vgg16':
+        return vgg16(input_shape)
+    elif name == 'vgg19':
+        return vgg19(input_shape)
+    elif name == 'resnet50':
+        return resnet50(input_shape)
+    elif name == 'inception_v3':
+        return inception_v3(input_shape)
+    elif name == 'xception':
+        return xception(input_shape)

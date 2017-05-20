@@ -15,6 +15,18 @@ def build_simple_top_model(input_shape, number_of_repeats):
     :param number_of_repeats: repeats of FC block additional to the first Flatten layer and the last sigmoid output layer.
     :return:
     '''
+
+    img_features_input = Input(shape=input_shape)
+    top = Flatten()(img_features_input)
+    for i in range(0,number_of_repeats):
+        top = Dense(256, activation='relu')(top)
+        top = Dropout(0.5)(top)
+    output = Dense(1, activation='sigmoid')(top)
+
+    model = Model(inputs=img_features_input, outputs=output)
+    return model
+
+    '''
     model = Sequential()
     model.add(Flatten(input_shape=input_shape))
     for i in range(0,number_of_repeats):
@@ -22,6 +34,7 @@ def build_simple_top_model(input_shape, number_of_repeats):
         model.add(Dropout(0.5))
     model.add(Dense(1, activation='sigmoid'))
     return model
+    '''
 
 def build_osm_only_model(input_shape, number_of_repeats):
     '''
@@ -170,7 +183,7 @@ def get_cnn_models(Settings):
 
         if model_settings["model_type"] is 'simple_cnn_with_top' or model_settings["model_type"] is 'img_osm_mix':
             cnn_model = model_settings["cnn_model"]
-            model_cnn = Models.get_model(cnn_model)
+            model_cnn = Models.get_model(cnn_model, pixels=model_settings["pixels"])
             #DefaultModel["cut_cnn"]
 
             top = [] #build_top_model(input_shape=None, number_of_repeats=model["top_repeat_FC_block"])
