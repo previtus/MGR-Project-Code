@@ -8,7 +8,7 @@ import sys
 #settings_file = 'Settings/simple_hack.py'
 
 #settings_file = 'Settings/shuffle_effective_1200.py'
-settings_file = 'Settings/osm_variable_osm_data_edits.py'
+settings_file = 'Settings/finetune_tests.py'
 job_id = ''
 
 if len(sys.argv) > 2:
