@@ -1,7 +1,7 @@
 def Setup(Settings,DefaultModel):
     # finetune_tests.py
 
-    Settings["experiment_name"] = "Finetuning-tests_big_cca_10hrs_experiment"
+    Settings["experiment_name"] = "Finetuning-tests_big_cca_10hrs_experiment_FixedN"
 
     Settings["graph_histories"] = ['together'] #['all','together',[],[1,0],[0,0,0],[]]
 

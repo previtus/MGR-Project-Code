@@ -117,7 +117,7 @@ def train_model(model, dataset, model_settings):
 
             n = len(model[0].layers) - model_settings["finetune_num_of_cnn_layers"]
 
-            for layer in model[0].layers[:175]:
+            for layer in model[0].layers[:n]:
                 print layer
                 layer.trainable = False
 
