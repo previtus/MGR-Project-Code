@@ -61,6 +61,19 @@ def prepare_folders(Settings, datasets, verbose=False):
         model_settings["filename_features_train"] = filename_features_train
         model_settings["filename_features_test"] = filename_features_test
 
+        # Finetune feature filenames
+        if model_settings["finetune"]:
+            number_of_layers_unlocked = model_settings["finetune_num_of_cnn_layers"]
+
+            [finetune_features_train, finetune_features_test] = get_feature_file_names(
+            shared_folder=Settings["folders"]["shared_features_folder"], dataset_uid=dataset.unique_id, model_name=model_settings["cnn_model"],
+            cut=number_of_layers_unlocked)
+
+            model_settings["finetune_features_train"] = finetune_features_train
+            model_settings["finetune_features_test"] = finetune_features_test
+
+
+
         model_identificator = model_settings["dataset_name"]+"_"+model_settings["unique_id"]+"_"+str(model_settings["epochs"])
         model_settings["history_filename"] = Settings["folders"]["history_folder"] + model_identificator+".npy"
         model_settings["graph_filename"] = Settings["folders"]["local_logs_folder"] + "graph_" + model_identificator+".png"
@@ -90,6 +103,15 @@ def prepare_folders(Settings, datasets, verbose=False):
             print model_settings["filename_features_train"]
         for model_settings in Settings["models"]:
             print model_settings["filename_features_test"]
+
+        for model_settings in Settings["models"]:
+            if model_settings["finetune"]:
+                print model_settings["finetune_features_train"]
+        for model_settings in Settings["models"]:
+            if model_settings["finetune"]:
+                print model_settings["finetune_features_test"]
+
+
 
     return Settings
 
@@ -177,7 +199,7 @@ def do_we_need_to_cook(filename_features_train, filename_features_test):
     return not(os.path.exists(filename_features_train) and os.path.getsize(filename_features_train) > 0
         and os.path.exists(filename_features_test) and os.path.getsize(filename_features_test) > 0)
 
-def get_feature_file_names(shared_folder, dataset_uid, model_name):
+def get_feature_file_names(shared_folder, dataset_uid, model_name, cut = 0):
     '''
     :param shared_folder: taken from getSharedDirectory()
     :param dataset_uid: taken from dataset.unique_id
@@ -185,8 +207,12 @@ def get_feature_file_names(shared_folder, dataset_uid, model_name):
     :return:
     '''
 
-    filename_features_train = shared_folder+'features_train_'+dataset_uid+'_'+model_name+'.npy'
-    filename_features_test = shared_folder+'features_validation_'+dataset_uid+'_'+model_name+'.npy'
+    add = ''
+    if cut <> 0:
+        add = '_cut'+str(cut)
+
+    filename_features_train = shared_folder+'features_train_'+dataset_uid+'_'+model_name+add+'.npy'
+    filename_features_test = shared_folder+'features_validation_'+dataset_uid+'_'+model_name+add+'.npy'
     return [filename_features_train, filename_features_test]
 
 # Outputs

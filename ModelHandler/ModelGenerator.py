@@ -199,3 +199,56 @@ def get_cnn_models(Settings):
             print "Yet to be programmed."
 
     return models
+
+# Thank you https://github.com/fchollet/keras/issues/5074#issuecomment-274259404
+def split_model(model, start, end):
+    confs = model.get_config()
+    weights = {l.name:l.get_weights() for l in model.layers}
+    # split model
+    kept_layers = set()
+    for i, l in enumerate(confs['layers']):
+        if i == 0:
+            confs['layers'][0]['config']['batch_input_shape'] = model.layers[start].input_shape
+        elif i < start or i > end:
+            continue
+        kept_layers.add(l['name'])
+    # filter layers
+    layers = [l for l in confs['layers'] if l['name'] in kept_layers]
+    layers[1]['inbound_nodes'][0][0][0] = layers[0]['name']
+    # set conf
+    confs['layers'] = layers
+    confs['input_layers'][0][0] = layers[0]['name']
+    confs['output_layers'][0][0] = layers[-1]['name']
+
+    print confs
+
+    # create new model
+    newModel = Model.from_config(confs)
+    for l in newModel.layers:
+        l.set_weights(weights[l.name])
+    return newModel
+
+# building models for fine tuning
+def build_finetune_model(cnn, top, cut, input_shape):
+    from keras.models import Model
+
+    for n in range(0,len(cnn.layers)):
+        layer = cnn.layers[n]
+        #print layer, type(layer), layer.get_config()
+
+        name = layer.get_config()['name']
+        if 'add' in name:
+            print n, layer
+
+    print cut, cnn.layers[cut]
+
+    cnn_rest_model = split_model(cnn, cut+1, len(cnn.layers))
+
+    model_middle = Model(input=cnn_rest_model.input, output=top(cnn_rest_model.output))
+
+    return model_middle
+
+def join_two_models(one, two):
+    from keras.models import Model
+    finetune_model = Model(input=one.input, output=two(one.output))
+    return finetune_model

@@ -40,6 +40,8 @@ def load_default_settings():
     DefaultModel["finetune_num_of_cnn_layers"] = 5
     DefaultModel["finetune_epochs"] = 5
 
+    DefaultModel["finetune_DEBUG_METHOD_OF_MODEL_GEN"] = True # True - uses cooked feature files, False - trains the whole model on spot
+
     # Hurray for shuffling
     DefaultModel["shuffle_dataset"] = True
 
@@ -52,6 +54,13 @@ def load_default_settings():
     DefaultSettings["models"].append(DefaultModel)
 
     DefaultSettings["graph_histories"] = ['all','together',[]] #['all',[],[0,2]]
+
+    # empty values, which will be filled:
+    DefaultSettings["filename_features_train"] = ''
+    DefaultSettings["filename_features_test"] = ''
+    DefaultSettings["finetune_features_train"] = ''
+    DefaultSettings["finetune_features_test"] = ''
+
 
     return DefaultSettings, DefaultModel
 
