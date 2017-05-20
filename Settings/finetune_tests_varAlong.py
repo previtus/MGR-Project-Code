@@ -1,7 +1,7 @@
 def Setup(Settings,DefaultModel):
-    # finetune_tests_varA.py
+    # finetune_tests_varAlong.py
 
-    Settings["experiment_name"] = "Finetuning-tests_big_cca_10hrs_experiment_1k100_varAlong-useFeat-162"
+    Settings["experiment_name"] = "Finetuning-tests_big_cca_10hrs_experiment_1k100_varAlong-useFeat-162_rep"
 
     Settings["graph_histories"] = ['together'] #['all','together',[],[1,0],[0,0,0],[]]
 
@@ -15,7 +15,7 @@ def Setup(Settings,DefaultModel):
 
     Settings["models"][n]["finetune"] = True
     Settings["models"][n]["finetune_num_of_cnn_layers"] = 162
-    Settings["models"][n]["finetune_epochs"] = 50
+    Settings["models"][n]["finetune_epochs"] = 100
     Settings["models"][n]["finetune_DEBUG_METHOD_OF_MODEL_GEN"] = True
     # 5 cca 1 hour
     # 50 cca 10 hrs?
