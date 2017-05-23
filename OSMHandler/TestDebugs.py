@@ -11,7 +11,7 @@ def testConnection():
     print len(vec_b), vec_b
 
 
-def testCheckingSegments(input_path, output_path):
+def testCheckingSegments(input_path, output_path, radius = 100, close=False):
     import OSMHandler.Checker as Checker
     import OSMHandler.Marker as Marker
     import Downloader.DataOperations
@@ -22,14 +22,14 @@ def testCheckingSegments(input_path, output_path):
     Segments = Downloader.DataOperations.LoadDataFile(input_path)
 
     #Segments = Segments[0:3]
-    radius = 100
 
     allright = Checker.Check(Segments)
     print "checks out as ", allright
     if not allright:
         Marker.Mark(Segments, radius = radius)
 
-        Marker.closeConnection()
+        if close:
+            Marker.closeConnection()
 
     allright = Checker.Check(Segments)
     print "checks out as ", allright
@@ -37,7 +37,23 @@ def testCheckingSegments(input_path, output_path):
     Segments = Downloader.DataOperations.SaveDataFile(output_path, Segments)
 
 
+input_path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/1200x_markable_299x299/SegmentsData.dump'
+output_path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/1200x_markable_299x299/SegmentsData_marked_R50_4Tables.dump'
+r = 50
+testCheckingSegments(input_path, output_path, radius = r,close=False)
+
+input_path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/1200x_markable_299x299/SegmentsData.dump'
+output_path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/1200x_markable_299x299/SegmentsData_marked_R200_4Tables.dump'
+r = 200
+testCheckingSegments(input_path, output_path, radius = r,close=False)
+
 input_path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_markable_640x640/SegmentsData.dump'
-output_path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_markable_640x640/SegmentsData_marked_R100_4Tables.dump'
-testCheckingSegments(input_path, output_path)
+output_path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_markable_640x640/SegmentsData_marked_R50_4Tables.dump'
+r = 50
+testCheckingSegments(input_path, output_path, radius = r,close=False)
+
+input_path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_markable_640x640/SegmentsData.dump'
+output_path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_markable_640x640/SegmentsData_marked_R200_4Tables.dump'
+r = 200
+testCheckingSegments(input_path, output_path, radius = r,close=True)
 
