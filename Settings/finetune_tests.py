@@ -10,12 +10,15 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["unique_id"] = 'img_only'
     Settings["models"][n]["epochs"] = 2
 
-    Settings["models"][n]["number_of_images"] = 20
+    Settings["models"][n]["number_of_images"] = None
     Settings["models"][n]["cooking_method"] = 'generators'
 
     Settings["models"][n]["finetune"] = True
     Settings["models"][n]["finetune_num_of_cnn_layers"] = 162
     Settings["models"][n]["finetune_epochs"] = 1
+
+
+    Settings["models"][n]["finetune_DEBUG_METHOD_OF_MODEL_GEN"] = False
     # 5 cca 1 hour
     # 50 cca 10 hrs?
 
