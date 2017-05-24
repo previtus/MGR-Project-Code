@@ -87,8 +87,9 @@ def AdditionalStatistics(Segments):
         saveAllPlotsToPDF()
     show()
 
-
+'''
 file = '/home/ekmek/Desktop/MGR-Project-Code/Data/StreetViewData/1200x_markable_299x299/SegmentsData.dump'
 from Downloader.DataOperations import *
 Segments = LoadDataFile(file)
 StatisticsSegments(Segments, True)
+'''
