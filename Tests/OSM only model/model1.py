@@ -33,7 +33,7 @@ model_settings = {}
 model_settings["optimizer"] = 'rmsprop'
 model_settings["loss_func"] = 'mean_absolute_error' #mean_squared_error
 model_settings["metrics"] = ['mean_absolute_error']
-model_settings["epochs"] = 100
+model_settings["epochs"] = 200
 
 model.name = 'model1'
 model.compile(optimizer=model_settings["optimizer"], loss=model_settings["loss_func"],
@@ -83,9 +83,9 @@ Validation: metric mean_absolute_error=0.286389, loss=0.119701
 
 # mean_absolute_error
 '''
-min_loss = 0.259212  epoch = 76
-min_val_loss = 0.277197  epoch = 25
+min_loss = 0.240779  epoch = 94
+min_val_loss = 0.275416  epoch = 73
 --------------------------
-Train: metric mean_absolute_error=0.243858, loss=0.243858
-Validation: metric mean_absolute_error=0.283704, loss=0.283704
+Train: metric mean_absolute_error=0.228147, loss=0.228147
+Validation: metric mean_absolute_error=0.288617, loss=0.288617
 '''
