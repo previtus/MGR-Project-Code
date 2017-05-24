@@ -36,6 +36,7 @@ class Dataset:
         return None
 
     def randomize_all_list_order_deterministically(self, local_seed):
+        # CAREFUL MESSES UP OSM DATA, BECAUSE OF DUALITY IN DATA
         '''
         According to a chosen seed number will shuffle contents of lists (of urls, of scores, of osm) so they are kept
          intact.
@@ -55,6 +56,7 @@ class Dataset:
         self.__osm = c
 
     def randomize_all_list_order_deterministically_modulo(self, local_seed):
+        # CAREFUL WHAT IF WE DON'T HAVE MODULO 6
         '''
         According to a chosen seed number will shuffle contents of lists (of urls, of scores, of osm) so they are kept
          intact.
@@ -71,8 +73,9 @@ class Dataset:
         a = self.__list_of_images
         b = self.__labels
         c = self.__osm
+        d = self.__segment_ids
 
-        lists = list(zip(a, b, c))
+        lists = list(zip(a, b, c, d))
         shuffled_lists = []
 
         random.Random(local_seed).shuffle(indices)
@@ -80,22 +83,121 @@ class Dataset:
             str_ = ''
             for k in range(0,images_per_segment):
                 index = i*images_per_segment+k
-                str_ += str(i*images_per_segment+k)+', '
+                #str_ += str(i*images_per_segment+k)+', '
+                str_ += str(i*images_per_segment+k)+'('+str(lists[index][3])+'), '
                 shuffled_lists.append(lists[index])
             #print str_
 
-        a, b, c = zip(*shuffled_lists)
+        a, b, c, d = zip(*shuffled_lists)
         self.__list_of_images = a
         self.__labels = np.array(b)
         self.__osm = c
+        self.__segment_ids = d
+
+    def randomize_all_list_order_deterministically_same_segment(self, local_seed):
+        '''
+        According to a chosen seed number will shuffle contents of lists (of urls, of scores, of osm) so they are kept
+         intact.
+        :return:
+        '''
+
+        n = len(self.__list_of_images)
+        indices = range(0,n)
+        #print indices
+        #print n, self.__list_of_images
+
+        a = self.__list_of_images
+        b = self.__labels
+        c = self.__osm
+        d = self.__segment_ids
+
+        #print len(a), len(b), len(c), len(d), d[0:10]
+
+        lists = list(zip(a, b, c, d))
+        shuffled_lists = []
+        already_used_data = []
+
+        random.Random(local_seed).shuffle(indices)
+        for index in indices:
+            if index in already_used_data:
+                continue
+
+            str_ = ''
+            l = lists[index]
+            seg_id = l[3]
+
+            #print index, seg_id, l
+
+            #for k in range(-6,6):
+            #    print index+k, lists[index+k][3]
+
+            k = index-1
+            found_first_of_such_id = False
+            if k == -1:
+                found_first_of_such_id = True
+            while not found_first_of_such_id:
+                seg_id_prev = lists[k][3]
+                if seg_id == seg_id_prev:
+                    k -= 1
+                else:
+                    k += 1
+                    found_first_of_such_id = True
+
+            first_index = k
+            last_index = k
+
+            found_last_of_such_id = False
+            k += 1
+            while not found_last_of_such_id:
+                if k >= n:
+                    found_last_of_such_id = True
+                    last_index = k-1
+                elif seg_id == lists[k][3]:
+                    k += 1
+                else:
+                    found_last_of_such_id = True
+                    last_index = k-1
+
+            str_ = ''
+            for i in range(first_index, last_index+1):
+                #print i, lists[i][3]
+                str_ += str(i)+'('+str(lists[i][3])+'), '
+                shuffled_lists.append(lists[i])
+                already_used_data.append(i)
+            #print str_
 
 
-    def init_from_lists(self, list_of_images, labels, osm, img_width, img_height):
+
+            #print 'pre', first_index-1, lists[first_index-1][3]
+            #print 'post', last_index+1, lists[last_index+1][3]
+
+
+
+            # we are now in SOME data entry, we should look how many around it are of the same
+
+            '''
+            for k in range(0,images_per_segment):
+                index = i*images_per_segment+k
+                str_ += str(i*images_per_segment+k)+', '
+                shuffled_lists.append(lists[index])
+            #print str_
+            '''
+
+        a, b, c, d = zip(*shuffled_lists)
+        self.__list_of_images = a
+        self.__labels = np.array(b)
+        self.__osm = c
+        self.__segment_ids = d
+
+        #print len(a), len(b), len(c), len(d), d[0:10]
+
+    def init_from_lists(self, list_of_images, labels, osm, segment_ids, img_width, img_height):
         self.img_width = img_width
         self.img_height = img_height
         self.__list_of_images = list_of_images
         self.__labels = labels
         self.__osm = osm
+        self.__segment_ids = segment_ids
         self.num_of_images = len(self.__list_of_images)
 
         self.has_osm_loaded = (len(self.__osm)>0)
@@ -104,9 +206,9 @@ class Dataset:
         # Segments are not used apart from initialization
         Segments = DataOperations.LoadDataFile(path_to_segments_file)
         segments_dir = os.path.dirname(path_to_segments_file) + '/'
-        __list_of_images, __labels, __osm = KerasPreparation.LoadDataFromSegments(Segments, has_score=True, path_to_images=segments_dir)
+        __list_of_images, __labels, __osm, __segment_ids = KerasPreparation.LoadDataFromSegments(Segments, has_score=True, path_to_images=segments_dir)
 
-        self.init_from_lists(__list_of_images, __labels, __osm, img_width, img_height)
+        self.init_from_lists(__list_of_images, __labels, __osm, __segment_ids, img_width, img_height)
 
     # Osm data editation
     def cast_osm_to_bool(self):
@@ -404,6 +506,7 @@ class Dataset:
 
         sel_imgs = [self.__list_of_images[i] for i in indices]
         sel_labels = [self.__labels[i] for i in indices]
+        sel_segment_ids = [self.__segment_ids[i] for i in indices]
 
         if self.__osm == []:
             sel_osm = []
@@ -411,7 +514,7 @@ class Dataset:
             sel_osm = [self.__osm[i] for i in indices]
 
         newDataset = Dataset()
-        newDataset.init_from_lists(sel_imgs, sel_labels, sel_osm, self.img_width, self.img_height)
+        newDataset.init_from_lists(sel_imgs, sel_labels, sel_osm, sel_segment_ids, self.img_width, self.img_height)
 
         return newDataset
 

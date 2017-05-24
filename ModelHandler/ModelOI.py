@@ -170,7 +170,7 @@ def load_dataset(Settings):
                     dataset.randomize_all_list_order_deterministically(model_settings["seed"])
                     dataset.unique_id = dataset.unique_id + "_shuffled_non_modulo"
                 else:
-                    dataset.randomize_all_list_order_deterministically_modulo(model_settings["seed"])
+                    dataset.randomize_all_list_order_deterministically_same_segment(model_settings["seed"])
             else:
                 dataset.unique_id = dataset.unique_id + "_notshuffled"
 

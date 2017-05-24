@@ -55,6 +55,9 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
     list_of_images = []
     labels = []
     osm_vectors = []
+    segment_ids = []
+
+    segment_id = 0
 
     for Segment in Segments:
 
@@ -65,6 +68,7 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
                 if Segment.hasLoadedImageI(i_th_image):
                     list_of_images.append(Segment.getImageFilename(i_th_image))
                     labels.append(Segment.getScore())
+                    segment_ids.append(segment_id)
 
                 if Segment.Segment_OSM_MARKING_VERSION == OSM_MARKING_VERSION:
                     # only if we have one - checkOSMVersion could be used too
@@ -75,12 +79,14 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
 
                     osm_vectors.append(osm)
 
+        segment_id += 1
+
     # If the path to images is specific, modify it from simple "Data/images/" with putting path_to_images before it.
     if (path_to_images is not None):
         # for example to ['images/000.jpg', ...] it will add "DifferentPath/" -> ['DifferentPath/images/000.jpg', ...]
         list_of_images = [(path_to_images+x) for x in list_of_images]
 
-    return list_of_images, labels, osm_vectors
+    return list_of_images, labels, osm_vectors, segment_ids
 
 def LoadActualImages(list_of_images, resize=None, dim_ordering=KERAS_SETTING_DIMENSIONS):
     x = load_images_with_keras(list_of_images, target_size=resize, dim_ordering=dim_ordering)
