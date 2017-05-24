@@ -12,21 +12,19 @@ number_of_repeats = 2
 osm_features_input = Input(shape=input_shape)
 top = Dense(256, activation='relu')(osm_features_input)
 top = Dropout(0.5)(top)
-for i in range(0, number_of_repeats - 1):
-    top = Dense(256, activation='relu')(top)
-    top = Dropout(0.5)(top)
+top = Dense(256, activation='relu')(top)
+top = Dropout(0.5)(top)
 output = Dense(1, activation='sigmoid')(top)
 
 model = Model(inputs=osm_features_input, outputs=output)
 
 model_settings = {}
 model_settings["optimizer"] = 'rmsprop'
-model_settings["loss_func"] = 'mean_squared_error'
+model_settings["loss_func"] = 'mean_absolute_error' #mean_squared_error
 model_settings["metrics"] = ['mean_absolute_error']
-model_settings["loss_func"] = 'mean_absolute_error'
-model_settings["metrics"] = ['mean_squared_error']
-model_settings["epochs"] = 20
+model_settings["epochs"] = 50
 
+model.name = 'model0'
 model.compile(optimizer=model_settings["optimizer"], loss=model_settings["loss_func"],
               metrics=model_settings["metrics"])
 
@@ -36,7 +34,6 @@ model.compile(optimizer=model_settings["optimizer"], loss=model_settings["loss_f
 ##
 
 from kerutils import FitMonitor, show_scores
-import kerutils
 fmon = FitMonitor()
 #fmon = FitMonitor(thresh=0.05, maxloss=0.05, filename="model0_autosave.h5")
 
@@ -53,10 +50,31 @@ h = model.fit(osm, y,
 print '--------------------------'
 
 loss, metric = model.evaluate(X_train, Y_train, verbose=0)
-print("Train: metric=%f, loss=%f" % (metric, loss))
+print("Train: metric mean_absolute_error=%f, loss=%f" % (metric, loss))
 loss, metric = model.evaluate(X_test, Y_test, verbose=0)
-print("Validation: metric=%f, loss=%f" % (metric, loss))
+print("Validation: metric mean_absolute_error=%f, loss=%f" % (metric, loss))
 
 print '--------------------------'
 
 show_scores(model, h, X_train, Y_train, X_test, Y_test)
+
+#
+# Heavily overfits
+#
+'''
+min_loss = 0.070534  epoch = 19
+min_val_loss = 0.117932  epoch = 1
+--------------------------
+Train: metric mean_absolute_error=0.194500, loss=0.062831
+Validation: metric mean_absolute_error=0.292885, loss=0.128716
+'''
+
+# mean_absolute_error
+'''
+min_loss = 0.204694  epoch = 48
+min_val_loss = 0.299948  epoch = 46
+--------------------------
+Train: metric mean_absolute_error=0.191815, loss=0.191815
+Validation: metric mean_absolute_error=0.310030, loss=0.310030
+
+'''
