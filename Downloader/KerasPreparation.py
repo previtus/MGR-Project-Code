@@ -59,13 +59,37 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
 
     segment_id = 0
 
+    '''
+    number_no_score_yes_img = 0
+    number_no_score_no_img = 0
+    number_yes_score_yes_img = 0
+    number_yes_score_no_img = 0
+    '''
     for Segment in Segments:
+
+        '''
+        # stats:
+        if Segment.hasUnknownScore():
+            for i_th_image in range(0,Segment.number_of_images):
+                if Segment.hasLoadedImageI(i_th_image):
+                    number_no_score_yes_img += 1
+                else:
+                    number_no_score_no_img += 1
+        else:
+            for i_th_image in range(0,Segment.number_of_images):
+                if Segment.hasLoadedImageI(i_th_image):
+                    number_yes_score_yes_img += 1
+                else:
+                    number_yes_score_no_img += 1
+        '''
+
 
         # if we care for score
         if (has_score and not Segment.hasUnknownScore()) or (has_score == None):
             # but we always care for images
             for i_th_image in range(0,Segment.number_of_images):
                 if Segment.hasLoadedImageI(i_th_image):
+
                     list_of_images.append(Segment.getImageFilename(i_th_image))
                     labels.append(Segment.getScore())
                     segment_ids.append(segment_id)
@@ -85,6 +109,15 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
     if (path_to_images is not None):
         # for example to ['images/000.jpg', ...] it will add "DifferentPath/" -> ['DifferentPath/images/000.jpg', ...]
         list_of_images = [(path_to_images+x) for x in list_of_images]
+
+
+    # stats printing
+    '''
+    print 'number_no_score_yes_img', number_no_score_yes_img
+    print 'number_no_score_no_img', number_no_score_no_img
+    print 'number_yes_score_yes_img', number_yes_score_yes_img
+    print 'number_yes_score_no_img', number_yes_score_no_img
+    '''
 
     return list_of_images, labels, osm_vectors, segment_ids
 

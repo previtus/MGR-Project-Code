@@ -1,0 +1,8 @@
+
+#  Loading dataset at /home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_markable_640x640/SegmentsData_marked_R100.dump
+
+number_no_score_yes_img 21696
+number_no_score_no_img 3264
+number_yes_score_yes_img 8376
+number_yes_score_no_img 0
+ 

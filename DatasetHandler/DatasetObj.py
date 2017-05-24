@@ -395,7 +395,7 @@ class Dataset:
     # Dataset reporting: ---------------------------------------------------------------------------------------------
 
     def statistics(self):
-        print "Dataset of", self.num_of_images, " scored images of", self.img_width, "x", self.img_height, "resolution."
+        print "Dataset of", len(self.__list_of_images), " scored images of", self.img_width, "x", self.img_height, "resolution."
         labels = np.array(self.__labels)
         min = np.amin(labels)
         max = np.amax(labels)
