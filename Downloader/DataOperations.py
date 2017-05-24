@@ -152,3 +152,56 @@ def save_object(obj, filename):
 # sample usage
 save_object(company1, 'company1.pkl')
 '''
+
+def save_segments_file_as_without_missing_files(in_segments_file, path_to_images, out_segments_file):
+    # Special treatment of Segments file - mark all missing images as unusable
+    # ... we don't want to redownload them, as these have been manually deleted as too >bonkers<. (understand: outliers)
+    Segments = LoadDataFile(in_segments_file)
+
+    print "Segments may have nonexistent files linked:"
+    for Segment in Segments:
+        for i_th_image in range(0,Segment.number_of_images):
+
+            if Segment.hasLoadedImageI(i_th_image):
+                # Additional filtering - if we cant find the image, don't include it
+                # this is useful for manual deleting of images
+
+                filename = path_to_images+Segment.getImageFilename(i_th_image)
+
+                import os.path
+                if not os.path.isfile(filename):
+                    print filename
+                    Segment.HasLoadedImages[i_th_image] = False
+
+    print "Now shouldn't:"
+    for Segment in Segments:
+        for i_th_image in range(0,Segment.number_of_images):
+
+            if Segment.hasLoadedImageI(i_th_image):
+                # Additional filtering - if we cant find the image, don't include it
+                # this is useful for manual deleting of images
+
+                filename = path_to_images+Segment.getImageFilename(i_th_image)
+
+                import os.path
+                if not os.path.isfile(filename):
+                    print filename
+                    Segment.HasLoadedImages[i_th_image] = False
+
+    SaveDataFile(out_segments_file, Segments)
+
+'''
+in_segments_file = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_manclean_640x640/SegmentsData_marked_R50_4Tables_invalid.dump'
+path_to_images = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_manclean_640x640/'
+out_segments_file = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_manclean_640x640/SegmentsData_marked_R50_4Tables.dump'
+save_segments_file_as_without_missing_files(in_segments_file, path_to_images, out_segments_file)
+'''
+
+'''
+keep files:
+SegmentsData_invalid.dump
+SegmentsData_marked_R100_4Tables_invalid.dump
+SegmentsData_marked_R100_invalid.dump
+SegmentsData_marked_R200_4Tables_invalid.dump
+SegmentsData_marked_R50_4Tables_invalid.dump
+'''
