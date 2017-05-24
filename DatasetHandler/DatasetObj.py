@@ -102,9 +102,9 @@ class Dataset:
         '''
 
         n = len(self.__list_of_images)
-        indices = range(0,n)
-        #print indices
-        #print n, self.__list_of_images
+        #indices = range(0,n)
+        indices = range(0,n)*6
+        indices += range(0,n)
 
         a = self.__list_of_images
         b = self.__labels
