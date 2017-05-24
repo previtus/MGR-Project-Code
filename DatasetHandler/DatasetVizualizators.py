@@ -55,25 +55,29 @@ def GenerateAverageImagesFromDictionary(dict, save_to_dir=None, output_folder=No
 
     return dict_of_images
 
-def plotX_sortValues(dont_touch_this_x, title=''):
+def plotX_sortValues(dont_touch_this_x, title='', x_min=0.0, x_max=1.0, notReverse=False, custom_x_label = '# of images', custom_y_label = 'Score value'):
     x = copy.copy(dont_touch_this_x)
-    x.sort(reverse=True)
+    if notReverse:
+        x.sort()
+    else:
+        x.sort(reverse=True)
 
     plt.figure()
     axes = plt.axes()
-    axes.set_xlabel('# of images')
-    axes.set_ylabel('Score value')
+    axes.set_xlabel(custom_x_label)
+    axes.set_ylabel(custom_y_label)
 
     plt.plot(x)
     axes.fill_between(range(len(x)), x, facecolor='b', alpha=0.4)
 
-    zoomOut(axes, [0.0, len(x)], [0.0, 1.0], factor=0.05)
+    zoomOut(axes, [0.0, len(x)], [x_min, x_max], factor=0.05)
 
     axes.fill_between(x, 0)
 
     axes.set_title(title)
 
-def plotHistogram(x, title='', num_bins=100, x_min=0.0, x_max=1.0):
+def plotHistogram(x, title='', num_bins=100, x_min=0.0, x_max=1.0, custom_x_label = 'Score value', custom_y_label = 'Count of occurances'):
+    plt.figure()
     axes = plt.axes()
 
     hist, bins = np.histogram(x, bins=num_bins)
@@ -85,8 +89,8 @@ def plotHistogram(x, title='', num_bins=100, x_min=0.0, x_max=1.0):
     axes.xaxis.set_minor_locator(ticker.MultipleLocator(np.abs(x_max-x_min)/100.0))
 
     # add a 'best fit' line
-    axes.set_xlabel('Score value')
-    axes.set_ylabel('Count of occurances')
+    axes.set_xlabel(custom_x_label)
+    axes.set_ylabel(custom_y_label)
 
     zoomOutY(axes, factor=0.05, only_up=True)
     zoomOutX(axes, [x_min, x_max], factor=0.05)

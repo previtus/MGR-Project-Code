@@ -35,6 +35,21 @@ def bearing_between_two_points(start, end, degrees_offset=0.0):
 
     return bearing_from_north
 
+def distance_between_two_points(start, end):
+    lat1 = start[0]
+    lat2 = end[0]
+    lon1 = start[1]
+    lon2 = end[1]
+
+    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a))
+    r = 6371 # Radius of earth in kilometers. Use 3956 for miles
+    return c * r
+
 def segmentIDtoListID(semgentId):
     '''
     segment id might be 1000 if we start there, but the list is indexing from 0
