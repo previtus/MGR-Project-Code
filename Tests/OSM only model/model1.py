@@ -12,14 +12,17 @@ dataset, osm, osm_val, y, y_val = inits.get_dataset()
 input_shape = dataset.getShapeOfOsm()
 
 osm_features_input = Input(shape=input_shape)
-top = Dense(64, activation='relu')(osm_features_input)
+top = Dense(8, activation='relu')(osm_features_input)
 #top = Dense(32)(osm_features_input)
 #top = SReLU()(top)
 top = Dropout(0.5)(top)
 
-top = Dense(64, activation='relu')(osm_features_input)
+top = Dense(4, activation='relu')(osm_features_input)
 #top = Dense(32)(osm_features_input)
 #top = SReLU()(top)
+top = Dropout(0.5)(top)
+
+top = Dense(4, activation='relu')(osm_features_input)
 top = Dropout(0.5)(top)
 
 output = Dense(1, activation='sigmoid')(top)
@@ -30,7 +33,7 @@ model_settings = {}
 model_settings["optimizer"] = 'rmsprop'
 model_settings["loss_func"] = 'mean_absolute_error' #mean_squared_error
 model_settings["metrics"] = ['mean_absolute_error']
-model_settings["epochs"] = 30
+model_settings["epochs"] = 100
 
 model.name = 'model1'
 model.compile(optimizer=model_settings["optimizer"], loss=model_settings["loss_func"],
@@ -80,9 +83,9 @@ Validation: metric mean_absolute_error=0.286389, loss=0.119701
 
 # mean_absolute_error
 '''
-min_loss = 0.228507  epoch = 29
-min_val_loss = 0.290259  epoch = 1
+min_loss = 0.259212  epoch = 76
+min_val_loss = 0.277197  epoch = 25
 --------------------------
-Train: metric mean_absolute_error=0.217665, loss=0.217665
-Validation: metric mean_absolute_error=0.298639, loss=0.298639
+Train: metric mean_absolute_error=0.243858, loss=0.243858
+Validation: metric mean_absolute_error=0.283704, loss=0.283704
 '''
