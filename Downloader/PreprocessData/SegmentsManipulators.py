@@ -58,6 +58,14 @@ def AdditionalStatistics(Segments):
         #print d, Segment.Start, Segment.End
         stats_over_d.append(d)
 
+        '''
+        m = midpoint(Segment.Start, Segment.End)
+        d1 = 1000 * distance_between_two_points(Segment.Start, m)
+        d2 = 1000 * distance_between_two_points(m, Segment.End)
+        print abs(d - (d1+d2)), d1, d2
+        '''
+
+
     from DatasetHandler.DatasetVizualizators import *
     import numpy as np
 

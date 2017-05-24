@@ -50,6 +50,22 @@ def distance_between_two_points(start, end):
     r = 6371 # Radius of earth in kilometers. Use 3956 for miles
     return c * r
 
+
+def midpoint(start, end):
+    lat1 = start[0]
+    lat2 = end[0]
+    lon1 = start[1]
+    lon2 = end[1]
+    lat1, lon1, lat2, lon2 = map(radians, (lat1, lon1, lat2, lon2))
+
+    Bx = cos(lat2) * cos(lon2 - lon1)
+    By = cos(lat2) * sin(lon2 - lon1)
+
+    lat3 = atan2(sin(lat1) + sin(lat2), sqrt((cos(lat1)+Bx)*(cos(lat1)+Bx) + By*By))
+    lon3 = lon1 + atan2(By, cos(lat1) + Bx)
+
+    return map(degrees, ([lat3, lon3]))
+
 def segmentIDtoListID(semgentId):
     '''
     segment id might be 1000 if we start there, but the list is indexing from 0
