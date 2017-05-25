@@ -48,6 +48,8 @@ def load_default_settings():
     # OSM data editation
     DefaultModel["edit_osm_vec"] = '' # 'booleans', 'low-mid-high'
 
+    DefaultModel["osm_manual_width"] = 256
+
     # Special case HACKS
     DefaultModel["special_case"] = '' # by default no hack # hack_dont_use_features, is not yet prepared
 

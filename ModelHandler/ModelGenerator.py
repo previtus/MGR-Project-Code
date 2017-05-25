@@ -36,7 +36,7 @@ def build_simple_top_model(input_shape, number_of_repeats):
     return model
     '''
 
-def build_osm_only_model(input_shape, number_of_repeats):
+def build_osm_only_model(input_shape, number_of_repeats, manual_width=256):
     '''
     Build a simple model with just OSM vector as it's input, couple of FC blocks and then sigmoid output of 1 score value
     :param input_shape:
@@ -44,10 +44,10 @@ def build_osm_only_model(input_shape, number_of_repeats):
     :return:
     '''
     osm_features_input = Input(shape=input_shape)
-    top = Dense(256, activation='relu')(osm_features_input)
+    top = Dense(manual_width, activation='relu')(osm_features_input)
     top = Dropout(0.5)(top)
     for i in range(0,number_of_repeats-1):
-        top = Dense(256, activation='relu')(top)
+        top = Dense(manual_width, activation='relu')(top)
         top = Dropout(0.5)(top)
     output = Dense(1, activation='sigmoid')(top)
 
@@ -159,7 +159,7 @@ def get_top_models(models, datasets, Settings):
             input_shape = dataset.getShapeOfOsm()
             print "model shape is: ", input_shape
 
-            model[0] = build_osm_only_model(input_shape=input_shape, number_of_repeats=model_settings["top_repeat_FC_block"])
+            model[0] = build_osm_only_model(input_shape=input_shape, number_of_repeats=model_settings["top_repeat_FC_block"], manual_width=model_settings["osm_manual_width"])
             print model_settings["unique_id"], model
         else:
             print "Yet to be programmed."

@@ -5,7 +5,7 @@ from keras.layers.advanced_activations import PReLU, ELU, LeakyReLU, Thresholded
 from keras.models import Model
 from keras.layers import Input, concatenate
 
-from keras_contrib.layers.advanced_activations import SReLU
+#from keras_contrib.layers.advanced_activations import SReLU
 
 dataset, osm, osm_val, y, y_val = inits.get_dataset()
 
