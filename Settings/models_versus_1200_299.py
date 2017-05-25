@@ -1,5 +1,5 @@
 def Setup(Settings,DefaultModel):
-    Settings["experiment_name"] = "Comparison_of_models"
+    Settings["experiment_name"] = "Comparison_of_models_1200"
 
     Settings["graph_histories"] = ['together', [0,1], [1,2], [0,2]] #['all','together',[],[1,0],[0,0,0],[]]
     n=0
@@ -9,7 +9,9 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["model_type"] = 'img_osm_mix'
     Settings["models"][n]["unique_id"] = 'mix'
     Settings["models"][n]["top_repeat_FC_block"] = 2
-    Settings["models"][n]["epochs"] = 300
+    Settings["models"][n]["epochs"] = 500
+    Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
+
 
     Settings["models"].append(DefaultModel.copy())
     n=1
@@ -18,7 +20,8 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["model_type"] = 'osm_only'
     Settings["models"][n]["unique_id"] = 'osm_only'
     Settings["models"][n]["top_repeat_FC_block"] = 2
-    Settings["models"][n]["epochs"] = 300
+    Settings["models"][n]["epochs"] = 500
+
 
     Settings["models"].append(DefaultModel.copy())
     n=2
@@ -27,6 +30,6 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["model_type"] = 'simple_cnn_with_top'
     Settings["models"][n]["unique_id"] = 'img_only'
     Settings["models"][n]["top_repeat_FC_block"] = 2
-    Settings["models"][n]["epochs"] = 300
+    Settings["models"][n]["epochs"] = 500
 
     return Settings

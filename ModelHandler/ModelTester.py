@@ -231,6 +231,7 @@ def train_model(model, dataset, model_settings):
             optimizer_tmp = model_settings["optimizer"]
             model_settings["optimizer"] = model_settings["finetune_optimizer"]
 
+
             history_to_append = train_top_model(finetune_model, model_settings, train_data, train_labels, validation_data, validation_labels)
             model_settings["epochs"] = epochs_tmp
             model_settings["optimizer"] = optimizer_tmp
@@ -238,11 +239,12 @@ def train_model(model, dataset, model_settings):
         # Append histories
 
         #{'val_mean_absolute_error': [0.27633494684393978, 0.27673623693381116], 'loss': [0.15686354677721928, 0.12237877659907737], 'mean_absolute_error': [0.3303849070751238, 0.30686430593424935], 'val_loss': [0.10361090554317957, 0.10128958691173875]}
-        print history
-        print history_to_append
-        for key in history.keys():
-            history[key] += history_to_append[key]
-        print history
+        if model_settings["finetune"]:
+            print history
+            print history_to_append
+            for key in history.keys():
+                history[key] += history_to_append[key]
+            print history
 
 
     elif model_settings["model_type"] is 'img_osm_mix':
@@ -336,7 +338,7 @@ def train_top_model(model, model_settings, train_data, train_labels, validation_
 
     model.compile(optimizer=model_settings["optimizer"], loss=model_settings["loss_func"], metrics=model_settings["metrics"])
 
-    history = model.fit(train_data, train_labels,
+    history = model.fit(train_data, train_labels, verbose=1,
               epochs=model_settings["epochs"], batch_size=32,
               validation_data=(validation_data, validation_labels))
 

@@ -306,6 +306,7 @@ def graph_histories(histories, Settings):
             graph_file = Settings["folders"]["together_graph_filename"]
             custom_title = 'All:' + Settings["folders"]["together_graph_title"]
             visualize_histories(histories, names, plotvalues='loss', show=False, save=True, save_path=graph_file, custom_title=custom_title)
+            visualize_histories(histories, names, plotvalues='loss', show=False, save=True, save_path=graph_file+'_justValidation.png', custom_title=custom_title, just_val=True)
 
             print "graph saved >>", graph_file
 

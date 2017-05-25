@@ -2,9 +2,9 @@ from ExperimentRunner.ModelExperiments import run_many_models
 import sys
 
 #settings_file = 'Settings/mix_model.py'
-settings_file = 'Settings/osm_effect_of_diff_radius.py'
+settings_file = 'Settings/models_versus_1200_299.py'
 #settings_file = 'Settings/var_cnn_test.py'
-#settings_file = 'Settings/models_versus.py'
+#settings_file = 'Settings/models_versus_1200_299.py'
 #settings_file = 'Settings/simple_hack.py'
 
 #settings_file = 'Settings/shuffle_effective_1200.py'
