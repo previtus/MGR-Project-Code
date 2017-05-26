@@ -196,3 +196,179 @@ class SegmentObj:
     def markWithVector(self, nearby_vector, index, MARKING_VERSION):
         self.DistinctNearbyVector[index] = nearby_vector
         self.Segment_OSM_MARKING_VERSION = MARKING_VERSION
+
+    # ---------------------------------------------------------------------------------------------------------------------
+    def betweenPoints(self, pointStart, pointEnd):
+        urls = []
+        filenames = []
+
+        # Looking from START to END
+        self.DistinctLocations.append(pointStart) # we are standing in Start
+        k = len(self.DistinctLocations) - 1
+        loaded_before = len(self.LocationsIndex)
+
+        # 1 IMG
+        urls.append(self.getGoogleViewUrl(pointStart, pointEnd, PIXELS_X, PIXELS_Y))
+        filenames.append(self.getImageFilename(loaded_before+len(filenames)))
+        self.LocationsIndex.append(k)
+
+        '''
+        # Turning around the spot on for the two end points:
+        # Smart turns: START->END turn till 180 'right'
+        split_into = 5.0 # will create (split_into-1) images
+        degrees_turn = 180.0/split_into
+        summ = degrees_turn
+        while (summ < 180.0):
+            urls.append(self.getGoogleViewUrl(pointStart, pointEnd, PIXELS_X, PIXELS_Y, degrees_offset=summ))
+            filenames.append(self.getImageFilename(loaded_before+len(filenames)))
+            summ += degrees_turn
+        '''
+
+        urls.append(self.getGoogleViewUrl(pointStart, pointEnd, PIXELS_X, PIXELS_Y, degrees_offset=120.0))
+        filenames.append(self.getImageFilename(loaded_before+len(filenames)))
+        self.LocationsIndex.append(k)
+        urls.append(self.getGoogleViewUrl(pointStart, pointEnd, PIXELS_X, PIXELS_Y, degrees_offset=240.0))
+        filenames.append(self.getImageFilename(loaded_before+len(filenames)))
+        self.LocationsIndex.append(k)
+
+        # Looking from END to START
+        self.DistinctLocations.append(pointEnd) # we are standing in Start
+        k = len(self.DistinctLocations) - 1
+
+        # 1 IMG
+        urls.append( self.getGoogleViewUrl(pointEnd, pointStart, PIXELS_X,PIXELS_Y) )
+        filenames.append( self.getImageFilename(loaded_before+len(filenames)) )
+        self.LocationsIndex.append(k)
+
+        '''
+        # Smart turns: END->START turn till 180 'right'
+        summ = degrees_turn
+        while (summ < 180.0):
+            urls.append(self.getGoogleViewUrl(pointEnd, pointStart, PIXELS_X, PIXELS_Y, degrees_offset=summ))
+            filenames.append(self.getImageFilename(loaded_before+len(filenames)))
+            summ += degrees_turn
+
+        # COUNT = 2 + 2*(split_into-1) = 2 + 2*4 = 10 per one segment
+        # 10 times the data? sounds pretty good
+        '''
+
+        urls.append( self.getGoogleViewUrl(pointEnd, pointStart, PIXELS_X,PIXELS_Y, degrees_offset=120.0))
+        filenames.append(self.getImageFilename(loaded_before+len(filenames)))
+        self.LocationsIndex.append(k)
+        urls.append( self.getGoogleViewUrl(pointEnd, pointStart, PIXELS_X,PIXELS_Y, degrees_offset=240.0))
+        filenames.append(self.getImageFilename(loaded_before+len(filenames)))
+        self.LocationsIndex.append(k)
+
+        return urls, filenames
+
+    def getGoogleViewUrls_novel_brainscratching_aproach_weee_ohyeah(self, PIXELS_X, PIXELS_Y, minimal_length):
+        urls = []
+        filenames = []
+
+        min_allowed_distance = minimal_length
+
+        d = 1000*distance_between_two_points(self.Start, self.End)
+        number_of_splits = int(max((floor(d / min_allowed_distance)),1.0))
+
+        #print "---", d, min_allowed_distance, number_of_splits
+
+        before_frac = 0.0
+        loc = 0
+
+        for frac in range(0,number_of_splits):
+            current_frac = (frac+1) * (1.0 / number_of_splits)
+
+            # before_frac, current_frac will be 0.0-0.2, 0.2-0.4, etc all the way till 0.8-1.0
+            PointA = interpolation(self.Start, self.End, fraction=before_frac)
+            PointB = interpolation(self.Start, self.End, fraction=current_frac)
+            #d = 1000*distance_between_two_points(PointA, PointB)
+            #print before_frac, current_frac, d
+
+            urls1, filenames1 = self.betweenPoints(PointA, PointB)
+            urls += urls1
+            filenames += filenames1
+
+            loc = self.DistinctLocations.pop()
+
+            before_frac = current_frac
+        self.DistinctLocations.append(loc)
+
+        '''
+        if ( d > -1 and d <= 2*min_allowed_distance):
+            # 0-40 meters, normal behavior
+            urls, filenames = self.betweenPoints(self.Start, self.End)
+
+        elif ( d > 2*min_allowed_distance and d <= 3*min_allowed_distance):
+            # 40-60 meters, split into two
+            Mid = midpoint(self.Start, self.End)
+            urls1, filenames1 = self.betweenPoints(self.Start, Mid)
+            self.DistinctLocations.pop()
+            urls2, filenames2 = self.betweenPoints(Mid, self.End)
+            urls = urls1 + urls2
+            filenames = filenames1 + filenames2
+
+        elif ( d > 3*min_allowed_distance and d <= 4*min_allowed_distance):
+            # 60-80 meters, split into three
+            Third1 = interpolation(self.Start, self.End, fraction=0.333)
+            Third2 = interpolation(self.Start, self.End, fraction=0.666)
+            urls1, filenames1 = self.betweenPoints(self.Start, Third1)
+            self.DistinctLocations.pop()
+            urls2, filenames2 = self.betweenPoints(Third1, Third2)
+            self.DistinctLocations.pop()
+            urls3, filenames3 = self.betweenPoints(Third2, self.End)
+            urls = urls1 + urls2 + urls3
+            filenames = filenames1 + filenames2 + filenames3
+
+        elif ( d > 4*min_allowed_distance and d <= 5*min_allowed_distance):
+            # 80-100 meters, split into four
+            Mid = midpoint(self.Start, self.End)
+            Quarter1 = midpoint(self.Start, Mid)
+            Quarter2 = midpoint(Mid, self.End)
+            urls1, filenames1 = self.betweenPoints(self.Start, Quarter1)
+            self.DistinctLocations.pop()
+            urls2, filenames2 = self.betweenPoints(Quarter1, Mid)
+            self.DistinctLocations.pop()
+            urls3, filenames3 = self.betweenPoints(Mid, Quarter2)
+            self.DistinctLocations.pop()
+            urls4, filenames4 = self.betweenPoints(Quarter2, self.End)
+            urls = urls1 + urls2 + urls3 + urls4
+            filenames = filenames1 + filenames2 + filenames3 + filenames4
+        else:
+            # 100 and more, split into five
+            Fifth1 = interpolation(self.Start, self.End, fraction=0.2)
+            Fifth2 = interpolation(self.Start, self.End, fraction=0.4)
+            Fifth3 = interpolation(self.Start, self.End, fraction=0.6)
+            Fifth4 = interpolation(self.Start, self.End, fraction=0.8)
+
+            urls1, filenames1 = self.betweenPoints(self.Start, Fifth1)
+            self.DistinctLocations.pop()
+            urls2, filenames2 = self.betweenPoints(Fifth1, Fifth2)
+            self.DistinctLocations.pop()
+            urls3, filenames3 = self.betweenPoints(Fifth2, Fifth3)
+            self.DistinctLocations.pop()
+            urls4, filenames4 = self.betweenPoints(Fifth3, Fifth4)
+            self.DistinctLocations.pop()
+            urls5, filenames5 = self.betweenPoints(Fifth4, self.End)
+            urls = urls1 + urls2 + urls3 + urls4 + urls5
+            filenames = filenames1 + filenames2 + filenames3 + filenames4 + filenames5
+        '''
+
+        number_of_images = len(urls)
+        self.resetImageMemory(number_of_images)
+
+
+        for distLoc in self.DistinctLocations:
+            self.DistinctNearbyVector.append(None)
+
+        '''
+        # DEBUG distances
+        str_distances = ''
+        last = self.DistinctLocations[0]
+        for distLoc in self.DistinctLocations[1:]:
+            d = 1000*distance_between_two_points(last, distLoc)
+            last = distLoc
+            str_distances += str(d)+', '
+        print str_distances, self.DistinctLocations, self.LocationsIndex
+        '''
+
+        return [urls, filenames]

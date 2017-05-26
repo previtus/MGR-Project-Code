@@ -6,7 +6,7 @@ from Downloader.DataOperations import *
 from Downloader.PreprocessData.SegmentsManipulators import *
 from DatasetHandler.FileHelperFunc import *
 
-def RunDownload(name, from_edge, to_edge, px_py):
+def RunDownload(name, from_edge, to_edge, px_py, minimal_length):
     '''
     Run downloader while setting the most important variables here
     :param name: name of the folder it will safe in Data/StreetViewData/<name>
@@ -27,7 +27,7 @@ def RunDownload(name, from_edge, to_edge, px_py):
     FromEdgeID = from_edge
     ToEdgeID = to_edge
 
-    PreprocessDataF(path_to_edges, path_to_datafolder, FromEdgeID, ToEdgeID, PIXELS_X=px_py, PIXELS_Y=px_py)
+    PreprocessDataF(path_to_edges, path_to_datafolder, FromEdgeID, ToEdgeID, PIXELS_X=px_py, PIXELS_Y=px_py, minimal_length=minimal_length)
 
 def RunCheck(name, px_py):
     path_to_datafolder = get_project_folder()+'Data/StreetViewData/'+name+'/'

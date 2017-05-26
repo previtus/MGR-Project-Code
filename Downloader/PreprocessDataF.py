@@ -11,7 +11,7 @@ from DataOperations import *
 import pickle
 
 def PreprocessDataF(EdgesFile, Path, FromEdgeID = FromEdgeID, ToEdgeID=ToEdgeID,
-                    PIXELS_X = PIXELS_X, PIXELS_Y = PIXELS_Y):
+                    PIXELS_X = PIXELS_X, PIXELS_Y = PIXELS_Y, minimal_length=20):
     OutputFile = Path+DATASTRUCTUREFILE
 
     # 1 data prep
@@ -20,7 +20,7 @@ def PreprocessDataF(EdgesFile, Path, FromEdgeID = FromEdgeID, ToEdgeID=ToEdgeID,
     Segments = PrepSegments(EdgesGEOJSON, FromEdgeID, ToEdgeID)
 
     # 2 list of urls
-    FilenameMap = GenListOfUrls(Segments,PIXELS_X,PIXELS_Y, PrependPath=Path)
+    FilenameMap = GenListOfUrls(Segments,PIXELS_X,PIXELS_Y, PrependPath=Path, minimal_length=minimal_length)
 
     # 3 download from urls
     FailedDownloads = DownloadUrlFilenameMap(FilenameMap, Segments)

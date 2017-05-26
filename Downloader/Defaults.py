@@ -11,8 +11,8 @@ ToEdgeID = 2 #15 # 14 -> will end with 013.jpg
 #ToEdgeID = 5300
 # 1st dataset: out of 1165640! (there are 1165641 lines and the 1st one is just text)
 # 2nd dataset: out of 5556 edges
-PIXELS_X = 299
-PIXELS_Y = 299
+PIXELS_X = 640
+PIXELS_Y = 640
 NUMBER_OF_ZEROS_PADDING = '04'
 
 DOWNLOAD_TIMEOUT = 0.7
