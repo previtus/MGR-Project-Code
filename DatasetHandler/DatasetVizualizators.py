@@ -70,7 +70,7 @@ def plotX_sortValues(dont_touch_this_x, title='', x_min=0.0, x_max=1.0, notRever
     plt.plot(x)
     axes.fill_between(range(len(x)), x, facecolor='b', alpha=0.4)
 
-    zoomOut(axes, [0.0, len(x)], [x_min, x_max], factor=0.05)
+    zoomOut(axes, [0.0, len(x)-1], [x_min, x_max], factor=0.05)
 
     axes.fill_between(x, 0)
 
