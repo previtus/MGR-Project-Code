@@ -1,3 +1,5 @@
+from Downloader.DataOperations import *
+
 def StatisticsSegments(Segments, additionalStatistics=False):
     '''
     Provide statistics for loaded dataset
@@ -42,7 +44,6 @@ def StatisticsSegments(Segments, additionalStatistics=False):
 
 '''
 # Examples of usage
-from DataOperations import *
 Segments = LoadDataFile('../'+DATASTRUCTUREFILE)
 StatisticsSegments(Segments)
 
@@ -54,20 +55,23 @@ def AdditionalStatistics(Segments):
     stats_over_d = []
 
     for Segment in Segments:
-        d = 1000*distance_between_two_points(Segment.Start, Segment.End)
-        #print d, Segment.Start, Segment.End
-        stats_over_d.append(d)
+        if not Segment.hasUnknownScore():
 
-        '''
-        m = midpoint(Segment.Start, Segment.End)
-        d1 = 1000 * distance_between_two_points(Segment.Start, m)
-        d2 = 1000 * distance_between_two_points(m, Segment.End)
-        print abs(d - (d1+d2)), d1, d2
-        '''
+            d = 1000*distance_between_two_points(Segment.Start, Segment.End)
+            #print d, Segment.Start, Segment.End
+            stats_over_d.append(d)
 
+            '''
+            m = midpoint(Segment.Start, Segment.End)
+            d1 = 1000 * distance_between_two_points(Segment.Start, m)
+            d2 = 1000 * distance_between_two_points(m, Segment.End)
+            print abs(d - (d1+d2)), d1, d2
+            '''
 
     from DatasetHandler.DatasetVizualizators import *
     import numpy as np
+
+    print stats_over_d
 
     data = np.array(stats_over_d)
     min = np.amin(data)
@@ -87,9 +91,10 @@ def AdditionalStatistics(Segments):
         saveAllPlotsToPDF()
     show()
 
+
 '''
-file = '/home/ekmek/Desktop/MGR-Project-Code/Data/StreetViewData/1200x_markable_299x299/SegmentsData.dump'
-from Downloader.DataOperations import *
+file = '/home/ekmek/Desktop/MGR-Project-Code/Data/StreetViewData/50-100x_MoarImgs/SegmentsData.dump'
+#file = '/home/ekmek/Desktop/MGR-Project-Code/Data/StreetViewData/1200x_markable_299x299/SegmentsData.dump'
 Segments = LoadDataFile(file)
 StatisticsSegments(Segments, True)
 '''
