@@ -13,7 +13,7 @@ if len(sys.argv) > 4:
     from_id = int(sys.argv[2])  # var2
     to_id = int(sys.argv[3])  # var3
     pixels = int(sys.argv[4])  # var4
-    minimal_length = int(sys.argv[5])  # var4
+    minimal_length = int(sys.argv[5])  # var5
 else:
     print "Using default values. Please run as: run_downloader_on_server.py nameOfFolder fromId toId pixels minimalLength"
 
