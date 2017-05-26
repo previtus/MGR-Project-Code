@@ -53,6 +53,7 @@ def load_default_settings():
 
     # Special case HACKS
     DefaultModel["special_case"] = '' # by default no hack # hack_dont_use_features, is not yet prepared
+    DefaultModel["osm_only_unique_osms"] = False
 
     DefaultSettings["models"].append(DefaultModel)
 
