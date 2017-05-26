@@ -44,6 +44,7 @@ def load_default_settings():
 
     # Hurray for shuffling
     DefaultModel["shuffle_dataset"] = True
+    DefaultModel["shuffle_dataset_method"] = 'default-same-segment'
 
     # OSM data editation
     DefaultModel["edit_osm_vec"] = '' # 'booleans', 'low-mid-high'

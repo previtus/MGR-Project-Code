@@ -191,6 +191,31 @@ class Dataset:
 
         #print len(a), len(b), len(c), len(d), d[0:10]
 
+    def mix_within_groups(self, array_train, array_validation, local_seed):
+        lists = []
+        lists_val = []
+
+        if len(array_train) == 2:
+            lists = list(zip(array_train[0], array_train[1]))
+            lists_val = list(zip(array_validation[0], array_validation[1]))
+
+        if len(array_train) == 3:
+            lists = list(zip(array_train[0], array_train[1], array_train[2]))
+            lists_val = list(zip(array_validation[0], array_validation[1], array_validation[2]))
+
+        random.Random(local_seed+1).shuffle(lists)
+        random.Random(local_seed+2).shuffle(lists_val)
+
+        if len(array_train) == 2:
+            a, b = zip(*lists)
+            c, d = zip(*lists_val)
+            return [a,b,c,d]
+
+        if len(array_train) == 3:
+            a, b, c = zip(*lists)
+            d, e, f = zip(*lists_val)
+            return [a,b,c,d,e,f]
+
     def init_from_lists(self, list_of_images, labels, osm, segment_ids, img_width, img_height):
         self.img_width = img_width
         self.img_height = img_height
@@ -304,6 +329,15 @@ class Dataset:
         osm_val = np.asarray(osm_val)
 
         return [osm, osm_val]
+
+    def DEBUGgetDataLabels_split_only_osm(self, validation_split=0.2):
+        osm, osm_val = KerasPreparation.split_one_array(self.__osm, validation_split)
+        ids, ids_val = KerasPreparation.split_one_array(self.__segment_ids, validation_split)
+        osm = np.asarray(osm)
+        osm_val = np.asarray(osm_val)
+
+        return [osm, osm_val, ids, ids_val]
+
 
     def getDataLabels_split_with_osm(self, resize=None, validation_split=0.2):
         [x, y, x_val, y_val] = self.getDataLabels_split(resize, validation_split)
@@ -467,7 +501,7 @@ class Dataset:
         return new_names
 
     def DebugGetDatasetArrays(self):
-        return [self.__list_of_images, self.__labels]
+        return [self.__list_of_images, self.__labels, self.__osm, self.__segment_ids]
 
     def sampleUniform(self, desired_number):
         # this is without repetition
