@@ -266,7 +266,6 @@ def train_model(model, dataset, model_settings):
 
             history = train_top_model(model, model_settings, [x, osm], y, [x_val, osm_val], y_val)
 
-
             print "foo"
         else:
 
@@ -284,6 +283,9 @@ def train_model(model, dataset, model_settings):
 
         [osm, osm_val] = dataset.getDataLabels_split_only_osm(validation_split=model_settings["validation_split"])
         [y, y_val] = dataset.getDataLabels_split_only_y(validation_split=model_settings["validation_split"])
+
+        #if model_settings["intermix"]:
+        #    [osm, y, osm_val, y_val] = dataset.mix_within_groups([osm, y], [osm_val, y_val], model_settings["seed"])
 
         osm_model = model[0]
         history = train_top_model(osm_model, model_settings, osm, y, osm_val, y_val)
@@ -335,6 +337,11 @@ def load_feature_file(path):
 
 # Test Whole model = Fit
 def train_top_model(model, model_settings, train_data, train_labels, validation_data, validation_labels):
+    train_data = np.array(train_data)
+    train_labels = np.array(train_labels)
+    validation_data = np.array(validation_data)
+    validation_labels = np.array(validation_labels)
+
 
     model.compile(optimizer=model_settings["optimizer"], loss=model_settings["loss_func"], metrics=model_settings["metrics"])
 
@@ -347,3 +354,65 @@ def train_top_model(model, model_settings, train_data, train_labels, validation_
 
     return history.history
 
+
+# CUSTOM KERAS CALLBACK
+# inspired by Kerutils at https://github.com/samyzaf/kerutils
+from keras.callbacks import Callback
+import datetime, sys
+
+def format_time(seconds):
+    if seconds < 400:
+        s = float(seconds)
+        return "%.1f seconds" % (s,)
+    elif seconds < 4000:
+        m = seconds / 60.0
+        return "%.2f minutes" % (m,)
+    else:
+        h = seconds / 3600.0
+        return "%.2f hours" % (h,)
+
+class RunMonitor(Callback):
+    def __init__(self, **opt):
+        super(Callback, self).__init__()
+        self.verbose = opt.get('verbose', 1)
+        self.hist = {'loss': [], 'val_loss': []}
+        self.current_epoch = -1
+
+    def on_epoch_begin(self, epoch, logs={}):
+        self.current_epoch = epoch
+
+    def on_train_begin(self, logs={}):
+        self.start_time = datetime.datetime.now()
+        t = datetime.datetime.strftime(self.start_time, '%Y-%m-%d %H:%M:%S')
+        print "Training started:", t
+
+        self.progress = 0
+
+    def on_train_end(self, logs={}):
+        self.end_time = datetime.datetime.now()
+        t = datetime.datetime.strftime(self.end_time, '%Y-%m-%d %H:%M:%S')
+        time_str = format_time(self.end_time - self.start_time)
+        print "Training ended:", t, "(took ", time_str, ")"
+
+    #def on_batch_end(self, batch, logs={}):
+
+    def on_epoch_end(self, epoch, logs={}):
+        loss = logs.get('loss')
+        val_loss = logs.get('val_loss', -1)
+
+        percentage = int(epoch / (self.params['epochs'] / 100.0))
+        if percentage > self.progress:
+            sys.stdout.write('.')
+            if percentage%5 == 0:
+                dt = datetime.datetime.now() - self.start_time
+                time_str = format_time(dt.total_seconds())
+                fmt = '%02d%% epoch=%d, loss=%f, val_loss=%f, time=%s\n'
+                vals = (percentage,    epoch,    loss,    val_loss,    time_str)
+
+                sys.stdout.write(fmt % vals)
+            sys.stdout.flush()
+            self.progress = percentage
+
+    def print_params(self):
+        for key in sorted(self.params.keys()):
+            print("%s = %s" % (key, self.params[key]))
