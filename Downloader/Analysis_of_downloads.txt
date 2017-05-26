@@ -24,7 +24,7 @@ min_allowed_distance => num_of_image_urls_to_attempt_to_down
 15 	=>	24060
 20 * 	=>	18534
 25	=>	15408
-30 	=>	13350
+30 *	=>	13350
 
 min_allowed_distance => num_of_image_urls_to_attempt_to_down
 1200x
