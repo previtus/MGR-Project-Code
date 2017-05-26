@@ -64,7 +64,41 @@ def midpoint(start, end):
     lat3 = atan2(sin(lat1) + sin(lat2), sqrt((cos(lat1)+Bx)*(cos(lat1)+Bx) + By*By))
     lon3 = lon1 + atan2(By, cos(lat1) + Bx)
 
-    return map(degrees, ([lat3, lon3]))
+    return tuple(map(degrees, ([lat3, lon3])))
+
+
+def interpolation(start, end, fraction):
+    lat1 = start[0]
+    lat2 = end[0]
+    lon1 = start[1]
+    lon2 = end[1]
+    lat1, lon1, lat2, lon2 = map(radians, (lat1, lon1, lat2, lon2))
+
+    sinlat1 = sin(lat1)
+    coslat1 = cos(lat1)
+    sinlon1 = sin(lon1)
+    coslon1 = cos(lon1)
+    sinlat2 = sin(lat2)
+    coslat2 = cos(lat2)
+    sinlon2 = sin(lon2)
+    coslon2 = cos(lon2);
+
+    dlat = lat2 - lat1;
+    dlon = lon2 - lon1;
+    a = sin(dlat/2.0) * sin(dlat/2.0) + cos(lat1) * cos(lat2) * sin(dlon/2.0) * sin(dlon/2.0)
+    dd = 2.0 * atan2(sqrt(a), sqrt(1.0-a))
+
+    A = sin((1.0-fraction)*dd) / sin(dd)
+    B = sin(fraction*dd) / sin(dd)
+
+    x = A * coslat1 * coslon1 + B * coslat2 * coslon2
+    y = A * coslat1 * sinlon1 + B * coslat2 * sinlon2
+    z = A * sinlat1 + B * sinlat2
+
+    lat3 = atan2(z, sqrt(x*x + y*y))
+    lon3 = atan2(y, x)
+
+    return tuple(map(degrees, ([lat3, lon3])))
 
 def segmentIDtoListID(semgentId):
     '''
