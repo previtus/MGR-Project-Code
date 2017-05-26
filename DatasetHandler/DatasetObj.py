@@ -216,6 +216,29 @@ class Dataset:
             d, e, f = zip(*lists_val)
             return [a,b,c,d,e,f]
 
+
+    def remove_dual_osms(self):
+        '''
+        We know that every third entry is actually unique (in sense of osm,score pair) - when we are talking about osm_only model
+        :return:
+        '''
+        indices = []
+
+        images_per_segment = 3
+        n = len(self.__list_of_images)
+        bytripples = range(0,int(n/images_per_segment))
+
+        for i in bytripples:
+            indices.append(i*images_per_segment)
+
+        print len(self.__list_of_images), len(self.__labels), len(self.__osm), len(self.__segment_ids)
+        self.__list_of_images = [self.__list_of_images[i] for i in indices]
+        self.__labels = [self.__labels[i] for i in indices]
+        self.__osm = [self.__osm[i] for i in indices]
+        self.__segment_ids = [self.__segment_ids[i] for i in indices]
+
+        print len(self.__list_of_images), len(self.__labels), len(self.__osm), len(self.__segment_ids)
+
     def init_from_lists(self, list_of_images, labels, osm, segment_ids, img_width, img_height):
         self.img_width = img_width
         self.img_height = img_height
