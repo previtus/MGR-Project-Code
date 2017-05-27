@@ -1,11 +1,11 @@
 from Downloader.DownloaderRunner import RunDownload, RunCheck, RunMarkBad
 import sys
 
-name = "5556x_minlen30_640px"
+name = "5556x_minlen10_640px"
 from_id = 0
 to_id = 5556 #5556
 pixels = 640
-minimal_length = 30
+minimal_length = 10
 
 # python run_downloader_on_server.py NAME FROMID TOID PIXELS MIN_LEN
 if len(sys.argv) > 4:
