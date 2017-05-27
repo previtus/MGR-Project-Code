@@ -119,6 +119,9 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
     print 'number_yes_score_no_img', number_yes_score_no_img
     '''
 
+    if len(osm_vectors) == 0:
+        osm_vectors = [None] * len(list_of_images)
+
     return list_of_images, labels, osm_vectors, segment_ids
 
 def LoadActualImages(list_of_images, resize=None, dim_ordering=KERAS_SETTING_DIMENSIONS):
