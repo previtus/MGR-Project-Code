@@ -37,7 +37,7 @@ def RunCheck(name, px_py):
     StatisticsSegments(Segments)
 
     if (HasSomeErrorneousData(Segments, ERROR_MESSAGE_QUOTA)):
-        print "Surpassed quota last lime! Redownloading."
+        print "Surpassed quota last time! Redownloading."
         Segments = FixDataFile_FailedDownloads(segments_file, ERROR_MESSAGE_QUOTA, PIXELS_X=px_py, PIXELS_Y=px_py, PrependPath=path_to_datafolder)
 
     if (HasSomeErrorneousData(Segments, ERROR_MESSAGE_FAILED_MANY_TIMES)):

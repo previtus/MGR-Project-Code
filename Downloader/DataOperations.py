@@ -75,7 +75,8 @@ def HasSomeErrorneousData(Segments, ERROR_TYPE):
         Segments = FixDataFile_FailedDownloads(_,E)
     '''
     for segment in Segments:
-        for i_th_image in range(0, segment.number_of_images):
+        for i_th_image in range(0, len(segment.ErrorMessages)):
+            #print segment.ErrorMessages[i_th_image]
             if segment.ErrorMessages[i_th_image] == ERROR_TYPE:
                 return True
     return False
@@ -113,6 +114,7 @@ def FixDataFile_FailedDownloads(name, ERROR_TYPE, PIXELS_X, PIXELS_Y, PrependPat
         for i_th_image in range(0, segment.number_of_images):
             if segment.ErrorMessages[i_th_image] == ERROR_TYPE:
                 broken = True
+                segment.LocationsIndex = []
                 #print segment.SegmentId
         if broken:
             BrokenSegments.append(segment)
@@ -190,11 +192,32 @@ def save_segments_file_as_without_missing_files(in_segments_file, path_to_images
 
     SaveDataFile(out_segments_file, Segments)
 
+
+def save_segments_file_marking_missing_files_as_errors(in_segments_file, path_to_images, out_segments_file):
+    Segments = LoadDataFile(in_segments_file)
+
+    print "Segments may have nonexistent files linked:"
+    for Segment in Segments:
+        for i_th_image in range(0,Segment.number_of_images):
+
+            if Segment.hasLoadedImageI(i_th_image):
+                # Additional filtering - if we cant find the image, don't include it
+                # this is useful for manual deleting of images
+
+                filename = path_to_images+Segment.getImageFilename(i_th_image)
+
+                import os.path
+                if not os.path.isfile(filename):
+                    print filename
+                    Segment.ErrorMessages[i_th_image] = ERROR_MESSAGE_QUOTA
+
+    SaveDataFile(out_segments_file, Segments)
+
 '''
-in_segments_file = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_manclean_640x640/SegmentsData_marked_R50_4Tables_invalid.dump'
-path_to_images = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_manclean_640x640/'
-out_segments_file = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_manclean_640x640/SegmentsData_marked_R50_4Tables.dump'
-save_segments_file_as_without_missing_files(in_segments_file, path_to_images, out_segments_file)
+in_segments_file = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_minlen30_640px/SegmentsData.dump'
+path_to_images = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_minlen30_640px/'
+out_segments_file = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_minlen30_640px/SegmentsData.dump'
+save_segments_file_marking_missing_files_as_errors(in_segments_file, path_to_images, out_segments_file)
 '''
 
 '''

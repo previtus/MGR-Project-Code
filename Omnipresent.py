@@ -82,3 +82,7 @@ def save_job_report_page(folder_path, job_id, cut = True):
 
 
 #save_job_report_page(folder_path='',job_id='1398409.arien-pro.ics.muni.cz')
+
+import os
+def file_exists_and_accesible(PATH):
+    return os.path.isfile(PATH) and os.access(PATH, os.R_OK)

@@ -5,6 +5,7 @@ import shutil
 import numpy as np
 import random
 import Downloader.Defaults
+from Omnipresent import file_exists_and_accesible
 
 class Dataset:
     '''
@@ -238,6 +239,13 @@ class Dataset:
         self.__segment_ids = [self.__segment_ids[i] for i in indices]
 
         print len(self.__list_of_images), len(self.__labels), len(self.__osm), len(self.__segment_ids)
+
+    def test_existence_of_all_images(self):
+        for url in self.__list_of_images:
+            b = file_exists_and_accesible(url)
+            if not b:
+                print "File cannot be accessed! ", url
+
 
     def init_from_lists(self, list_of_images, labels, osm, segment_ids, img_width, img_height):
         self.img_width = img_width
