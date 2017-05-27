@@ -1,11 +1,11 @@
 from Downloader.DownloaderRunner import RunDownload, RunCheck, RunMarkBad
 import sys
 
-name = "5556x_minlen20_640px"
+name = "5556x_minlen30_640px"
 from_id = 0
 to_id = 5556 #5556
 pixels = 640
-minimal_length = 20
+minimal_length = 30
 
 # python run_downloader_on_server.py NAME FROMID TOID PIXELS MIN_LEN
 if len(sys.argv) > 4:
@@ -21,8 +21,8 @@ print "[Setting] run_downloader_on_server.py", name, from_id, to_id, pixels
 
 print 'CAREFULLY CHECK THE FILE_NOT_FOUND_CHECKSUM!!! Is it the one for '+str(pixels)+' ??'
 
-RunDownload(name, from_id, to_id, pixels, minimal_length)
-#RunCheck(name, pixels)
+#RunDownload(name, from_id, to_id, pixels, minimal_length)
+RunCheck(name, pixels)
 
 #RunMarkBad(name)
 #RunCheck(name, pixels)
