@@ -276,6 +276,8 @@ def train_model(model, dataset, model_settings):
             [y, y_val] = dataset.getDataLabels_split_only_y(validation_split=model_settings["validation_split"])
             [train_data, _, validation_data, _] = load_features(filename_features_train, filename_features_test, y, y_val)
 
+            print len_(train_data), len_(y), len_(osm)
+
             top_model = model[1]
             history = train_top_model(top_model, model_settings, [osm, train_data], y, [osm_val, validation_data], y_val)
 
@@ -337,11 +339,16 @@ def load_feature_file(path):
 
 # Test Whole model = Fit
 def train_top_model(model, model_settings, train_data, train_labels, validation_data, validation_labels):
-    train_data = np.array(train_data)
+    if len(train_data) <> 2:
+        train_data = np.array(train_data)
+        validation_data = np.array(validation_data)
+    else:
+        train_data[0] = np.array(train_data[0])
+        train_data[1] = np.array(train_data[1])
+        validation_data[0] = np.array(validation_data[0])
+        validation_data[1] = np.array(validation_data[1])
     train_labels = np.array(train_labels)
-    validation_data = np.array(validation_data)
     validation_labels = np.array(validation_labels)
-
 
     model.compile(optimizer=model_settings["optimizer"], loss=model_settings["loss_func"], metrics=model_settings["metrics"])
 
