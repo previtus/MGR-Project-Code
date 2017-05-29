@@ -1,31 +1,31 @@
 import inits
 from keras.models import Sequential
-from keras.layers import Dropout, Flatten, Dense, LeakyReLU, Convolution1D
+from keras.layers import Dropout, Flatten, Dense, LeakyReLU, Convolution1D, BatchNormalization
 from keras.layers.advanced_activations import PReLU, ELU, LeakyReLU, ThresholdedReLU
 from keras.models import Model
 from keras.layers import Input, concatenate
-
-#from keras_contrib.layers.advanced_activations import SReLU
 
 dataset, osm, osm_val, y, y_val = inits.get_dataset()
 
 input_shape = dataset.getShapeOfOsm()
 
 osm_features_input = Input(shape=input_shape)
-top = Dense(8, activation='relu')(osm_features_input)
-#top = Dense(32)(osm_features_input)
-#top = SReLU()(top)
+top = BatchNormalization()(osm_features_input)
+
+top = Dense(8, activation='relu')(top)
+top = BatchNormalization()(top)
 top = Dropout(0.5)(top)
 
 top = Dense(4, activation='relu')(top)
-#top = Dense(32)(osm_features_input)
-#top = SReLU()(top)
+top = BatchNormalization()(top)
 top = Dropout(0.5)(top)
 
 top = Dense(4, activation='relu')(top)
+top = BatchNormalization()(top)
 top = Dropout(0.5)(top)
 
-top = Dense(4, activation='relu')(top)
+top = Dense(2, activation='relu')(top)
+top = BatchNormalization()(top)
 top = Dropout(0.5)(top)
 
 output = Dense(1, activation='sigmoid')(top)
@@ -78,9 +78,9 @@ show_scores(model, h, X_train, Y_train, X_test, Y_test)
 
 # mean_absolute_error
 '''
-min_loss = 0.264388  epoch = 195
-min_val_loss = 0.270930  epoch = 164
+min_loss = 0.265693  epoch = 378
+min_val_loss = 0.276488  epoch = 235
 --------------------------
-Train: metric mean_absolute_error=0.236980, loss=0.236980
-Validation: metric mean_absolute_error=0.273574, loss=0.273574
+Train: metric mean_absolute_error=0.243317, loss=0.243317
+Validation: metric mean_absolute_error=0.290595, loss=0.290595
 '''
