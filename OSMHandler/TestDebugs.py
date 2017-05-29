@@ -36,7 +36,7 @@ def testCheckingSegments(input_path, output_path, radius = 100, close=False):
 
     Segments = Downloader.DataOperations.SaveDataFile(output_path, Segments)
 
-path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_minlen30_640px/'
+path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_minlen10_640px/'
 input_path = path+'SegmentsData.dump'
 output_path = path+'SegmentsData_marked_R100_4Tables.dump'
 r = 100
