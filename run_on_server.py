@@ -10,7 +10,7 @@ settings_file = 'Settings/osm_only_model.py'
 #settings_file = 'Settings/shuffle_effective_1200.py'
 #settings_file = 'Settings/finetune_tests_varAlong.py'
 
-settings_file = 'Settings/set1/osm.py'
+settings_file = 'Settings/set1/models_10m_640px.py'
 
 job_id = ''
 

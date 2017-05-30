@@ -1,5 +1,5 @@
 def Setup(Settings,DefaultModel):
-    # set1/models_30m_640px.py
+    # set1/models_10m_640px.py
 
     Settings["experiment_name"] = "set1b_Models_Test_10m_640px"
 
