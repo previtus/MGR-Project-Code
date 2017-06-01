@@ -421,6 +421,41 @@ class Dataset:
                 osm = osms[index]
                 yield ([image, osm], score)
 
+    def generator_of_all_data(self):
+        '''
+        Usage:
+
+        xy_generator = dataset.generator_of_all_data()
+        for X_batch, y_batch in xy_generator:
+            #print y_batch
+            print len_(X_batch), len_(y_batch), y_batch
+
+        '''
+        index_at = 0
+
+        while True:
+            batch_size = 32
+            X = []
+            y = []
+
+            for index in range(0,batch_size):
+                if (index+index_at)>len(self.__list_of_images):
+                    index_at = 0
+
+                a = self.__list_of_images[index+index_at]
+                b = self.__labels[index+index_at]
+                c = self.__osm[index+index_at]
+                d = self.__segment_ids[index+index_at]
+
+                image = KerasPreparation.LoadActualImages([a])
+                X.append(image)
+                y.append([a,b,c,d])
+
+            index_at += batch_size
+
+            yield (X,y)
+
+
     def getImageGenerator(self, validation_split, resize=None):
         # idea:
         # take the lists on images and their labels - split these two arrays by the validation split
