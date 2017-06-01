@@ -55,8 +55,11 @@ def load_default_settings():
     DefaultModel["special_case"] = '' # by default no hack # hack_dont_use_features, is not yet prepared
     DefaultModel["osm_only_unique_osms"] = False
 
-    DefaultSettings["models"].append(DefaultModel)
+    # Noncanon dataset creation
+    DefaultModel["noncanon_dataset"] = '' # can be 'expand_existing_dataset'
 
+
+    DefaultSettings["models"].append(DefaultModel)
     DefaultSettings["graph_histories"] = ['all','together',[]] #['all',[],[0,2]]
 
     # empty values, which will be filled:
@@ -64,7 +67,6 @@ def load_default_settings():
     DefaultSettings["filename_features_test"] = ''
     DefaultSettings["finetune_features_train"] = ''
     DefaultSettings["finetune_features_test"] = ''
-
 
     return DefaultSettings, DefaultModel
 
