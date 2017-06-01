@@ -7,7 +7,7 @@ from DatasetHandler.FileHelperFunc import use_path_which_exists, make_folder_ifI
 import os
 import ModelHandler.CreateModel.KerasApplicationsModels as Models
 import DatasetHandler.CreateDataset
-from Omnipresent import save_job_report_page, send_mail
+from Omnipresent import save_job_report_page, send_mail, len_
 import Downloader.VisualizeHistory
 
 def prepare_folders(Settings, datasets, verbose=False):
@@ -154,9 +154,13 @@ def load_dataset(Settings):
     debug_ptrs = []
 
     for model_settings in Settings["models"]:
+
         ptr = model_settings["dataset_pointer"]
         if ptr == -1:
-            dataset = DatasetHandler.CreateDataset.load_custom(model_settings["dataset_name"], model_settings["pixels"],
+            if model_settings["noncanon_dataset"] <> '':
+                dataset = handle_noncanon_dataset(Settings, model_settings)
+            else:
+                dataset = DatasetHandler.CreateDataset.load_custom(model_settings["dataset_name"], model_settings["pixels"],
                     desired_number=model_settings["number_of_images"], seed=model_settings["seed"], filename_override=model_settings["dump_file_override"])
 
             # Shuffling
@@ -202,6 +206,91 @@ def load_dataset(Settings):
     print "Datasets:", debug_ptrs, datasets
 
     return datasets
+
+def handle_noncanon_dataset(Settings, model_settings):
+    '''
+    We are creating a new custom dataset, instead of using one of the big officially used, "canon" datasets
+    :param Settings: Setting for the whole experiment
+    :param model_settings: Setting for our one dataset
+    :return:
+    '''
+    dataset = None
+
+    if model_settings["noncanon_dataset"] == 'expand_existing_dataset':
+        # Idea: take an existing dataset and expand it via
+
+        # Directly load the old segments file
+
+        # for each segment
+        #   for each image
+        #       apply the custom ImageDataGenerator to generate new images (depending of settings)
+        #       save the new images into target folder as well as into this Segment
+        # save edited Segments array into new SegmentsFile.dump
+
+        import Downloader.DataOperations as DataOperations
+        from DatasetHandler.FileHelperFunc import get_project_folder
+
+        ABS_PATH_TO_PRJ = get_project_folder()
+        #print ABS_PATH_TO_PRJ # /home/ekmek/Vitek/MGR-Project-Code/
+
+        #Segments = DataOperations.LoadDataFile(path_to_segments_file)
+        #segments_dir = os.path.dirname(path_to_segments_file) + '/'
+
+        '''
+        # make this into function i guess
+        path_r100 = ABS_PATH_TO_PRJ+'Data/StreetViewData/'+folder+'/SegmentsData_marked_R100.dump'
+        path = ABS_PATH_TO_PRJ+'Data/StreetViewData/'+folder+'/SegmentsData.dump'
+
+        path_override = ABS_PATH_TO_PRJ+'Data/StreetViewData/'+folder+'/' + filename_override
+
+        if os.path.isfile(path_r100):
+            path = path_r100
+
+        if filename_override <> '' and os.path.isfile(path_override):
+            path = path_override
+        '''
+
+
+
+
+        '''
+        dataset = DatasetHandler.CreateDataset.load_custom(model_settings["dataset_name"], model_settings["pixels"],
+            desired_number=model_settings["number_of_images"], seed=model_settings["seed"], filename_override=model_settings["dump_file_override"])
+
+        xy_generator = dataset.generator_of_all_data()
+        for X_batch, y_batch in xy_generator:
+            #print y_batch
+            print len_(X_batch), len_(y_batch), y_batch
+        '''
+
+        # we need a generator over existing dataset, which will get
+        # X, y - where X are images and y the rest of data
+
+        # create new dump file out of these ... ouch
+
+        # datagen = ImageDataGenerator(...) load that one from Setting, should have unique name
+
+        # flow(X, y) where X are images and in y everything else needed to make one data unit for dataset
+        '''
+        datagen = ImageDataGenerator()
+        imdgen = ImageDataGenerator(
+            featurewise_center = False,  # set input mean to 0 over the dataset
+            samplewise_center = False,  # set each sample mean to 0
+            featurewise_std_normalization = False,  # divide inputs by std of the dataset
+            samplewise_std_normalization = False,  # divide each input by its std
+            zca_whitening = False,  # apply ZCA whitening
+            rotation_range = 0,  # randomly rotate images in the range (degrees, 0 to 180)
+            width_shift_range = 0.1,  # randomly shift images horizontally (fraction of total width)
+            height_shift_range = 0.1,  # randomly shift images vertically (fraction of total height)
+            horizontal_flip = True,  # randomly flip images
+            vertical_flip = False,  # randomly flip images
+        )
+        for X_batch, y_batch in datagen.flow(X_train, y_train, batch_size=9, save_to_dir='images', save_prefix='aug', save_format='png'):
+        '''
+    else:
+        print "This type of noncanon dataset generation has not yet been implemented!"
+
+    return dataset
 
 # Cooking
 def do_we_need_to_cook(filename_features_train, filename_features_test):
