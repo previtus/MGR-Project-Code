@@ -95,3 +95,11 @@ def save_job_report_page(folder_path, job_id, cut = True):
 import os
 def file_exists_and_accesible(PATH):
     return os.path.isfile(PATH) and os.access(PATH, os.R_OK)
+
+def array_md5(arr):
+    import hashlib
+    import cPickle as pickle
+    data_pickle = pickle.dumps(arr)
+    data_md5 = hashlib.md5(data_pickle).hexdigest()
+
+    return data_md5
