@@ -7,7 +7,7 @@ from DatasetHandler.FileHelperFunc import use_path_which_exists, make_folder_ifI
 import os
 import ModelHandler.CreateModel.KerasApplicationsModels as Models
 import DatasetHandler.CreateDataset
-from Omnipresent import save_job_report_page, send_mail, len_
+from Omnipresent import save_job_report_page, send_mail, len_, array_md5
 import Downloader.VisualizeHistory
 
 def prepare_folders(Settings, datasets, verbose=False):
@@ -227,11 +227,83 @@ def handle_noncanon_dataset(Settings, model_settings):
         #       save the new images into target folder as well as into this Segment
         # save edited Segments array into new SegmentsFile.dump
 
-        import Downloader.DataOperations as DataOperations
-        from DatasetHandler.FileHelperFunc import get_project_folder
+        debug_visual_output = False
 
-        ABS_PATH_TO_PRJ = get_project_folder()
-        #print ABS_PATH_TO_PRJ # /home/ekmek/Vitek/MGR-Project-Code/
+        from DatasetHandler.CreateDataset import get_path_for_dataset
+        from Downloader.DataOperations import LoadDataFile
+        from Downloader.KerasPreparation import LoadActualImages
+        import numpy as np
+
+        if debug_visual_output:
+            from matplotlib import pyplot
+            from keras.preprocessing.image import array_to_img
+            import math
+
+        folder = model_settings["dataset_name"]
+        filename_override = model_settings["dump_file_override"]
+        segments_path = get_path_for_dataset(folder, filename_override)
+        segments_dir = os.path.dirname(segments_path) + '/'
+
+        print segments_path  # /home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_minlen30_640px/SegmentsData.dump
+        print segments_dir   # /home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_minlen30_640px/
+
+        size_of_batch = model_settings["noncanon_dataset_genfrom1"]
+
+        image_generator = model_settings["noncanon_dataset_imagegenerator"]
+        print "image_generator", image_generator
+        #image_generator.fit(X_train)
+
+        Segments = LoadDataFile(segments_path)
+
+        number_of_images_parsed = 0
+        for Segment in Segments:
+            for i_th_image in range(0,Segment.number_of_images):
+                if Segment.hasLoadedImageI(i_th_image):
+                    filename = segments_dir+Segment.getImageFilename(i_th_image)
+                    number_of_images_parsed += 1
+                    print filename
+
+                    # we have one image filepath - generate data
+                    x = LoadActualImages([filename])
+                    y = np.array([Segment.SegmentId])
+                    print "ORIGINAL id", y, "img:", len_(x[0])
+
+                    X_batch = []
+                    y_batch = []
+                    for x_gen, y_gen in image_generator.flow(x, y, batch_size=1):
+                        image = x_gen[0]
+                        X_batch.append(image)
+                        y_batch.append(y_gen[0])
+
+                        #print "id", y_gen, "img:", len_(x_gen), array_md5(image)
+
+                        if len(X_batch) == size_of_batch:
+
+                            print "GENERATED ", len(y_batch), " images > ", len_(X_batch), y_batch
+
+                            if debug_visual_output:
+                                # create a grid of 3x3 images
+                                size_for_plot = int(math.floor(math.sqrt(size_of_batch-0.1))+1)
+                                size_for_plot_y = size_for_plot
+                                while size_of_batch <= size_for_plot*(size_for_plot_y-1):
+                                    size_for_plot_y -= 1
+
+                                print size_for_plot, "x", size_for_plot_y, " grid"
+
+                                for i in range(0, len(X_batch)):
+                                    pyplot.subplot(size_for_plot_y,size_for_plot,i+1)
+
+                                    img = X_batch[i]
+                                    backimg = array_to_img(img)
+                                    pyplot.imshow(backimg)
+                                # show the plot
+                                pyplot.show()
+                                break
+
+                            break # end generation for this one image
+
+        print "number_of_images_parsed", number_of_images_parsed
+
 
         #Segments = DataOperations.LoadDataFile(path_to_segments_file)
         #segments_dir = os.path.dirname(path_to_segments_file) + '/'
