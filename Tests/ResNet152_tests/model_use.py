@@ -14,10 +14,10 @@ def run_test():
 
     if K.image_dim_ordering() == 'th':
         # Use pre-trained weights for Theano backend
-        weights_path = 'resnet152_weights_th.h5'
+        weights_path = '/storage/brno2/home/previtus/MGR-Project-Code/Tests/ResNet152_tests/resnet152_weights_th.h5'
     else:
         # Use pre-trained weights for Tensorflow backend
-        weights_path = 'resnet152_weights_tf.h5'
+        weights_path = '/storage/brno2/home/previtus/MGR-Project-Code/Tests/ResNet152_tests/resnet152_weights_tf.h5'
 
     # Test pretrained model
     model = resnet152_model(img_rows, img_cols, channel, weights_path, load_top=False, new_top=True)
