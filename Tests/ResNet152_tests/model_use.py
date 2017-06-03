@@ -26,7 +26,8 @@ def run_test():
     for layer in model.layers[:10]:
         layer.trainable = False
 
-    sgd = SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True)
+    # lr 0.001
+    sgd = SGD(lr=1e-3, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
 
     model.summary()
