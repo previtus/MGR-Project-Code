@@ -22,6 +22,10 @@ def run_test():
     # Test pretrained model
     model = resnet152_model(img_rows, img_cols, channel, weights_path, load_top=False, new_top=True)
 
+    # LOCK LAYERS!
+    for layer in model.layers[:10]:
+        layer.trainable = False
+
     sgd = SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
 
