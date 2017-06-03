@@ -235,6 +235,7 @@ def build_finetune_model(cnn, top, cut, input_shape):
     for n in range(0,len(cnn.layers)):
         layer = cnn.layers[n]
         #print layer, type(layer), layer.get_config()
+        #print layer.name, type(layer).__name__, layer, type(layer), layer.get_config()
 
         name = layer.get_config()['name']
         if 'add' in name:
