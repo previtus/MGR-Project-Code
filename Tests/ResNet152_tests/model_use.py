@@ -6,9 +6,9 @@ from keras import backend as K
 from resnet152keras import resnet152_model
 
 def run_test():
-    img_rows, img_cols = 299, 299 # Resolution of inputs
+    img_rows, img_cols = 640, 640 # Resolution of inputs
     channel = 3
-    batch_size = 8
+    batch_size = 32
     nb_epoch = 500
 
 
@@ -47,7 +47,7 @@ def run_test():
     history = model.fit(x, y,
               batch_size=batch_size,
               nb_epoch=nb_epoch,
-              shuffle=True,
+              #shuffle=True,
               verbose=1,
               validation_data=(x_val, y_val),
     )
@@ -55,7 +55,7 @@ def run_test():
     from Downloader.VisualizeHistory import saveHistory
     from Downloader.VisualizeHistory import visualize_history
 
-    saveHistory(history.history, "history.npy")
+    saveHistory(history.history, "history_30m640dataset_nonShuffle32batch.npy")
 
-    custom_title = 'Resnet152_test'
-    visualize_history(history, show=False, save=True, save_path='graph.png', custom_title=custom_title)
+    custom_title = 'Resnet152_test_640_30m'
+    visualize_history(history, show=False, save=True, save_path='graph_30m640dataset_nonShuffle32batch.png', custom_title=custom_title)
