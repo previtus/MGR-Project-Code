@@ -3,8 +3,8 @@ from Omnipresent import len_
 
 def get_dataset():
     model_settings = {}
-    model_settings["dataset_name"] = "5556x_minlen30_640px"
-    model_settings["pixels"] = 640
+    model_settings["dataset_name"] = "1200x_markable_299x299"
+    model_settings["pixels"] = 299
     model_settings["number_of_images"] = None
     model_settings["seed"] = 13
     model_settings["validation_split"] = 0.25

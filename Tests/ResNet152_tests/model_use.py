@@ -6,10 +6,10 @@ from keras import backend as K
 from resnet152keras import resnet152_model
 
 def run_test():
-    img_rows, img_cols = 640, 640 # Resolution of inputs
+    img_rows, img_cols = 299, 299 # Resolution of inputs
     channel = 3
     batch_size = 32
-    nb_epoch = 500
+    nb_epoch = 20
 
 
     if K.image_dim_ordering() == 'th':
@@ -55,7 +55,7 @@ def run_test():
     from Downloader.VisualizeHistory import saveHistory
     from Downloader.VisualizeHistory import visualize_history
 
-    saveHistory(history.history, "history_30m640dataset_nonShuffle32batch.npy")
+    saveHistory(history.history, "history_1200x_markable_299x299_nonShuffle32batch.npy")
 
     custom_title = 'Resnet152_test_640_30m'
-    visualize_history(history, show=False, save=True, save_path='graph_30m640dataset_nonShuffle32batch.png', custom_title=custom_title)
+    visualize_history(history, show=False, save=True, save_path='graph_1200x_markable_299x299_nonShuffle32batch.png', custom_title=custom_title)
