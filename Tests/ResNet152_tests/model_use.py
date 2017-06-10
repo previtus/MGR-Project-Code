@@ -55,7 +55,8 @@ def run_test():
     from Downloader.VisualizeHistory import saveHistory
     from Downloader.VisualizeHistory import visualize_history
 
-    saveHistory(history.history, "history_1200x_markable_299x299_nonShuffle32batch.npy")
+    path = '/storage/brno2/home/previtus/MGR-Project-Code/Tests/ResNet152_tests/'
+    saveHistory(history.history, path+"history_1200x_markable_299x299_nonShuffle32batch.npy")
 
     custom_title = 'Resnet152_test_640_30m'
-    visualize_history(history, show=False, save=True, save_path='graph_1200x_markable_299x299_nonShuffle32batch.png', custom_title=custom_title)
+    visualize_history(history, show=False, save=True, save_path=path+'graph_1200x_markable_299x299_nonShuffle32batch.png', custom_title=custom_title)
