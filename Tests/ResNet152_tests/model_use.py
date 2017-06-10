@@ -9,7 +9,7 @@ def run_test():
     img_rows, img_cols = 299, 299 # Resolution of inputs
     channel = 3
     batch_size = 32
-    nb_epoch = 20
+    nb_epoch = 50
 
 
     if K.image_dim_ordering() == 'th':
