@@ -21,7 +21,9 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["noncanon_dataset"] = 'expand_existing_dataset'
 
     from keras.preprocessing.image import ImageDataGenerator
-    image_generator = ImageDataGenerator(
+    from DatasetHandler.custom_image import ImageDataGenerator as custom_ImageDataGenerator
+
+    image_generator = custom_ImageDataGenerator(
             featurewise_center = False,  # set input mean to 0 over the dataset
             samplewise_center = False,  # set each sample mean to 0
             featurewise_std_normalization = False,  # divide inputs by std of the dataset
@@ -34,7 +36,7 @@ def Setup(Settings,DefaultModel):
             vertical_flip = False,  # randomly flip images
     )
 
-    defaults = ImageDataGenerator(
+    defaults = custom_ImageDataGenerator(
         featurewise_center=False, # Set input mean to 0 over the dataset, feature-wise.
         samplewise_center=False, # Set each sample mean to 0.
         featurewise_std_normalization=False, # Divide inputs by std of the dataset, feature-wise.
@@ -57,15 +59,15 @@ def Setup(Settings,DefaultModel):
     )
 
     Settings["models"][n]["noncanon_dataset_imagegenerator"] = image_generator
-    Settings["models"][n]["noncanon_dataset_genfrom1"] = 1
+    Settings["models"][n]["noncanon_dataset_genfrom1"] = 4
 
     Settings["models"][n]["model_type"] = 'simple_cnn_with_top'
-    Settings["models"][n]["dataset_name"] = "5556x_minlen30_640px"
+    Settings["models"][n]["dataset_name"] = "5556x_minlen30_640px_expanded"
     Settings["models"][n]["pixels"] = 640
     Settings["models"][n]["cnn_model"] = 'resnet50'
     Settings["models"][n]["unique_id"] = 'resnet50_5556x_minlen30_640px'
     Settings["models"][n]["cooking_method"] = 'generators' # 'direct' or 'generators'
     Settings["models"][n]["epochs"] = 5
-    #Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
+    Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
 
     return Settings
