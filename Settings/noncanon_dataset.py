@@ -59,7 +59,7 @@ def Setup(Settings,DefaultModel):
     )
 
     Settings["models"][n]["noncanon_dataset_imagegenerator"] = image_generator
-    Settings["models"][n]["noncanon_dataset_genfrom1"] = 4
+    Settings["models"][n]["noncanon_dataset_genfrom1"] = 2
 
     Settings["models"][n]["model_type"] = 'simple_cnn_with_top'
     Settings["models"][n]["dataset_name"] = "5556x_minlen30_640px_expanded"
@@ -68,6 +68,8 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["unique_id"] = 'resnet50_5556x_minlen30_640px'
     Settings["models"][n]["cooking_method"] = 'generators' # 'direct' or 'generators'
     Settings["models"][n]["epochs"] = 5
-    Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
+    #Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
+    Settings["models"][n]["extended_dir_name"] = 'images_generated_2flipshift'
+    Settings["models"][n]["dump_file_expanded"] = 'SegmentsData_' + Settings["models"][n]["extended_dir_name"] + '_expanded.dump'
 
     return Settings

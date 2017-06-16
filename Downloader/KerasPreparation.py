@@ -58,6 +58,7 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
     segment_ids = []
 
     segment_id = 0
+    flag_is_extended = False
 
     '''
     number_no_score_yes_img = 0
@@ -88,9 +89,19 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
         if (has_score and not Segment.hasUnknownScore()) or (has_score == None):
             # but we always care for images
             for i_th_image in range(0,Segment.number_of_images):
+                location_index = Segment.LocationsIndex[i_th_image]
+                is_extended = False
+                if location_index > 100:
+                    # then this particular image is loaded from an extended folder
+                    is_extended = True
+                    location_index -= 200
+                    flag_is_extended = True
                 if Segment.hasLoadedImageI(i_th_image):
 
-                    list_of_images.append(Segment.getImageFilename(i_th_image))
+                    filename = Segment.getImageFilename(i_th_image)
+                    if is_extended:
+                        filename = 'images_generated' + filename[6:]
+                    list_of_images.append(filename)
                     labels.append(Segment.getScore())
                     segment_ids.append(segment_id)
 
@@ -98,8 +109,7 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
                     # only if we have one - checkOSMVersion could be used too
 
                     # Aaardwark, fix Segment.getNearbyVector(i_th_image) in Segment.LocationsIndex(i_th_image) -> Segment.LocationsIndex[i_th_image]
-                    index = Segment.LocationsIndex[i_th_image]
-                    osm = Segment.DistinctNearbyVector[index]
+                    osm = Segment.DistinctNearbyVector[location_index]
 
                     osm_vectors.append(osm)
 
@@ -122,7 +132,7 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
     if len(osm_vectors) == 0:
         osm_vectors = [None] * len(list_of_images)
 
-    return list_of_images, labels, osm_vectors, segment_ids
+    return list_of_images, labels, osm_vectors, segment_ids, flag_is_extended
 
 def LoadActualImages(list_of_images, resize=None, dim_ordering=KERAS_SETTING_DIMENSIONS):
     x = load_images_with_keras(list_of_images, target_size=resize, dim_ordering=dim_ordering)

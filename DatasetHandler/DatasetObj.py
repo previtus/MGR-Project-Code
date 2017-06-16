@@ -32,6 +32,7 @@ class Dataset:
     num_of_images = 0
     unique_id = ''
     has_osm_loaded = False
+    flag_is_extended = False
 
     def __init__(self):
         return None
@@ -262,7 +263,8 @@ class Dataset:
         # Segments are not used apart from initialization
         Segments = DataOperations.LoadDataFile(path_to_segments_file)
         segments_dir = os.path.dirname(path_to_segments_file) + '/'
-        __list_of_images, __labels, __osm, __segment_ids = KerasPreparation.LoadDataFromSegments(Segments, has_score=True, path_to_images=segments_dir)
+        __list_of_images, __labels, __osm, __segment_ids, flag_is_extended = KerasPreparation.LoadDataFromSegments(Segments, has_score=True, path_to_images=segments_dir)
+        self.flag_is_extended = flag_is_extended
 
         self.init_from_lists(__list_of_images, __labels, __osm, __segment_ids, img_width, img_height)
 

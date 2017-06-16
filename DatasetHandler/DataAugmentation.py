@@ -1,5 +1,6 @@
 from Omnipresent import len_
 import os
+import shutil
 from DatasetHandler.FileHelperFunc import use_path_which_exists, make_folder_ifItDoesntExist
 
 def handle_noncanon_dataset(Settings, model_settings):
@@ -22,7 +23,8 @@ def handle_noncanon_dataset(Settings, model_settings):
         #       save the new images into target folder as well as into this Segment
         # save edited Segments array into new SegmentsFile.dump
 
-        debug_visual_output = True
+        debug_visual_output = False
+        debug_txt_output = False
 
         from DatasetHandler.CreateDataset import get_path_for_dataset
         from Downloader.DataOperations import LoadDataFile
@@ -39,7 +41,7 @@ def handle_noncanon_dataset(Settings, model_settings):
         segments_path = get_path_for_dataset(folder, filename_override)
         segments_dir = os.path.dirname(segments_path) + '/'
 
-        generated_images_folder = os.path.dirname(segments_path) + '/images_generated/'
+        generated_images_folder = os.path.dirname(segments_path) + '/' + model_settings["extended_dir_name"] + '/'
         print 'generated_images_folder', generated_images_folder
         make_folder_ifItDoesntExist(generated_images_folder)
 
@@ -57,7 +59,8 @@ def handle_noncanon_dataset(Settings, model_settings):
 
         number_of_images_parsed = 0
         for Segment in Segments:
-            for i_th_image in range(0,Segment.number_of_images):
+            number_of_images = Segment.number_of_images
+            for i_th_image in range(0,number_of_images):
                 if Segment.hasLoadedImageI(i_th_image):
                     filename = segments_dir+Segment.getImageFilename(i_th_image)
                     number_of_images_parsed += 1
@@ -66,7 +69,8 @@ def handle_noncanon_dataset(Settings, model_settings):
                     # we have one image filepath - generate data
                     x = LoadActualImages([filename])
                     y = np.array([Segment.SegmentId])
-                    print "ORIGINAL id", y, "img:", len_(x[0])
+                    if debug_txt_output:
+                        print "ORIGINAL id", y, "ith", i_th_image, "img:", len_(x[0])
 
                     X_batch = []
                     y_batch = []
@@ -80,20 +84,38 @@ def handle_noncanon_dataset(Settings, model_settings):
                         filename_generated = y_gen[1][0]
                         id = y_gen[0][0]
 
-                        print id, filename_generated
+                        if debug_txt_output:
+                            print id, filename_generated
 
-                        # save image on path filename_generated to the Segments hierarchy!
-                        print "Segment.number_of_images", Segment.number_of_images
-                        print "Segment.LocationsIndex", Segment.LocationsIndex
-                        print "Segment.DistinctLocations", Segment.DistinctLocations
-                        print "Segment.DistinctNearbyVector", Segment.DistinctNearbyVector
-                        print "Segment.HasLoadedImages", Segment.HasLoadedImages
-                        print "Segment.ErrorMessages", Segment.ErrorMessages
+                            # save image on path filename_generated to the Segments hierarchy!
+                            print "Segment.number_of_images", Segment.number_of_images
+                            print "Segment.LocationsIndex", Segment.LocationsIndex
+                            print "Segment.DistinctLocations", Segment.DistinctLocations
+                            print "Segment.DistinctNearbyVector", Segment.DistinctNearbyVector
+                            print "Segment.HasLoadedImages", Segment.HasLoadedImages
+                            print "Segment.ErrorMessages", Segment.ErrorMessages
 
-                        new_filename_generated = Segment.getImageFilename(Segment.number_of_images+number_of_images_generated)
-                        print "rename", filename_generated, "to", new_filename_generated
+                        # Value 200 is the marker
+                        location_index = Segment.LocationsIndex[i_th_image] + 200
+                        # accordingly we get Segment.DistinctLocations[location_index] and Segment.DistinctNearbyVector[location_index]
+                        has_img = Segment.HasLoadedImages[i_th_image]
+                        has_err = Segment.ErrorMessages[i_th_image]
 
-                        print "---"
+                        # Add to this Segment
+                        Segment.number_of_images += 1
+                        Segment.LocationsIndex.append(location_index)
+                        Segment.HasLoadedImages.append(has_img)
+                        Segment.ErrorMessages.append(has_err)
+
+
+                        # Change filename and path
+                        new_filename_generated = segments_dir + model_settings["extended_dir_name"] + Segment.getImageFilename(Segment.number_of_images+number_of_images_generated)[6:]
+                        if debug_txt_output:
+                            print "rename", filename_generated, "to", new_filename_generated
+
+                        shutil.move(filename_generated, new_filename_generated)
+
+                        print "."
 
                         X_batch.append(image)
                         y_batch.append(id)
@@ -102,7 +124,8 @@ def handle_noncanon_dataset(Settings, model_settings):
 
                         if len(X_batch) == size_of_batch:
 
-                            print "GENERATED ", len(y_batch), " images > ", len_(X_batch), y_batch
+                            if debug_txt_output:
+                                print "GENERATED ", len(y_batch), " images > ", len_(X_batch), y_batch
 
                             if debug_visual_output:
                                 # create a grid of 3x3 images
@@ -124,64 +147,14 @@ def handle_noncanon_dataset(Settings, model_settings):
                                 break
 
                             break # end generation for this one image
-                    print "Save new images from id", y, " in", len_(X_batch)
+                    if debug_txt_output:
+                        print "Save new images from id", y, " in", len_(X_batch)
         print "number_of_images_parsed", number_of_images_parsed
 
 
-        #Segments = DataOperations.LoadDataFile(path_to_segments_file)
-        #segments_dir = os.path.dirname(path_to_segments_file) + '/'
+        from Downloader.DataOperations import SaveDataFile
+        SaveDataFile(model_settings["dump_file_expanded"], Segments)
 
-        '''
-        # make this into function i guess
-        path_r100 = ABS_PATH_TO_PRJ+'Data/StreetViewData/'+folder+'/SegmentsData_marked_R100.dump'
-        path = ABS_PATH_TO_PRJ+'Data/StreetViewData/'+folder+'/SegmentsData.dump'
-
-        path_override = ABS_PATH_TO_PRJ+'Data/StreetViewData/'+folder+'/' + filename_override
-
-        if os.path.isfile(path_r100):
-            path = path_r100
-
-        if filename_override <> '' and os.path.isfile(path_override):
-            path = path_override
-        '''
-
-
-
-
-        '''
-        dataset = DatasetHandler.CreateDataset.load_custom(model_settings["dataset_name"], model_settings["pixels"],
-            desired_number=model_settings["number_of_images"], seed=model_settings["seed"], filename_override=model_settings["dump_file_override"])
-
-        xy_generator = dataset.generator_of_all_data()
-        for X_batch, y_batch in xy_generator:
-            #print y_batch
-            print len_(X_batch), len_(y_batch), y_batch
-        '''
-
-        # we need a generator over existing dataset, which will get
-        # X, y - where X are images and y the rest of data
-
-        # create new dump file out of these ... ouch
-
-        # datagen = ImageDataGenerator(...) load that one from Setting, should have unique name
-
-        # flow(X, y) where X are images and in y everything else needed to make one data unit for dataset
-        '''
-        datagen = ImageDataGenerator()
-        imdgen = ImageDataGenerator(
-            featurewise_center = False,  # set input mean to 0 over the dataset
-            samplewise_center = False,  # set each sample mean to 0
-            featurewise_std_normalization = False,  # divide inputs by std of the dataset
-            samplewise_std_normalization = False,  # divide each input by its std
-            zca_whitening = False,  # apply ZCA whitening
-            rotation_range = 0,  # randomly rotate images in the range (degrees, 0 to 180)
-            width_shift_range = 0.1,  # randomly shift images horizontally (fraction of total width)
-            height_shift_range = 0.1,  # randomly shift images vertically (fraction of total height)
-            horizontal_flip = True,  # randomly flip images
-            vertical_flip = False,  # randomly flip images
-        )
-        for X_batch, y_batch in datagen.flow(X_train, y_train, batch_size=9, save_to_dir='images', save_prefix='aug', save_format='png'):
-        '''
     else:
         print "This type of noncanon dataset generation has not yet been implemented!"
 
