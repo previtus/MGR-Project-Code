@@ -36,25 +36,18 @@ def testCheckingSegments(input_path, output_path, radius = 100, close=False):
 
     Segments = Downloader.DataOperations.SaveDataFile(output_path, Segments)
 
-path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_minlen10_640px/'
-input_path = path+'SegmentsData.dump'
-output_path = path+'SegmentsData_marked_R100_4Tables.dump'
+path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_minlen30_640px_expanded/'
+input_path = path+'SegmentsData_images_generated_2flipshift_expanded.dump'
+output_path = path+'SegmentsData_mark100_images_generated_2flipshift_expanded.dump'
 r = 100
 testCheckingSegments(input_path, output_path, radius = r,close=False)
 
-input_path = path+'SegmentsData.dump'
-output_path = path+'SegmentsData_marked_R200_4Tables.dump'
+input_path = path+'SegmentsData_images_generated_2flipshift_expanded.dump'
+output_path = path+'SegmentsData_mark200_images_generated_2flipshift_expanded.dump'
 r = 200
 testCheckingSegments(input_path, output_path, radius = r,close=False)
 
-input_path = path+'SegmentsData.dump'
-output_path = path+'SegmentsData_marked_R50_4Tables.dump'
+input_path = path+'SegmentsData_images_generated_2flipshift_expanded.dump'
+output_path = path+'SegmentsData_mark50_images_generated_2flipshift_expanded.dump'
 r = 50
 testCheckingSegments(input_path, output_path, radius = r,close=False)
-
-'''
-input_path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_markable_640x640/SegmentsData.dump'
-output_path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_markable_640x640/SegmentsData_marked_R200_4Tables.dump'
-r = 200
-testCheckingSegments(input_path, output_path, radius = r,close=True)
-'''
