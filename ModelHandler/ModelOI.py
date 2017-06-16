@@ -159,10 +159,10 @@ def load_dataset(Settings):
         ptr = model_settings["dataset_pointer"]
         if ptr == -1:
             if model_settings["noncanon_dataset"] <> '':
+                handle_noncanon_dataset(Settings, model_settings)
+                model_settings["dump_file_override"] = model_settings["dump_file_expanded"]
 
-                dataset = handle_noncanon_dataset(Settings, model_settings)
-            else:
-                dataset = DatasetHandler.CreateDataset.load_custom(model_settings["dataset_name"], model_settings["pixels"],
+            dataset = DatasetHandler.CreateDataset.load_custom(model_settings["dataset_name"], model_settings["pixels"],
                     desired_number=model_settings["number_of_images"], seed=model_settings["seed"], filename_override=model_settings["dump_file_override"])
 
             # Shuffling

@@ -100,7 +100,7 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
 
                     filename = Segment.getImageFilename(i_th_image)
                     if is_extended:
-                        filename = 'images_generated' + filename[6:]
+                        filename = 'images_generated_test_folder' + filename[6:]
                     list_of_images.append(filename)
                     labels.append(Segment.getScore())
                     segment_ids.append(segment_id)

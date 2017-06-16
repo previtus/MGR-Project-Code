@@ -10,7 +10,6 @@ def handle_noncanon_dataset(Settings, model_settings):
     :param model_settings: Setting for our one dataset
     :return:
     '''
-    dataset = None
 
     if model_settings["noncanon_dataset"] == 'expand_existing_dataset':
         # Idea: take an existing dataset and expand it via
@@ -153,9 +152,9 @@ def handle_noncanon_dataset(Settings, model_settings):
 
 
         from Downloader.DataOperations import SaveDataFile
-        SaveDataFile(model_settings["dump_file_expanded"], Segments)
+        print "Saving new Segments file into ", segments_dir+model_settings["dump_file_expanded"]
+        SaveDataFile(segments_dir+model_settings["dump_file_expanded"], Segments)
 
     else:
         print "This type of noncanon dataset generation has not yet been implemented!"
 
-    return dataset
