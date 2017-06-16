@@ -108,7 +108,7 @@ def handle_noncanon_dataset(Settings, model_settings):
 
 
                         # Change filename and path
-                        new_filename_generated = segments_dir + model_settings["extended_dir_name"] + Segment.getImageFilename(Segment.number_of_images+number_of_images_generated)[6:]
+                        new_filename_generated = segments_dir + model_settings["extended_dir_name"] + Segment.getImageFilename(Segment.number_of_images-1)[6:]
                         if debug_txt_output:
                             print "rename", filename_generated, "to", new_filename_generated
 
