@@ -49,7 +49,7 @@ def Setup(Settings,DefaultModel):
     # Set these values:
     number_of_images_from_one = 2
     source_dataset = "miniset_640px"
-    target_dataset = "miniset_640px_2x_expanded"
+    target_dataset = "miniset_640px_2x_expanded" # Careful: always choose unique name!
     pixels = 640
     epochs = 500
     use_dump_file = 'SegmentsData_mark100.dump' # -> * new XYZ_expanded.dump
