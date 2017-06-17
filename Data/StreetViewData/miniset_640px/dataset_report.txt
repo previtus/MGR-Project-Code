@@ -1,0 +1,30 @@
+Miniset
+
+When this dataset is loaded for a model:
+Case a.), we don't have feature files yet for this combinations of settings and dataset. We will cook it into Logs folder in .npy files. Continue normally.
+Case b.) We load the feature files and use them for training (for image_only and mixed models).
+
+Settings1:
+
+    Settings["experiment_name"] = "FolderNameForTheExperiment"
+    Settings["graph_histories"] = ['together']
+
+    n=0
+    Settings["models"][n]["model_type"] = 'img_osm_mix' # 'simple_cnn_with_top', 'img_osm_mix', 'osm_only'
+    Settings["models"][n]["dataset_name"] = "miniset_640px"
+    Settings["models"][n]["pixels"] = 640
+    Settings["models"][n]["cnn_model"] = 'resnet50'
+    Settings["models"][n]["unique_id"] = 'uniqueNameForThisModelInFutureGraphs'
+    Settings["models"][n]["cooking_method"] = 'generators'
+    Settings["models"][n]["epochs"] = 500
+    Settings["models"][n]["dump_file_override"] = 'SegmentsData_mark100.dump'
+
+
+Miniset extended
+
+We check for the existence of the target folfer and target dump file. If we can find them, we will load them and continue as in normal case.
+Otherwise we copy the source folders images, and extend the dataset generating new images. We will also save a new dump file and then continue with it as the main dump file.
+We carry on like in regular case, only we are using a newly created dataset with it's new dataset dump file.
+Naturally with a new dataset we need to cook features, but we leave that upon the already existing structures.
+
+Settings2
