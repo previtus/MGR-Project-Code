@@ -6,6 +6,7 @@
 # Can perform the more precise k-fold cross validation
 
 from ModelHandler.ModelGenerator import build_simple_top_model, build_full_mixed_model, build_finetune_model, join_two_models
+from ModelHandler.KfoldTester import k_fold_crossvalidation
 from Omnipresent import len_
 import numpy as np
 from keras.utils import plot_model
@@ -134,9 +135,15 @@ def train_models(models, datasets, Settings):
         model_settings = Settings["models"][index]
         dataset = datasets[ model_settings["dataset_pointer"] ]
 
-        print "Testing", model_settings["unique_id"], model
-        history = train_model(model, dataset, model_settings)
-        histories.append(history)
+        if model_settings["k_fold_crossvalidation"]:
+            print "k-fold crossvalidation testing, k=", model_settings["crossvalidation_k"], model_settings["unique_id"], model
+            history = k_fold_crossvalidation(model, dataset, model_settings)
+            histories.append(history) # SPECIAL HISTORY IN THIS CASE THOUGH
+
+        else:
+            print "Regular testing", model_settings["unique_id"], model
+            history = train_model(model, dataset, model_settings)
+            histories.append(history)
 
         index += 1
     return histories

@@ -10,7 +10,7 @@ import sys
 #settings_file = 'Settings/shuffle_effective_1200.py'
 #settings_file = 'Settings/finetune_tests_varAlong.py'
 
-settings_file = 'Settings/expand_dataset_template.py'
+settings_file = 'Settings/kfold_tests.py'
 
 job_id = ''
 
