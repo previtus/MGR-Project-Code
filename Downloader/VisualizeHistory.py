@@ -53,6 +53,8 @@ def visualize_history(hi, show=True, save=False, save_path='', show_also='', cus
                     raise
 
         plt.savefig(filename)
+        plt.savefig(filename+'.pdf', format='pdf')
+
         print "Saved image to "+filename
     if show:
         plt.show()
@@ -98,6 +100,8 @@ def visualize_histories(histories, names, plotvalues='loss', show=True, save=Fal
     plt.legend(leg, loc='best')
     if save:
         plt.savefig(save_path) #+plotvalues+'.png')
+        plt.savefig(save_path+'.pdf', format='pdf')
+
     if show:
         plt.show()
 
