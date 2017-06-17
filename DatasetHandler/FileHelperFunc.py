@@ -51,3 +51,9 @@ def copy_folder(src, dst):
         if exc.errno == errno.ENOTDIR:
             shutil.copy(src, dst)
         else: raise
+
+def copy_file(src, dst):
+    try:
+        shutil.copy(src, dst)
+    except OSError as exc:
+        raise

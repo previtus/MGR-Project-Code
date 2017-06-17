@@ -1,7 +1,7 @@
 from Omnipresent import len_
 import os
 import shutil
-from DatasetHandler.FileHelperFunc import use_path_which_exists, make_folder_ifItDoesntExist, copy_folder, file_exists, folder_exists
+from DatasetHandler.FileHelperFunc import use_path_which_exists, make_folder_ifItDoesntExist, copy_folder, copy_file, file_exists, folder_exists
 
 def handle_noncanon_dataset(Settings, model_settings):
     '''
@@ -79,7 +79,28 @@ def handle_noncanon_dataset(Settings, model_settings):
 
         # copy source_dataset -> target_dataset in dataset_name
         # from source_segments_dir/images to  target_segments_dir/images
-        copy_folder(source_segments_dir+'images', target_segments_dir+'images')
+        source__path = source_segments_dir+'images'
+        target__path = target_segments_dir+'images'
+
+        copy_folder(source__path, target__path)
+
+        # test the success of this copy process!
+        # for each file in source_segments_dir/images check for a copy in target_segments_dir/images
+
+        was_ok = False
+
+        while not was_ok:
+            was_ok = True
+            list_of_source_files=os.listdir(source__path)
+            for item in list_of_source_files:
+                file_source = source__path + '/' + item
+                file_target = target__path + '/' + item
+
+                if not file_exists(file_target):
+                    was_ok = False
+                    copy_file(file_source, file_target)
+
+                    print '-- was missing, now fixed:' + file_source
 
         size_of_batch = model_settings["noncanon_dataset_genfrom1"]
 
