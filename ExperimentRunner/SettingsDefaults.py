@@ -34,6 +34,9 @@ def load_default_settings():
     DefaultModel["metrics"] = ['mean_absolute_error'] # list of 'mean_squared_error' or 'mean_absolute_error' etc.
     DefaultModel["train_top"] = True # Always True??
 
+    DefaultModel["k_fold_crossvalidation"] = False
+    DefaultModel["crossvalidation_k"] = 4
+
     DefaultModel["finetune"] = False
     from keras import optimizers
     DefaultModel["finetune_optimizer"] = optimizers.SGD(lr=1e-4, momentum=0.9)
