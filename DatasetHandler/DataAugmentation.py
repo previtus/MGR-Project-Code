@@ -65,12 +65,9 @@ def handle_noncanon_dataset(Settings, model_settings):
         else:
             print '\t', file_exists(target_segments_path), target_segments_path
             print '\t', folder_exists(target_segments_dir+'images'), target_segments_dir+'images'
-            print '\t', folder_exists(target_segments_dir+'images_extended'), target_segments_dir+'images_extended'
 
 
-        generated_images_folder = os.path.dirname(target_segments_path) + '/images_extended/'
-        print 'generated_images_folder', generated_images_folder
-        make_folder_ifItDoesntExist(generated_images_folder)
+        generated_images_folder = os.path.dirname(target_segments_path) + '/images/'
 
         print "source_segments_path", source_segments_path  # /home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/miniset_640px/SegmentsData.dump
         print "source_segments_dir", source_segments_dir    # /home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/miniset_640px/
