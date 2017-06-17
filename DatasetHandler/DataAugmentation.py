@@ -53,10 +53,10 @@ def handle_noncanon_dataset(Settings, model_settings):
         target_segments_path = target_segments_dir+model_settings["dump_file_expanded"]
 
         # Check if we don't alredy have it?
-        if (file_exists(target_segments_path) and folder_exists(target_segments_dir+'images') and folder_exists(target_segments_dir+'images_extended')):
+        if (file_exists(target_segments_path) and folder_exists(target_segments_dir+'images')):
             list1 = os.listdir(target_segments_dir+'images')
             list2 = os.listdir(source_segments_dir+'images')
-            if len(list1)==len(list2):
+            if len(list1)>=len(list2):
                 # Seems like we have copied it correctly too
 
                 print "We already have this dataset extended! (", len(list1), len(list2), ")"
@@ -158,7 +158,7 @@ def handle_noncanon_dataset(Settings, model_settings):
                             print "Segment.ErrorMessages", Segment.ErrorMessages
 
                         # Value 200 is the marker
-                        location_index = Segment.LocationsIndex[i_th_image] + 200
+                        location_index = Segment.LocationsIndex[i_th_image] + 1000
                         # accordingly we get Segment.DistinctLocations[location_index] and Segment.DistinctNearbyVector[location_index]
                         has_img = Segment.HasLoadedImages[i_th_image]
                         has_err = Segment.ErrorMessages[i_th_image]
@@ -171,7 +171,7 @@ def handle_noncanon_dataset(Settings, model_settings):
 
 
                         # Change filename and path
-                        new_filename_generated = target_segments_dir + 'images_extended' + Segment.getImageFilename(Segment.number_of_images-1)[6:]
+                        new_filename_generated = target_segments_dir + 'images' + Segment.getImageFilename(Segment.number_of_images-1)[6:]
                         if debug_txt_output:
                             print "rename", filename_generated, "to", new_filename_generated
 

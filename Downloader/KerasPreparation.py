@@ -90,17 +90,19 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
             # but we always care for images
             for i_th_image in range(0,Segment.number_of_images):
                 location_index = Segment.LocationsIndex[i_th_image]
+
                 is_extended = False
-                if location_index > 100:
+                if location_index > 500:
                     # then this particular image is loaded from an extended folder
                     is_extended = True
-                    location_index -= 200
+                    location_index -= 1000
                     flag_is_extended = True
                 if Segment.hasLoadedImageI(i_th_image):
 
                     filename = Segment.getImageFilename(i_th_image)
                     if is_extended:
-                        filename = 'images_extended' + filename[6:]
+                        filename = 'images' + filename[6:]
+
                     list_of_images.append(filename)
                     labels.append(Segment.getScore())
                     segment_ids.append(segment_id)
