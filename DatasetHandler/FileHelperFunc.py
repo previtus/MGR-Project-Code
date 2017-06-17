@@ -33,6 +33,21 @@ def use_path_which_exists(list_of_possible_paths):
 
     return used_path
 
+def file_exists(fname):
+    return os.path.isfile(fname)
+
+def folder_exists(directory):
+    return os.path.exists(directory)
+
 def make_folder_ifItDoesntExist(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
+
+import shutil, errno
+def copy_folder(src, dst):
+    try:
+        shutil.copytree(src, dst)
+    except OSError as exc: # python >2.5
+        if exc.errno == errno.ENOTDIR:
+            shutil.copy(src, dst)
+        else: raise
