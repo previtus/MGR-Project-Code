@@ -47,9 +47,9 @@ def Setup(Settings,DefaultModel):
     )
 
     # Set these values:
-    number_of_images_from_one = 1
+    number_of_images_from_one = 2
     source_dataset = "miniset_640px"
-    target_dataset = "miniset_640px_expanded"
+    target_dataset = "miniset_640px_2x_expanded"
     pixels = 640
     epochs = 500
     use_dump_file = 'SegmentsData_mark100.dump' # -> * new XYZ_expanded.dump
@@ -66,7 +66,7 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["source_dataset"] = source_dataset
     Settings["models"][n]["pixels"] = pixels
     Settings["models"][n]["cnn_model"] = 'resnet50'
-    Settings["models"][n]["unique_id"] = 'expanded'
+    Settings["models"][n]["unique_id"] = 'expanded: ' + target_dataset
     Settings["models"][n]["cooking_method"] = 'generators' # 'direct' or 'generators'
     Settings["models"][n]["epochs"] = epochs
 
@@ -84,7 +84,7 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["dataset_name"] = Settings["models"][0]["source_dataset"]
     Settings["models"][n]["pixels"] = Settings["models"][0]["pixels"]
     Settings["models"][n]["cnn_model"] = Settings["models"][0]["cnn_model"]
-    Settings["models"][n]["unique_id"] = 'original'
+    Settings["models"][n]["unique_id"] = 'original: ' + source_dataset
     Settings["models"][n]["cooking_method"] = 'generators' # 'direct' or 'generators'
     Settings["models"][n]["epochs"] = Settings["models"][0]["epochs"]
     Settings["models"][n]["dump_file_override"] = Settings["models"][0]["dump_file_override"]
