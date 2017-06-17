@@ -1,7 +1,7 @@
 from Omnipresent import len_
 import os
 import shutil
-from DatasetHandler.FileHelperFunc import use_path_which_exists, make_folder_ifItDoesntExist
+from DatasetHandler.FileHelperFunc import use_path_which_exists, make_folder_ifItDoesntExist, copy_folder, file_exists, folder_exists
 
 def handle_noncanon_dataset(Settings, model_settings):
     '''
@@ -35,18 +35,51 @@ def handle_noncanon_dataset(Settings, model_settings):
             from keras.preprocessing.image import array_to_img
             import math
 
-        folder = model_settings["dataset_name"]
-        filename_override = model_settings["dump_file_override"]
-        segments_path = get_path_for_dataset(folder, filename_override)
-        segments_dir = os.path.dirname(segments_path) + '/'
+        target_folder = model_settings["dataset_name"]
+        source_folder = model_settings["source_dataset"]
 
-        generated_images_folder = os.path.dirname(segments_path) + '/' + model_settings["extended_dir_name"] + '/'
+        filename_override = model_settings["dump_file_override"]
+        source_segments_path = get_path_for_dataset(source_folder, filename_override)
+        source_segments_dir = os.path.dirname(source_segments_path) + '/'
+
+        if not file_exists(source_segments_dir + filename_override):
+            print "WARNING !!!!"
+            print '\t',"Careful, couldn't find the file", source_segments_dir + filename_override
+            print '\t',"... we will instead be using   ", source_segments_path
+
+
+        target_segments_path = get_path_for_dataset(target_folder, '')
+        target_segments_dir = os.path.dirname(target_segments_path) + '/'
+        target_segments_path = target_segments_dir+model_settings["dump_file_expanded"]
+
+        # Check if we don't alredy have it?
+        if (file_exists(target_segments_path) and folder_exists(target_segments_dir+'images') and folder_exists(target_segments_dir+'images_extended')):
+            list1 = os.listdir(target_segments_dir+'images')
+            list2 = os.listdir(source_segments_dir+'images')
+            if len(list1)==len(list2):
+                # Seems like we have copied it correctly too
+
+                print "We already have this dataset extended! (", len(list1), len(list2), ")"
+
+                return
+        else:
+            print '\t', file_exists(target_segments_path), target_segments_path
+            print '\t', folder_exists(target_segments_dir+'images'), target_segments_dir+'images'
+            print '\t', folder_exists(target_segments_dir+'images_extended'), target_segments_dir+'images_extended'
+
+
+        generated_images_folder = os.path.dirname(target_segments_path) + '/images_extended/'
         print 'generated_images_folder', generated_images_folder
         make_folder_ifItDoesntExist(generated_images_folder)
 
+        print "source_segments_path", source_segments_path  # /home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/miniset_640px/SegmentsData.dump
+        print "source_segments_dir", source_segments_dir    # /home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/miniset_640px/
+        print "target_segments_path", target_segments_path  # /home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/miniset_640px_expanded/SegmentsData_images_generated_test_folder_expanded.dump
+        print "target_segments_dir", target_segments_dir    # /home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/miniset_640px_expanded/
 
-        print segments_path  # /home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_minlen30_640px/SegmentsData.dump
-        print segments_dir   # /home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_minlen30_640px/
+        # copy source_dataset -> target_dataset in dataset_name
+        # from source_segments_dir/images to  target_segments_dir/images
+        copy_folder(source_segments_dir+'images', target_segments_dir+'images')
 
         size_of_batch = model_settings["noncanon_dataset_genfrom1"]
 
@@ -54,14 +87,14 @@ def handle_noncanon_dataset(Settings, model_settings):
         print "image_generator", image_generator
         #image_generator.fit(X_train)
 
-        Segments = LoadDataFile(segments_path)
+        Segments = LoadDataFile(source_segments_path)
 
         number_of_images_parsed = 0
         for Segment in Segments:
             number_of_images = Segment.number_of_images
             for i_th_image in range(0,number_of_images):
                 if Segment.hasLoadedImageI(i_th_image):
-                    filename = segments_dir+Segment.getImageFilename(i_th_image)
+                    filename = source_segments_dir+Segment.getImageFilename(i_th_image)
                     number_of_images_parsed += 1
                     print filename
 
@@ -108,13 +141,13 @@ def handle_noncanon_dataset(Settings, model_settings):
 
 
                         # Change filename and path
-                        new_filename_generated = segments_dir + model_settings["extended_dir_name"] + Segment.getImageFilename(Segment.number_of_images-1)[6:]
+                        new_filename_generated = target_segments_dir + 'images_extended' + Segment.getImageFilename(Segment.number_of_images-1)[6:]
                         if debug_txt_output:
                             print "rename", filename_generated, "to", new_filename_generated
 
                         shutil.move(filename_generated, new_filename_generated)
 
-                        print "."
+                        print ".", new_filename_generated
 
                         X_batch.append(image)
                         y_batch.append(id)
@@ -152,8 +185,8 @@ def handle_noncanon_dataset(Settings, model_settings):
 
 
         from Downloader.DataOperations import SaveDataFile
-        print "Saving new Segments file into ", segments_dir+model_settings["dump_file_expanded"]
-        SaveDataFile(segments_dir+model_settings["dump_file_expanded"], Segments)
+        print "Saving new Segments file into ", target_segments_path
+        SaveDataFile(target_segments_path, Segments)
 
     else:
         print "This type of noncanon dataset generation has not yet been implemented!"

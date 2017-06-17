@@ -7,7 +7,6 @@ def Setup(Settings,DefaultModel):
     Settings["graph_histories"] = ['together']
 
     n=0
-    Settings["models"][n]["noncanon_dataset"] = 'expand_existing_dataset'
 
     from keras.preprocessing.image import ImageDataGenerator
     from DatasetHandler.custom_image import ImageDataGenerator as custom_ImageDataGenerator
@@ -47,18 +46,47 @@ def Setup(Settings,DefaultModel):
         # The function should take one argument: one image (Numpy tensor with rank 3), and should output a Numpy tensor with the same shape.
     )
 
-    Settings["models"][n]["noncanon_dataset_imagegenerator"] = image_generator
-    Settings["models"][n]["noncanon_dataset_genfrom1"] = 3
+    # Set these values:
+    number_of_images_from_one = 1
+    source_dataset = "miniset_640px"
+    target_dataset = "miniset_640px_expanded"
+    pixels = 640
+    epochs = 500
+    use_dump_file = 'SegmentsData_mark100.dump' # -> * new XYZ_expanded.dump
 
-    Settings["models"][n]["model_type"] = 'simple_cnn_with_top'
-    Settings["models"][n]["dataset_name"] = "miniset_640px_expanded"
-    Settings["models"][n]["pixels"] = 640
+    model_type = 'img_osm_mix'
+
+    # Feed the monkey and don't touch anything!
+    Settings["models"][n]["noncanon_dataset"] = 'expand_existing_dataset'
+    Settings["models"][n]["noncanon_dataset_imagegenerator"] = image_generator
+    Settings["models"][n]["noncanon_dataset_genfrom1"] = number_of_images_from_one
+
+    Settings["models"][n]["model_type"] = model_type
+    Settings["models"][n]["dataset_name"] = target_dataset
+    Settings["models"][n]["source_dataset"] = source_dataset
+    Settings["models"][n]["pixels"] = pixels
     Settings["models"][n]["cnn_model"] = 'resnet50'
-    Settings["models"][n]["unique_id"] = 'testingExpanding'
+    Settings["models"][n]["unique_id"] = 'expanded'
     Settings["models"][n]["cooking_method"] = 'generators' # 'direct' or 'generators'
-    Settings["models"][n]["epochs"] = 5
-    #Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
-    Settings["models"][n]["extended_dir_name"] = 'images_generated_test_folder'
-    Settings["models"][n]["dump_file_expanded"] = 'SegmentsData_' + Settings["models"][n]["extended_dir_name"] + '_expanded.dump'
+    Settings["models"][n]["epochs"] = epochs
+
+    Settings["models"][n]["dump_file_override"] = use_dump_file
+    Settings["models"][n]["dump_file_expanded"] = use_dump_file[:-5] + '_expanded.dump'
+
+    # REST IS AUTOMATIC -----
+    n=1
+    Settings["models"].append(DefaultModel.copy())
+
+    # Run it agains the original dataset will ya?
+    Settings["models"][n]["noncanon_dataset"] = '' # this one is normal
+
+    Settings["models"][n]["model_type"] = Settings["models"][0]["model_type"]
+    Settings["models"][n]["dataset_name"] = Settings["models"][0]["source_dataset"]
+    Settings["models"][n]["pixels"] = Settings["models"][0]["pixels"]
+    Settings["models"][n]["cnn_model"] = Settings["models"][0]["cnn_model"]
+    Settings["models"][n]["unique_id"] = 'original'
+    Settings["models"][n]["cooking_method"] = 'generators' # 'direct' or 'generators'
+    Settings["models"][n]["epochs"] = Settings["models"][0]["epochs"]
+    Settings["models"][n]["dump_file_override"] = Settings["models"][0]["dump_file_override"]
 
     return Settings
