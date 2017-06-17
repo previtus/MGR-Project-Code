@@ -10,7 +10,7 @@ import sys
 #settings_file = 'Settings/shuffle_effective_1200.py'
 #settings_file = 'Settings/finetune_tests_varAlong.py'
 
-settings_file = 'Settings/noncanon_dataset_minitest2.py'
+settings_file = 'Settings/expand_dataset_template.py'
 
 job_id = ''
 
