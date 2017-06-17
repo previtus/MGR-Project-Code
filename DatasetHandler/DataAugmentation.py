@@ -1,7 +1,7 @@
 from Omnipresent import len_
 import os
 import shutil
-from DatasetHandler.FileHelperFunc import use_path_which_exists, make_folder_ifItDoesntExist, copy_folder, copy_file, file_exists, folder_exists
+from DatasetHandler.FileHelperFunc import use_path_which_exists, make_folder_ifItDoesntExist, copy_folder, copy_file, file_exists, folder_exists, md5
 
 def handle_noncanon_dataset(Settings, model_settings):
     '''
@@ -98,6 +98,15 @@ def handle_noncanon_dataset(Settings, model_settings):
 
                 if not file_exists(file_target):
                     was_ok = False
+                else:
+                    # file exists, but maybe just to be parainoid secure, md5 compare?
+                    md5_1 = md5(file_source)
+                    md5_2 = md5(file_target)
+
+                    if md5_1 <> md5_2:
+                        was_ok = False
+
+                if not was_ok:
                     copy_file(file_source, file_target)
 
                     print '-- was missing, now fixed:' + file_source
