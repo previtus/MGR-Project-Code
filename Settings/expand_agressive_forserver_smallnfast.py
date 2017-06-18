@@ -51,7 +51,7 @@ def Setup(Settings,DefaultModel):
     # Set these values:
     number_of_images_from_one = 1
     source_dataset = "1200x_markable_299x299"
-    target_dataset = "1200x_markable_299x299_1x_expanded"
+    target_dataset = "1200x_markable_299x299_1x_agressive_expanded"
     pixels = 299
     epochs = 500
     use_dump_file = 'SegmentsData_marked_R100_4Tables.dump' # -> * new XYZ_expanded.dump
