@@ -5,12 +5,11 @@ def len_(L):
     try:
         return np.array(L).shape
     except Exception:
-        comb = '' + str(len(L)) + "*"
-        if len(L) > 0:
-            i = L[0]
+        comb = ''
+        for i in L:
             s = str(len_(i))
-            if s <> "()":
-                comb += s + ' '
+            comb += s + " + "
+
         return comb
 
 def send_mail(subject, message, attachment_path = None):
