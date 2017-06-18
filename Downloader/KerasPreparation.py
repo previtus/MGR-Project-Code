@@ -11,9 +11,9 @@ def split_one_array(arr,validation_split=0.2):
         validation_split = 0.2
 
     split_at = int(len(arr) * (1 - validation_split))
-    arr_test = arr[0:split_at]
+    arr_train = arr[0:split_at]
     arr_val = arr[split_at:]
-    return arr_test,arr_val
+    return arr_train,arr_val
 
 def split_data(x,y,validation_split=0.2):
     '''

@@ -108,6 +108,166 @@ def visualize_histories(histories, names, plotvalues='loss', show=True, save=Fal
     plt.clf()
     return plt
 
+def visualize_special_histories(histories, plotvalues='loss', show=True, save=False, save_path='', custom_title=None, just_val=False):
+    '''
+    We are visualizing results of a k-fold crossvalidation training. In <histories> we have the individual runs of the experiment.
+
+    :param histories:
+    :param names:
+    :param plotvalues:
+    :param show:
+    :param save:
+    :param save_path:
+    :param custom_title:
+    :param just_val:
+    :return:
+    '''
+
+    train_color = 'grey'
+    val_color = 'blue'
+
+    avg_train_color = 'red'
+    avg_val_color = 'green'
+
+    avg_train = []
+    avg_val = []
+
+    # count the averages
+
+    epochs = len(histories[0][plotvalues])
+    for epoch in range(0, epochs):
+        trains = []
+        vals = []
+        for hi in histories:
+            train = hi[plotvalues][epoch]
+            val = hi['val_'+plotvalues][epoch]
+            trains.append(train)
+            vals.append(val)
+        avg_train.append( np.mean(trains) )
+        avg_val.append( np.mean(vals) )
+
+    import matplotlib.pyplot as plt
+    plt.figure()
+
+    if custom_title is None:
+        custom_title = 'model ' + plotvalues
+    if just_val:
+        custom_title = custom_title + ' (just validation results)'
+
+    i = 0
+    leg = []
+    if not just_val:
+        leg.append('average training')
+    leg.append('average validation')
+
+    if not just_val:
+        leg.append('training errors')
+    leg.append('validation errors')
+
+    # now averages:
+    if not just_val:
+        plt.plot(avg_train, color=avg_train_color)
+    plt.plot(avg_val, color=avg_val_color)
+
+    for hi in histories:
+        # list all data in history
+        print(hi.keys())
+        # summarize history for loss
+        if not just_val:
+            plt.plot(hi[plotvalues], linestyle='dashed', color=train_color)
+        plt.plot(hi['val_'+plotvalues], linestyle='dashed', color=val_color)
+        i += 1
+
+    # OK, but we also want these on top...:
+    if not just_val:
+        plt.plot(avg_train, color=avg_train_color)
+    plt.plot(avg_val, color=avg_val_color)
+
+
+    plt.title(custom_title)
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+
+
+    #plt.legend(leg, loc='lower left')
+    plt.legend(leg, loc='best')
+    if save:
+        plt.savefig(save_path) #+plotvalues+'.png')
+        plt.savefig(save_path+'.pdf', format='pdf')
+
+    if show:
+        plt.show()
+
+    plt.clf()
+    return plt
+
+def visualize_whiskered_boxed(whiskered_boxes_data, names, show=True, save=False, save_path='', custom_title=''):
+    '''
+    We are visualizing results of a k-fold crossvalidation training.
+    In <whiskered_boxes_data> we have data for whiskered box plots.
+    '''
+
+    from DatasetHandler.DatasetVizualizators import zoomOutY
+
+    plt.close()
+
+    plt.figure(figsize=(5, 8))
+    legend_on = True
+    if custom_title == '':
+        custom_title = ','.join(names)
+
+    # mark values
+    save_path += custom_title + '.png'
+
+    y_max = 1.0
+    y_min = 0.0
+    #y_max = -100.0
+    #y_min = 100.0
+    #for i in whiskered_boxes_data:
+    #    y_max = max(max(i),y_max)
+    #    y_min = min(min(i),y_min)
+
+
+    axes = plt.axes()
+    import matplotlib.ticker as ticker
+
+    axes.yaxis.set_major_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/10.0))
+    axes.yaxis.set_minor_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/100.0))
+
+    meanpointprops = dict(linewidth=0.0)
+
+    boxplot = plt.boxplot(whiskered_boxes_data, notch=False, showmeans=True, meanprops=meanpointprops)
+
+    #plt.xticks(names)
+
+    if (legend_on):
+        boxplot['medians'][0].set_label('median')
+        boxplot['means'][0].set_label('mean')
+        boxplot['fliers'][0].set_label('outlayers')
+        # boxplot['boxes'][0].set_label('boxes')
+        # boxplot['whiskers'][0].set_label('whiskers')
+        boxplot['caps'][0].set_label('caps')
+
+        #axes.set_xlim([0.7, 1.7])
+
+        plt.legend(numpoints = 1)
+
+    axes.set_title(custom_title)
+    axes.set_xticklabels(names)
+
+    zoomOutY(axes, [0.0,1.0], 0.1)
+
+    ## save
+    if save:
+        plt.savefig(save_path) #+plotvalues+'.png')
+        plt.savefig(save_path+'.pdf', format='pdf')
+
+    if show:
+        plt.show()
+
+    plt.clf()
+    return plt
+
 def saveHistory(history_dict, filename):
     if not os.path.exists(os.path.dirname(filename)):
         try:

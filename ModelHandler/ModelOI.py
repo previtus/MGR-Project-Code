@@ -285,9 +285,9 @@ def graph_histories(histories, Settings):
     :param Settings:
     :return:
     '''
-    for setting in Settings["graph_histories"]:
-        from Downloader.VisualizeHistory import visualize_history, visualize_histories
+    from Downloader.VisualizeHistory import visualize_history, visualize_histories, visualize_special_histories, visualize_whiskered_boxed
 
+    for setting in Settings["graph_histories"]:
         if setting == 'all':
             # graph each of them into their own image
             print 'all'
@@ -296,6 +296,9 @@ def graph_histories(histories, Settings):
             for history in histories:
                 model_settings = Settings["models"][index]
                 graph_file = model_settings["graph_filename"]
+
+                if model_settings["k_fold_crossvalidation"]:
+                    continue
 
                 custom_title = 'One:' + model_settings["unique_id"]
                 visualize_history(history, show=False, save=True, save_path=graph_file, custom_title=custom_title)
@@ -309,15 +312,22 @@ def graph_histories(histories, Settings):
 
             names = []
             index = 0
+            histories_selected = []
+
             for history in histories:
-                custom_name = Settings["models"][index]["unique_id"]
+                model_settings = Settings["models"][index]
+                if model_settings["k_fold_crossvalidation"]:
+                    continue
+
+                custom_name = model_settings["unique_id"]
                 names.append(custom_name)
+                histories_selected.append(history)
                 index +=1
 
             graph_file = Settings["folders"]["together_graph_filename"]
             custom_title = 'All:' + Settings["folders"]["together_graph_title"]
-            visualize_histories(histories, names, plotvalues='loss', show=False, save=True, save_path=graph_file, custom_title=custom_title)
-            visualize_histories(histories, names, plotvalues='loss', show=False, save=True, save_path=graph_file+'_justValidation.png', custom_title=custom_title, just_val=True)
+            visualize_histories(histories_selected, names, plotvalues='loss', show=False, save=True, save_path=graph_file, custom_title=custom_title)
+            visualize_histories(histories_selected, names, plotvalues='loss', show=False, save=True, save_path=graph_file+'_justValidation.png', custom_title=custom_title, just_val=True)
 
             print "graph saved >>", graph_file
 
@@ -340,6 +350,53 @@ def graph_histories(histories, Settings):
             custom_title = 'Combination [' + combination_txt + ']: ' + Settings["folders"]["together_graph_title"]
             visualize_histories(histories_subset, subset_names, plotvalues='loss', show=False, save=True, save_path=graph_file, custom_title=custom_title)
             print "graph saved >>", graph_file
+
+    model_index = 0
+    for special_history in histories:
+        model_settings = Settings["models"][model_index]
+        if model_settings["k_fold_crossvalidation"]:
+            # by default always generate graphs if we used k-fold crossvalidation
+            print "Plotting k-fold crossvalidation graphs for model", model_index
+            print "from data with", special_history.keys()
+
+            # for whiskered box plots:
+            # - best_validation_errors
+            # - last_validation_errors
+            # - last_training_measure
+            # - last_validation_measure
+            # - last_training_errors
+            # - best_training_measure
+            # - best_validation_measure
+            # - best_training_errors
+
+            # best_validation_errors, best_training_errors
+            data_for_whiskeredboxes = [ special_history["best_training_errors"], special_history["best_validation_errors"] ]
+            names = ["best_training_errors", "best_validation_errors"]
+            title = 'BestError'
+
+            graph_file = Settings["folders"]["together_graph_filename"] + '_kfoldcrossvalidation_' + title + '.png'
+            visualize_whiskered_boxed(data_for_whiskeredboxes, names=names,
+                                      show=False, save=True, save_path=graph_file, custom_title=title )
+
+            # best_validation_errors, best_training_errors
+            data_for_whiskeredboxes = [ special_history["last_training_errors"], special_history["best_training_errors"],
+                                        special_history["last_validation_errors"], special_history["best_validation_errors"] ]
+            names = ["last_train", "best_train", "last_val", "best_val"]
+            title = 'AllErrors'
+
+            graph_file = Settings["folders"]["together_graph_filename"] + '_kfoldcrossvalidation_AllErrors.png'
+            visualize_whiskered_boxed(data_for_whiskeredboxes, names=names,
+                                      show=False, save=True, save_path=graph_file, custom_title=title )
+
+            # for a shared graph plot
+            # - all_histories_of_this_model
+            histories = special_history["all_histories_of_this_model"]
+            graph_file = Settings["folders"]["together_graph_filename"] + '_kfoldcrossvalidation' + '.png'
+            custom_title = 'k-fold crossvalidation'
+
+            visualize_special_histories(histories, plotvalues='loss', show=False, save=True, save_path=graph_file, custom_title=custom_title)
+
+        model_index += 1
 
     return 0
 
@@ -421,8 +478,18 @@ def send_mail_with_graph(Settings):
     if 'together' in Settings["graph_histories"]:
         attachment_path = Settings["folders"]["together_graph_filename"]
 
+    second_path = ''
+    for model_setting in Settings["models"]:
+        if model_setting["k_fold_crossvalidation"]:
+            graph_file = Settings["folders"]["together_graph_filename"] + '_kfoldcrossvalidation' + '.png'
+            second_path = Settings["folders"]["together_graph_filename"] + '_kfoldcrossvalidation_AllErrors.pngAllErrors.png'
+            attachment_path = graph_file
+
     print "## Sending report mail with attachment ", attachment_path
     send_mail(subject, message, attachment_path)
+
+    if second_path <> '':
+        send_mail(subject, message, second_path)
 
 def save_metacentrum_report(Settings):
     job_id = Settings["job_id"]

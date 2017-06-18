@@ -356,12 +356,20 @@ class Dataset:
         y, y_val = KerasPreparation.split_one_array(y, validation_split)
         return [y, y_val]
 
+    def getDataLabels_only_y(self):
+        y = np.array(self.__labels)
+        return y
+
     def getDataLabels_split_only_osm(self, validation_split=0.2):
         osm, osm_val = KerasPreparation.split_one_array(self.__osm, validation_split)
         osm = np.asarray(osm)
         osm_val = np.asarray(osm_val)
 
         return [osm, osm_val]
+
+    def getDataLabels_only_osm(self):
+        osm = np.array(self.__osm)
+        return osm
 
     def DEBUGgetDataLabels_split_only_osm(self, validation_split=0.2):
         osm, osm_val = KerasPreparation.split_one_array(self.__osm, validation_split)

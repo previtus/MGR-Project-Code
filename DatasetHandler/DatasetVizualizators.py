@@ -99,14 +99,14 @@ def plotHistogram(x, title='', num_bins=100, x_min=0.0, x_max=1.0, custom_x_labe
 
     axes.set_title(title)
 
-def plotWhisker(data, title='', y_min=0.0, y_max=1.0, legend_on=True):
+def plotWhisker(data, title='', y_min=0.0, y_max=1.0, legend_on=True, notch=True):
     plt.figure(figsize=(5, 8))
     axes = plt.axes()
     axes.yaxis.set_major_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/10.0))
     axes.yaxis.set_minor_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/100.0))
 
     meanpointprops = dict(linewidth=0.0)
-    boxplot = plt.boxplot(data, notch=True, showmeans=True, meanprops=meanpointprops)
+    boxplot = plt.boxplot(data, notch=notch, showmeans=True, meanprops=meanpointprops)
 
     plt.xticks([])
 
