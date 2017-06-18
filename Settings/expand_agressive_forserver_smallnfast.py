@@ -2,7 +2,7 @@ def Setup(Settings,DefaultModel):
     # expand_agressive_forserver_smallnfast.py
 
 
-    Settings["experiment_name"] = "ExpandDataset_1200x_markable_299x299"
+    Settings["experiment_name"] = "AgressiveExpandDataset_1200x_markable_299x299"
 
     Settings["graph_histories"] = ['together']
 

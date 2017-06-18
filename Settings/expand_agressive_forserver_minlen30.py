@@ -2,7 +2,7 @@ def Setup(Settings,DefaultModel):
     # expand_agressive_forserver_minlen30.py
 
 
-    Settings["experiment_name"] = "ExpandDataset_5556x_minlen30_640px"
+    Settings["experiment_name"] = "AgressiveExpandDataset_5556x_minlen30_640px"
 
     Settings["graph_histories"] = ['together']
 
