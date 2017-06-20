@@ -1,9 +1,6 @@
-*.[jJ][pP][gG]
-*.[pP][nN][gG]
 *.[gG][iI][fF]
 *.[pP][yY][cC]
 *.[dD][uU][mM][pP]
-*.[nN][pP][yY]
 *.[pP][bB][fF]
 *.[hH][5]
 apicode.txt
@@ -24,3 +21,11 @@ WHOLE_MODEL_VGG16_WITH_CUSTOM_TOP.png
 secrets.py
 mail_secrets.py
 ConnectionSettingsSecrets.py
+
+
+/*.[pP][nN][gG]
+!/ResultsGraphing/*.[pP][nN][gG]
+*.[jJ][pP][gG]
+!/ResultsGraphing/*.[jJ][pP][gG]
+/*.[nN][pP][yY]
+!/ResultsGraphing/*.[nN][pP][yY]
