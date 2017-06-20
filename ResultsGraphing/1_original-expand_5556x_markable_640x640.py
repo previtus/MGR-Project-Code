@@ -22,9 +22,20 @@ Settings["folders"]["together_graph_filename"] = ''
 
 #visualize_special_history(original_history, Settings, save=False, show=True)
 
+from ResultsGraphing.custom import visualize_special_histories_custom
+import matplotlib.pyplot as plt
+
+plt.figure()
+
+colors1 = ['grey', 'lightgreen', 'red', 'green'] # << Green is original
+colors2 = ['grey', 'lightblue', 'red', 'blue']   # << Blue  is extended
+#train_color, val_color, avg_train_color, avg_val_color
+
 custom_title = 'original model'
-visualize_special_histories(original_history["all_histories_of_this_model"], plotvalues='loss', show=True, save=False, custom_title=custom_title)
+visualize_special_histories_custom(plt, colors1, original_history["all_histories_of_this_model"], plotvalues='loss', show=True, save=False, custom_title=custom_title, just_val=True)
 
 custom_title = 'extended model'
-visualize_special_histories(extended_history["all_histories_of_this_model"], plotvalues='loss', show=True, save=False, custom_title=custom_title)
+visualize_special_histories_custom(plt, colors2, extended_history["all_histories_of_this_model"], plotvalues='loss', show=True, save=False, custom_title=custom_title, just_val=True)
 
+plt.show()
+plt.clf()
