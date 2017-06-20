@@ -1,0 +1,17 @@
+Experiment [ExpandDataset_1200x_markable_299x299] report:
+With 2 models:
+expanded: 1200x_markable_299x299_1x_expanded
+img_osm_mix
+Trained for 500 epochs with rmsprop optimizer and loss function mean_squared_error
+Used dataset: 1200x_markable_299x299_1x_expanded with None images
+Dump file used: SegmentsData_marked_R100_4Tables_expanded.dump
+
+original: 1200x_markable_299x299
+img_osm_mix
+Trained for 500 epochs with rmsprop optimizer and loss function mean_squared_error
+Used dataset: 1200x_markable_299x299 with None images
+Dump file used: SegmentsData_marked_R100_4Tables.dump
+
+----------
+
+1200x_markable_299x299 is a tiny dataset, not that useful
