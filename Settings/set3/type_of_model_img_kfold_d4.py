@@ -1,5 +1,5 @@
 def Setup(Settings, DefaultModel):
-    # set2_for_results/type_of_model_img_kfold_d4.py
+    # set3/type_of_model_img_kfold_d4.py
 
     Settings["experiment_name"] = "TypesOfModels_monoTest_IMG_kfold_d4"
 

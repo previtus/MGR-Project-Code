@@ -1,5 +1,5 @@
 def Setup(Settings, DefaultModel):
-    # set2_for_results/type_of_model_osm_kfold_d3.py
+    # set3/type_of_model_osm_kfold_d3.py
 
     Settings["experiment_name"] = "TypesOfModels_monoTest_OSM_kfold_d3"
 

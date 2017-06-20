@@ -1,5 +1,5 @@
 def Setup(Settings, DefaultModel):
-    # set2_for_results/type_of_model_mix_kfold_d1.py
+    # set3/type_of_model_mix_kfold_d1.py
 
     Settings["experiment_name"] = "TypesOfModels_monoTest_MIX_kfold_d1"
 
