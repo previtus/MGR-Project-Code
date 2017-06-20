@@ -1,5 +1,5 @@
 def Setup(Settings,DefaultModel):
-    # basic_models_cooking.py
+    # cook2.py
     
     Settings["experiment_name"] = "cook"
 

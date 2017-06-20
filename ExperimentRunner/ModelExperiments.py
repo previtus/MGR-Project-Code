@@ -17,6 +17,7 @@ def run_many_models(settings_file=None, job_id=''):
     datasets = ModelOI.load_dataset(Settings)
 
     Settings = ModelOI.prepare_folders(Settings, datasets, verbose=True)
+
     models = ModelGenerator.get_cnn_models(Settings)
 
     # cooking
