@@ -1,0 +1,8 @@
+Experiment [TypesOfModels_monoTest_OSM_kfold_d3] report: 
+With 1 models: 
+osmmodel 
+osm_only 
+Trained for 500 epochs with rmsprop optimizer and loss function mean_squared_error 
+Used dataset: 5556x_minlen30_640px with None images 
+Dump file used: SegmentsData_marked_R100_4Tables.dump 
+

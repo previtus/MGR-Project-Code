@@ -1,0 +1,8 @@
+Experiment [ExpandDataset_5556x_markable_640x640_kfold10_originalComparison] report: 
+With 1 models: 
+original: 5556x_markable_640x640 
+img_osm_mix 
+Trained for 500 epochs with rmsprop optimizer and loss function mean_squared_error 
+Used dataset: 5556x_markable_640x640 with None images 
+Dump file used: SegmentsData_marked_R100_4Tables.dump 
+
