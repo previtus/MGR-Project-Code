@@ -13,7 +13,7 @@ def Setup(Settings, DefaultModel):
     Settings["models"][n]["dataset_name"] = "5556x_markable_640x640_2x_expanded"
     Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables_expanded.dump'
     Settings["models"][n]["pixels"] = 640
-    Settings["models"][n]["model_type"] = 'img_only' # osm_only img_only img_osm_mix
+    Settings["models"][n]["model_type"] = 'simple_cnn_with_top' # osm_only img_only img_osm_mix
     Settings["models"][n]["unique_id"] = 'imagemodel'
     Settings["models"][n]["top_repeat_FC_block"] = 2
     Settings["models"][n]["epochs"] = 500
