@@ -52,3 +52,21 @@ save(plt,True,'graphs/1_original-expand_5556x_markable_640x640/automatic')
 
 plt.show()
 plt.clf()
+
+
+
+
+
+# test this:
+'''
+# best_validation_errors, best_training_errors
+from Downloader.VisualizeHistory import visualize_whiskered_boxed
+
+data_for_whiskeredboxes = [original_history["last_training_errors"], original_history["best_training_errors"],
+                           original_history["last_validation_errors"], original_history["best_validation_errors"]]
+names = ["last_train", "best_train", "last_val", "best_val"]
+title = 'AllErrors'
+graph_file = '_kfoldcrossvalidation_AllErrors.png'
+visualize_whiskered_boxed(data_for_whiskeredboxes, names=names,
+                          show=True, save=False, save_path=graph_file, custom_title=title)
+'''
