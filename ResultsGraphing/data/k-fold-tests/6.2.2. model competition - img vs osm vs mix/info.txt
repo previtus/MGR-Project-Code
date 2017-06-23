@@ -12,6 +12,6 @@ mix 1761323
 
 dataset3 = 5556x_minlen30_640px_2x_expanded
 
-img	xxx
+img	5556x_minlen30_640px_2x_expanded_img_1769354
 osm	1761327
 mix	1761326
