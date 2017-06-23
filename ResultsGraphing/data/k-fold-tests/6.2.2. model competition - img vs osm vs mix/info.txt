@@ -1,0 +1,17 @@
+dataset1 = 5556x_markable_640x640
+
+img 1769355
+osm 1761330
+mix 1761329
+
+dataset2 = 5556x_minlen30_640px
+
+img 1769353
+osm 1761336
+mix 1761323
+
+dataset3 = 5556x_minlen30_640px_2x_expanded
+
+img	xxx
+osm	1761327
+mix	1761326
