@@ -2,7 +2,7 @@ def Setup(Settings,DefaultModel):
     # set2_for_results/builds_aggresive_expand_dataset_normalmarkable_kfold.py
     # probably ANOTHER 6GB
 
-    Settings["experiment_name"] = "ExpandDataset_5556x_markable_640x640_kfold10"
+    Settings["experiment_name"] = "builds_aggresive_expand_dataset_normalmarkable_kfold"
 
     Settings["graph_histories"] = ['together']
 
