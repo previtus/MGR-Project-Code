@@ -6,16 +6,16 @@ path_folder += '/data/k-fold-tests/5556x_markable_640x640__ExpandDataset_5556x_m
 original_history_path = path_folder+'original____1714013.arien-pro.ics.muni.cz_ExpandDataset_5556x_markable_640x640_kfold10_originalComparison/history/5556x_markable_640x640_original_5556x_markable_640x640_500.npy'
 extended_history_path = path_folder+'expanded___1714012.arien-pro.ics.muni.cz_ExpandDataset_5556x_markable_640x640_kfold10/history/5556x_markable_640x640_2x_expanded_expanded_5556x_markable_640x640_2x_expanded_500.npy'
 
-from Downloader.VisualizeHistory import loadHistory, visualize_history, visualize_special_histories
+from Downloader.VisualizeHistory import loadHistory
 from Omnipresent import len_
-from ResultsGraphing.custom import visualize_special_histories_custom, count_averages, draw_items_for_legend, onefrom, draw_normal_data, draw_titles_legends, draw_avg_data, save
+from ResultsGraphing.custom import count_averages, draw_items_for_legend, onefrom, draw_normal_data, draw_titles_legends, draw_avg_data, save_plot
 
 original_history = loadHistory(original_history_path)
 extended_history = loadHistory(extended_history_path)
 
 
-colors1 = ['grey', 'lightgreen', 'red', 'green'] # << Green is original
-colors2 = ['grey', 'lightblue', 'red', 'blue']   # << Blue  is extended
+colors1 = ['grey', 'green', 'red', 'green'] # << Green is original
+colors2 = ['grey', 'blue', 'red', 'blue']   # << Blue  is extended
 #          train_color, val_color, avg_train_color, avg_val_color
 
 original_history = count_averages(original_history, 'loss')
@@ -39,16 +39,16 @@ linestyles = ['solid', 'dashed', 'solid', 'dashed']
 leg = []
 [plt, leg] = draw_items_for_legend(plt, leg, items_to_draw, names_to_print, colors_to_use, linestyles)
 
-plt = draw_normal_data("val_loss", original_history["all_histories_of_this_model"], colors1[1], 'dashed', plt)
-plt = draw_normal_data("val_loss", extended_history["all_histories_of_this_model"], colors2[1], 'dashed', plt)
+plt, _ = draw_normal_data("val_loss", original_history["all_histories_of_this_model"], colors1[1], 'dashed', plt)
+plt, _ = draw_normal_data("val_loss", extended_history["all_histories_of_this_model"], colors2[1], 'dashed', plt)
 
-plt = draw_avg_data(original_history["avg_val_loss"], colors1[3], 'solid', plt)
-plt = draw_avg_data(extended_history["avg_val_loss"], colors2[3], 'solid', plt)
+plt, _ = draw_avg_data(original_history["avg_val_loss"], colors1[3], 'solid', plt)
+plt, _ = draw_avg_data(extended_history["avg_val_loss"], colors2[3], 'solid', plt)
 
 custom_title = 'original vs extended model'
 draw_titles_legends(plt, leg, custom_title)
 
-save(plt,True,'graphs/1_original-expand_5556x_markable_640x640/automatic')
+save_plot(plt,False,'graphs/1_original-expand_5556x_markable_640x640/automatic')
 
 plt.show()
 plt.clf()
