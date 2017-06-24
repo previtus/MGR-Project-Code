@@ -1,4 +1,5 @@
 import numpy as np
+from Omnipresent import len_
 
 def onefrom(ar, plotvalues):
     return ar["all_histories_of_this_model"][0][plotvalues]
@@ -61,7 +62,11 @@ def draw_titles_legends(plt, leg, custom_title):
 
     return plt
 
-def save(plt, save, path):
+def save_plot(plt, save, path):
+    from DatasetHandler.FileHelperFunc import get_folder_from_file, make_folder_ifItDoesntExist
+    dir = get_folder_from_file(path)
+    make_folder_ifItDoesntExist(dir)
+
     if save:
         plt.savefig(path)
         plt.savefig(path+'.pdf', format='pdf')
@@ -107,4 +112,54 @@ def visualize_special_histories_custom(plt, leg, colors, special_history, plotva
         plt.savefig(save_path) #+plotvalues+'.png')
         plt.savefig(save_path+'.pdf', format='pdf')
 
+    return plt
+
+def finally_show(plt):
+    # will show all drawn graphs at once
+    plt.show()
+
+def plot_only_averages(plt, special_histories, data_names, colors, custom_title, just='val', save=[False,'']):
+    items_to_draw = []
+    names_to_print = []
+    linestyles = []
+
+    for i in range(0,len(special_histories)):
+        special_histories[i] = count_averages(special_histories[i], 'loss')
+        if just=='val':
+            items_to_draw.append(special_histories[i]['avg_val_loss'])
+            linestyles.append('solid')
+            names_to_print.append(data_names[i])
+
+        if just == 'train':
+            items_to_draw.append(special_histories[i]['avg_loss'])
+            linestyles.append('solid')
+            names_to_print.append(data_names[i])
+
+        if just == 'both':
+            items_to_draw.append(special_histories[i]['avg_loss'])
+            linestyles.append('dashed')
+            items_to_draw.append(special_histories[i]['avg_val_loss'])
+            linestyles.append('solid')
+
+            names_to_print.append(data_names[2*i])
+            names_to_print.append(data_names[2*i+1])
+
+    print len_(items_to_draw), items_to_draw
+    print len_(names_to_print), names_to_print
+    print special_histories[0].keys()
+
+    plt.figure()
+
+    leg = []
+    [plt, leg] = draw_items_for_legend(plt, leg, items_to_draw, names_to_print, colors, linestyles)
+
+    for i in range(0,len(items_to_draw)):
+        avg = items_to_draw[i]
+        plt = draw_avg_data(avg, colors[i], linestyles[i], plt)
+
+    draw_titles_legends(plt, leg, custom_title)
+
+    save_plot(plt, save[0], save[1])
+
+    plt.draw()
     return plt

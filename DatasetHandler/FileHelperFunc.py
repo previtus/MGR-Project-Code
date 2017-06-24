@@ -36,6 +36,9 @@ def use_path_which_exists(list_of_possible_paths):
 def file_exists(fname):
     return os.path.isfile(fname)
 
+def get_folder_from_file(fname):
+    return os.path.dirname(fname) + '/'
+
 def folder_exists(directory):
     return os.path.exists(directory)
 
