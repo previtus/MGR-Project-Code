@@ -1,7 +1,7 @@
 import os
 from Omnipresent import len_
 from Downloader.VisualizeHistory import loadHistory
-from ResultsGraphing.custom import finally_show, plot_4x4_detailed, count_averages, save_plot, boxplots_in_row, boxplots_in_row_NVM
+from ResultsGraphing.custom import finally_show, plot_4x4_detailed, count_averages, save_plot, boxplots_in_row
 
 dir_folder = os.path.dirname(os.path.abspath(__file__))
 

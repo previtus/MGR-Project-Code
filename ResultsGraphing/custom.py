@@ -204,19 +204,8 @@ def plot_4x4_detailed(plt, special_histories, data_names):
     plot_one_one_subplot(axarr[1, 0], special_histories[2], data_names[2])
     lines = plot_one_one_subplot(axarr[1, 1], special_histories[3], data_names[3])
 
-    '''
-    axarr[0, 1].scatter(x, y)
-    axarr[0, 1].set_title('Axis [0,1]')
-    axarr[1, 0].plot(x, y ** 2)
-    axarr[1, 0].set_title('Axis [1,0]')
-    axarr[1, 1].scatter(x, y ** 2)
-    axarr[1, 1].set_title('Axis [1,1]')
-    '''
     # Fine-tune figure; hide x ticks for top plots and y ticks for right plots
     figure.subplots_adjust(hspace=0.24, wspace=0.1, bottom=0.19, top=0.92, left=0.1, right=0.95)
-
-    # 1053x677 pixels
-    #f.subplots_adjust(hspace=0.2, wspace=0.1, bottom=0.2, top=0.9, left=0.1, right=0.95)
 
     plt.setp([a.get_xticklabels() for a in axarr[0, :]], visible=False)
     plt.setp([a.get_yticklabels() for a in axarr[:, 1]], visible=False)
@@ -228,7 +217,6 @@ def plot_4x4_detailed(plt, special_histories, data_names):
     labels = ["val avg","val", "train avg", "train"]
 
     plt.figlegend(lines, labels, loc='lower center', ncol=4, labelspacing=0., bbox_to_anchor=(0.5, 0.))
-    #f.legend(lines, labels, loc=(0.5, 0), ncol=5)
 
     plt.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
     plt.xlabel("epoch")
@@ -236,52 +224,7 @@ def plot_4x4_detailed(plt, special_histories, data_names):
 
     return plt, figure
 
-def boxplots_in_row_NVM(plt, special_histories, data_names):
-    data_for_whiskeredboxes = []
-    names = []
-    for i in range(0,len(special_histories)):
-        data_for_whiskeredboxes += special_histories[i]["last_validation_errors"], special_histories[i]["last_training_errors"]
-        name = data_names[i]
-        names += [name+" val", name+" train"]
-
-    y_max = 1.0
-    y_min = 0.0
-
-    y_max = -100.0
-    y_min = 100.0
-    for i in data_for_whiskeredboxes:
-        y_max = max(max(i),y_max)
-        y_min = min(min(i),y_min)
-    y_min = 0.0
-    print y_min, y_max
-    y_max = math.ceil( y_max * 100 ) * 0.01
-
-    axes = plt.axes()
-    axes.yaxis.set_major_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/10.0))
-    axes.yaxis.set_minor_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/100.0))
-
-    boxplot = plt.boxplot(data_for_whiskeredboxes, notch=False, showmeans=True)
-
-    zoomOutY(axes, [y_min,y_max], 0.1)
-
-    axes.set_xticklabels(names)
-
-    legend_on = True
-
-    if (legend_on):
-        boxplot['medians'][0].set_label('median')
-        boxplot['means'][0].set_label('mean')
-        boxplot['fliers'][0].set_label('outlayers')
-        # boxplot['boxes'][0].set_label('boxes')
-        # boxplot['whiskers'][0].set_label('whiskers')
-        boxplot['caps'][0].set_label('caps')
-
-        #axes.set_xlim([0.7, 2.7])
-        plt.legend(numpoints = 1)
-
-    return plt
-
-def figure_out_y(special_histories):
+def figure_out_y(special_histories, just):
     data = []
     y_max = -100.0
     y_min = 100.0
@@ -290,22 +233,41 @@ def figure_out_y(special_histories):
         a = special_histories[i]["last_validation_errors"]
         b = special_histories[i]["last_training_errors"]
 
-        y_max = max(max(a),y_max)
-        y_min = min(min(a),y_min)
-        y_max = max(max(b),y_max)
-        y_min = min(min(b),y_min)
+        if just == 'val' or just == 'both':
+            y_max = max(max(a), y_max)
+            y_min = min(min(a), y_min)
+
+        if just == 'train' or just == 'both':
+            y_max = max(max(b), y_max)
+            y_min = min(min(b), y_min)
 
     y_min = 0.0
     y_max = math.ceil( y_max * 100 ) * 0.01
     print y_min, y_max
     return y_min, y_max
 
-def one_boxplot(axarritem, data, title, legend_on=False):
+def one_boxplot(axarritem, data, title, legend_on=False, just='both', showtitle=True, showxdesc=False):
     valdata = data["last_validation_errors"]
     traindata = data["last_training_errors"]
 
-    boxplot = axarritem.boxplot([valdata, traindata], labels=['val', 'train'], widths = 0.6, showmeans=True, meanline=True)
-    axarritem.set_title(title)
+    if just == 'val':
+        data = valdata
+        labels = None
+
+    if just == 'train':
+        data = traindata
+        labels = None
+
+    if just == 'both':
+        data = [valdata, traindata]
+        labels = ['val', 'train']
+
+    print labels
+    boxplot = axarritem.boxplot(data, labels=labels, widths = 0.6, showmeans=True, meanline=True)
+    if showtitle:
+        axarritem.set_title(title)
+    if showxdesc:
+        axarritem.set_xlabel(title)
 
 
     if (legend_on):
@@ -319,22 +281,99 @@ def one_boxplot(axarritem, data, title, legend_on=False):
         #axes.set_xlim([0.7, 2.7])
     return boxplot
 
-def boxplots_in_row(plt, special_histories, data_names):
-    y_min, y_max = figure_out_y(special_histories)
+def boxplots_in_row(plt, special_histories, data_names, just='both'):
+    y_min, y_max = figure_out_y(special_histories, just=just)
 
-    figure, axarr = plt.subplots(1, 4, sharex=True, sharey=True) #, figsize=(6, 8)
+    figure, axarr = plt.subplots(1, len(special_histories), sharex=True, sharey=True) #, figsize=(6, 8)
 
-    one_boxplot(axarr[0], special_histories[0], data_names[0])
-    one_boxplot(axarr[1], special_histories[1], data_names[1])
-    one_boxplot(axarr[2], special_histories[2], data_names[2])
-    one_boxplot(axarr[3], special_histories[3], data_names[3], legend_on=True)
+    for i in range(0,len(special_histories)-1):
+        one_boxplot(axarr[i], special_histories[i], data_names[i], just=just)
+    i = len(special_histories)-1
+    one_boxplot(axarr[i], special_histories[i], data_names[i], legend_on=True, just=just)
 
     figure.subplots_adjust(wspace=0, right=0.81, left=0.1)
 
-    plt.legend(numpoints=1, bbox_to_anchor=(1.1, 0.95))
+    plt.legend(numpoints=1, bbox_to_anchor=(1.1, 0.95))#, loc='upper right')
 
     axarr[0].yaxis.set_major_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/10.0))
     axarr[0].yaxis.set_minor_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/100.0))
 
+    zoomOutY(axarr[0], [y_min,y_max], 0.1)
 
     return plt, figure
+
+
+def boxplots_in_row_custom611(plt, special_histories, data_names, just='val'):
+    y_min, y_max = figure_out_y(special_histories, just=just)
+
+    figure, axarr = plt.subplots(1, len(special_histories), sharex=True, sharey=True, figsize=(4, 6))
+
+    for i in range(0,len(special_histories)-1):
+        one_boxplot(axarr[i], special_histories[i], data_names[i], just=just, showtitle=False, showxdesc=True)
+    i = len(special_histories)-1
+    one_boxplot(axarr[i], special_histories[i], data_names[i], legend_on=True, just=just, showtitle=False, showxdesc=True)
+
+    figure.subplots_adjust(wspace=0, right=0.93, left=0.17, top=0.94)
+
+    #plt.legend(numpoints=1, bbox_to_anchor=(1.1, 0.95))#, loc='upper right')
+    plt.setp([a.get_xticklabels() for a in axarr[:]], visible=False)
+
+    axarr[0].yaxis.set_major_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/10.0))
+    axarr[0].yaxis.set_minor_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/100.0))
+
+    zoomOutY(axarr[0], [y_min,y_max], 0.1)
+
+    return plt, figure
+
+def plot_together(data, names, colors, custom_title):
+    items_to_draw = []
+    for i in range(0,len(data)):
+        data[i] = count_averages(data[i], 'loss')
+
+        items_to_draw += [data[i]["avg_val_loss"], onefrom(data[i], "val_loss")]
+
+    import matplotlib.pyplot as plt
+    plt.figure()
+
+
+    colors_to_use = [colors[1], colors[0], colors[3], colors[2]]
+    linestyles = ['solid', 'dashed', 'solid', 'dashed']
+
+    leg = []
+    [plt, leg] = draw_items_for_legend(plt, leg, items_to_draw, names, colors_to_use, linestyles)
+
+    for i in range(0,len(data)):
+        plt, _ = draw_normal_data("val_loss", data[i]["all_histories_of_this_model"], colors[2*i], 'dashed', plt)
+
+    for i in range(0,len(data)):
+        plt, _ = draw_avg_data(data[i]["avg_val_loss"], colors[2*i], 'solid', plt)
+
+    draw_titles_legends(plt, leg, custom_title)
+    return plt
+
+def plot_two_together(a, b, names, colors, custom_title):
+    original_history = count_averages(a, 'loss')
+    extended_history = count_averages(b, 'loss')
+
+    print original_history.keys()
+
+    import matplotlib.pyplot as plt
+    plt.figure()
+
+    items_to_draw = [original_history["avg_val_loss"], onefrom(original_history, "val_loss")]
+    items_to_draw += [extended_history["avg_val_loss"], onefrom(extended_history, "val_loss")]
+
+    colors_to_use = [colors[1], colors[0], colors[3], colors[2]]
+    linestyles = ['solid', 'dashed', 'solid', 'dashed']
+
+    leg = []
+    [plt, leg] = draw_items_for_legend(plt, leg, items_to_draw, names, colors_to_use, linestyles)
+
+    plt, _ = draw_normal_data("val_loss", original_history["all_histories_of_this_model"], colors[0], 'dashed', plt)
+    plt, _ = draw_normal_data("val_loss", extended_history["all_histories_of_this_model"], colors[2], 'dashed', plt)
+
+    plt, _ = draw_avg_data(original_history["avg_val_loss"], colors[1], 'solid', plt)
+    plt, _ = draw_avg_data(extended_history["avg_val_loss"], colors[3], 'solid', plt)
+
+    draw_titles_legends(plt, leg, custom_title)
+    return plt
