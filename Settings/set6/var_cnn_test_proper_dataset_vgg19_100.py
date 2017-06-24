@@ -1,7 +1,7 @@
 def Setup(Settings,DefaultModel):
-    # set6/var_cnn_test_proper_dataset_vgg19.py
+    # set6/var_cnn_test_proper_dataset_vgg19_100.py
     
-    Settings["experiment_name"] = "var_cnn_test_proper_dataset_xception_kfold"
+    Settings["experiment_name"] = "var_cnn_test_proper_dataset_xception_kfold_100"
 
     Settings["graph_histories"] = ['together'] #['all','together',[],[1,0],[0,0,0],[]]
 
@@ -15,7 +15,7 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
     Settings["models"][n]["model_type"] = 'img_osm_mix'
 
-    Settings["models"][n]["epochs"] = 500
+    Settings["models"][n]["epochs"] = 100
 
     Settings["models"][n]["k_fold_crossvalidation"] = True
     Settings["models"][n]["crossvalidation_k"] = 10
