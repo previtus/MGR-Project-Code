@@ -58,7 +58,6 @@ plt.clf()
 
 
 # test this:
-'''
 # best_validation_errors, best_training_errors
 from Downloader.VisualizeHistory import visualize_whiskered_boxed
 
@@ -69,4 +68,3 @@ title = 'AllErrors'
 graph_file = '_kfoldcrossvalidation_AllErrors.png'
 visualize_whiskered_boxed(data_for_whiskeredboxes, names=names,
                           show=True, save=False, save_path=graph_file, custom_title=title)
-'''

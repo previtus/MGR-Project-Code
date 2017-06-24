@@ -1,5 +1,9 @@
 import numpy as np
+import math
 from Omnipresent import len_
+from DatasetHandler.DatasetVizualizators import zoomOutY
+import matplotlib.ticker as ticker
+
 
 def onefrom(ar, plotvalues):
     return ar["all_histories_of_this_model"][0][plotvalues]
@@ -171,7 +175,7 @@ def plot_only_averages(plt, special_histories, data_names, colors, custom_title,
     return plt
 
 def plot_one_one_subplot(axarritem, data, title):
-    axarritem.plot(data['avg_val_loss'])
+    #axarritem.plot(data['avg_val_loss'])
     axarritem.set_title(title)
 
     items_to_draw = [data["avg_val_loss"], onefrom(data, "val_loss")]
@@ -229,5 +233,108 @@ def plot_4x4_detailed(plt, special_histories, data_names):
     plt.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
     plt.xlabel("epoch")
     plt.ylabel("loss")
+
+    return plt, figure
+
+def boxplots_in_row_NVM(plt, special_histories, data_names):
+    data_for_whiskeredboxes = []
+    names = []
+    for i in range(0,len(special_histories)):
+        data_for_whiskeredboxes += special_histories[i]["last_validation_errors"], special_histories[i]["last_training_errors"]
+        name = data_names[i]
+        names += [name+" val", name+" train"]
+
+    y_max = 1.0
+    y_min = 0.0
+
+    y_max = -100.0
+    y_min = 100.0
+    for i in data_for_whiskeredboxes:
+        y_max = max(max(i),y_max)
+        y_min = min(min(i),y_min)
+    y_min = 0.0
+    print y_min, y_max
+    y_max = math.ceil( y_max * 100 ) * 0.01
+
+    axes = plt.axes()
+    axes.yaxis.set_major_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/10.0))
+    axes.yaxis.set_minor_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/100.0))
+
+    boxplot = plt.boxplot(data_for_whiskeredboxes, notch=False, showmeans=True)
+
+    zoomOutY(axes, [y_min,y_max], 0.1)
+
+    axes.set_xticklabels(names)
+
+    legend_on = True
+
+    if (legend_on):
+        boxplot['medians'][0].set_label('median')
+        boxplot['means'][0].set_label('mean')
+        boxplot['fliers'][0].set_label('outlayers')
+        # boxplot['boxes'][0].set_label('boxes')
+        # boxplot['whiskers'][0].set_label('whiskers')
+        boxplot['caps'][0].set_label('caps')
+
+        #axes.set_xlim([0.7, 2.7])
+        plt.legend(numpoints = 1)
+
+    return plt
+
+def figure_out_y(special_histories):
+    data = []
+    y_max = -100.0
+    y_min = 100.0
+
+    for i in range(0,len(special_histories)):
+        a = special_histories[i]["last_validation_errors"]
+        b = special_histories[i]["last_training_errors"]
+
+        y_max = max(max(a),y_max)
+        y_min = min(min(a),y_min)
+        y_max = max(max(b),y_max)
+        y_min = min(min(b),y_min)
+
+    y_min = 0.0
+    y_max = math.ceil( y_max * 100 ) * 0.01
+    print y_min, y_max
+    return y_min, y_max
+
+def one_boxplot(axarritem, data, title, legend_on=False):
+    valdata = data["last_validation_errors"]
+    traindata = data["last_training_errors"]
+
+    boxplot = axarritem.boxplot([valdata, traindata], labels=['val', 'train'], widths = 0.6, showmeans=True, meanline=True)
+    axarritem.set_title(title)
+
+
+    if (legend_on):
+        boxplot['medians'][0].set_label('median')
+        boxplot['means'][0].set_label('mean')
+        boxplot['fliers'][0].set_label('outlayers')
+        # boxplot['boxes'][0].set_label('boxes')
+        # boxplot['whiskers'][0].set_label('whiskers')
+        boxplot['caps'][0].set_label('caps')
+
+        #axes.set_xlim([0.7, 2.7])
+    return boxplot
+
+def boxplots_in_row(plt, special_histories, data_names):
+    y_min, y_max = figure_out_y(special_histories)
+
+    figure, axarr = plt.subplots(1, 4, sharex=True, sharey=True) #, figsize=(6, 8)
+
+    one_boxplot(axarr[0], special_histories[0], data_names[0])
+    one_boxplot(axarr[1], special_histories[1], data_names[1])
+    one_boxplot(axarr[2], special_histories[2], data_names[2])
+    one_boxplot(axarr[3], special_histories[3], data_names[3], legend_on=True)
+
+    figure.subplots_adjust(wspace=0, right=0.81, left=0.1)
+
+    plt.legend(numpoints=1, bbox_to_anchor=(1.1, 0.95))
+
+    axarr[0].yaxis.set_major_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/10.0))
+    axarr[0].yaxis.set_minor_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/100.0))
+
 
     return plt, figure

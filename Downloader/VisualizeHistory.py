@@ -234,7 +234,8 @@ def visualize_whiskered_boxed(whiskered_boxes_data, names, show=True, save=False
     axes.yaxis.set_major_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/10.0))
     axes.yaxis.set_minor_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/100.0))
 
-    meanpointprops = dict(linewidth=0.0)
+    #meanpointprops = dict(linewidth=0.0)
+    meanpointprops = dict(linewidth=1.0)
 
     boxplot = plt.boxplot(whiskered_boxes_data, notch=False, showmeans=True, meanprops=meanpointprops)
 

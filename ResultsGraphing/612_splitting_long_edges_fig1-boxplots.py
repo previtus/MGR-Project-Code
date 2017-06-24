@@ -1,7 +1,7 @@
 import os
 from Omnipresent import len_
 from Downloader.VisualizeHistory import loadHistory
-from ResultsGraphing.custom import finally_show, plot_4x4_detailed, count_averages, save_plot
+from ResultsGraphing.custom import finally_show, plot_4x4_detailed, count_averages, save_plot, boxplots_in_row, boxplots_in_row_NVM
 
 dir_folder = os.path.dirname(os.path.abspath(__file__))
 
@@ -34,7 +34,7 @@ The idea:
 model_txt = "mix" # or img
 
 path_folder = dir_folder + '/data/k-fold-tests/6.1.2. splitting long edges - minlen/'
-out_folder = dir_folder + '/graphs/6.1.2. splitting long edges - minlen/fig3_4x4comparison'
+out_folder = dir_folder + '/graphs/6.1.2. splitting long edges - minlen/fig1_boxplot_last'
 
 if model_txt == "mix":
     original = path_folder + "mix_original_1760999.npy"
@@ -74,13 +74,11 @@ for i in range(0,len(data_paths)):
     both_data_names.append(train_data_names[i])
     both_data_names.append("validation "+val_data_names[i])
 
-custom_title = 'Validation error averages'
+custom_title = 'Validation error in last epoch'
 
 import matplotlib.pyplot as plt
-plt, figure = plot_4x4_detailed(plt, special_histories, val_data_names)
-
+plt, figure = boxplots_in_row(plt, special_histories, val_data_names)
 figure.set_size_inches( (8, 6) )
-#figure.suptitle(custom_title) # needs adjustment of the top value
 
 # Now check everything with the defaults:
 DPI = figure.get_dpi()
@@ -88,8 +86,6 @@ print "DPI:", DPI
 DefaultSize = figure.get_size_inches()
 print "Default size in Inches", DefaultSize
 print "Which should result in a %i x %i Image"%(DPI*DefaultSize[0], DPI*DefaultSize[1])
-
-#figure.savefig("test200.png", dpi = (200), ) # change the dpi
 
 save_plot(plt, True, out_folder)
 
