@@ -1,7 +1,7 @@
 import os
 from Omnipresent import len_
 from Downloader.VisualizeHistory import loadHistory
-from ResultsGraphing.custom import finally_show, plot_4x4_detailed, count_averages, save_plot, boxplots_in_row, boxplots_in_row_custom611, plot_two_together, plot_together
+from ResultsGraphing.custom import finally_show, plot_2x2_detailed, count_averages, save_plot, boxplots_in_row, boxplots_in_row_custom611, plot_two_together, plot_together
 
 dir_folder = os.path.dirname(os.path.abspath(__file__))
 
@@ -25,7 +25,8 @@ dataset1 = "5556x_markable_640x640"
 dataset2 = "5556x_minlen30_640px"
 dataset3 = "5556x_minlen30_640px_2x_expanded"
 
-dataset_txt = "markable" # markable or minlen30 or expanded30
+dataset_txt = "minlen30" # markable or minlen30 or expanded30
+SAVE = True
 
 path_folder = dir_folder + '/data/k-fold-tests/6.2.2. model competition - img vs osm vs mix/'
 out_folder_1 = dir_folder + '/graphs/6.2.2. model competition - img vs osm vs mix/fig1_evolution'
@@ -69,7 +70,7 @@ custom_title = 'Models comparison'
 colors = ["green", "green", "red", "red", "blue", "blue"]
 
 plt = plot_together(special_histories, names_to_print, colors, custom_title)
-save_plot(plt, True, out_folder_1)
+save_plot(plt, SAVE, out_folder_1)
 
 
 # FIGURE 2 state in last
@@ -78,7 +79,7 @@ custom_title = 'Validation error in last epoch'
 plt, figure = boxplots_in_row_custom611(plt, special_histories, data_names, just='both')
 
 figure.suptitle(custom_title) # needs adjustment of the top value
-save_plot(plt, True, out_folder_2)
+save_plot(plt, SAVE, out_folder_2)
 
 
 # FIGURE 3 state in their best epoch
@@ -87,7 +88,7 @@ custom_title = 'Validation error in best epoch'
 plt, figure = boxplots_in_row_custom611(plt, special_histories, data_names, just='both', BestInstead=True)
 
 figure.suptitle(custom_title) # needs adjustment of the top value
-save_plot(plt, True, out_folder_3)
+save_plot(plt, SAVE, out_folder_3)
 
 
 finally_show(plt)

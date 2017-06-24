@@ -1,7 +1,7 @@
 import os
 from Omnipresent import len_
 from Downloader.VisualizeHistory import loadHistory
-from ResultsGraphing.custom import finally_show, plot_4x4_detailed, count_averages, save_plot
+from ResultsGraphing.custom import finally_show, plot_2x2_detailed, count_averages, save_plot
 
 dir_folder = os.path.dirname(os.path.abspath(__file__))
 
@@ -77,7 +77,7 @@ for i in range(0,len(data_paths)):
 custom_title = 'Validation error averages'
 
 import matplotlib.pyplot as plt
-plt, figure = plot_4x4_detailed(plt, special_histories, val_data_names)
+plt, figure = plot_2x2_detailed(plt, special_histories, val_data_names)
 
 figure.set_size_inches( (8, 6) )
 #figure.suptitle(custom_title) # needs adjustment of the top value

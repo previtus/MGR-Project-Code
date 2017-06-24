@@ -196,7 +196,7 @@ def plot_one_one_subplot(axarritem, data, title):
 
     return line_val_avg + lines_val[0] + line_train_avg + lines_train[0]
 
-def plot_4x4_detailed(plt, special_histories, data_names):
+def plot_2x2_detailed(plt, special_histories, data_names):
     figure, axarr = plt.subplots(2, 2, sharex=True, sharey=True)
 
     plot_one_one_subplot(axarr[0, 0], special_histories[0], data_names[0])
@@ -223,6 +223,34 @@ def plot_4x4_detailed(plt, special_histories, data_names):
     plt.ylabel("loss")
 
     return plt, figure
+
+def figure_out_fromDic_y(special_histories_dic, just, BestInstead=False):
+    data = []
+    y_max = -100.0
+    y_min = 100.0
+
+    for key in special_histories_dic.keys():
+        item = special_histories_dic[key]
+
+        a = item["last_validation_errors"]
+        b = item["last_training_errors"]
+
+        if BestInstead:
+            a = item["best_validation_errors"]
+            b = item["best_training_errors"]
+
+        if just == 'val' or just == 'both':
+            y_max = max(max(a), y_max)
+            y_min = min(min(a), y_min)
+
+        if just == 'train' or just == 'both':
+            y_max = max(max(b), y_max)
+            y_min = min(min(b), y_min)
+
+    y_min = 0.0
+    y_max = math.ceil( y_max * 100 ) * 0.01
+    print y_min, y_max
+    return y_min, y_max
 
 def figure_out_y(special_histories, just, BestInstead=False):
     data = []
@@ -389,3 +417,100 @@ def plot_two_together(a, b, names, colors, custom_title):
 
     draw_titles_legends(plt, leg, custom_title)
     return plt
+
+def plot_4x4_derailed_plots(plt, special_histories_dic):
+    figure, axarr = plt.subplots(4, 4, sharex=True, sharey=True)
+
+    depths = [1, 2, 3, 4]
+    widths = [32, 64, 128, 256]
+
+    data_paths = {}
+
+    di = 0
+
+
+    for d in depths:
+        wi = 0
+        for w in widths:
+            ind = 'w' + str(w) + '_d' + str(d)
+            item = special_histories_dic[ind]
+            name = 'depth '+ str(d) + ', width ' + str(w)
+
+            lines = plot_one_one_subplot(axarr[wi, di], item, name)
+
+            wi += 1
+        di += 1
+
+    # Fine-tune figure; hide x ticks for top plots and y ticks for right plots
+    figure.subplots_adjust(hspace=0.24, wspace=0.1, bottom=0.19, top=0.92, left=0.1, right=0.95)
+    figure.subplots_adjust(hspace=0.31, wspace=0.12, bottom=0.1, top=0.92, left=0.1, right=0.95)
+
+    plt.setp([a.get_xticklabels() for a in axarr[0, :]], visible=False)
+    plt.setp([a.get_yticklabels() for a in axarr[:, 1]], visible=False)
+
+    '''
+    # Big frame around
+    ax = figure.add_subplot(111, frameon=False)
+
+    #print lines
+    labels = ["val avg","val", "train avg", "train"]
+
+    plt.figlegend(lines, labels, loc='lower center', ncol=4, labelspacing=0., bbox_to_anchor=(0.5, 0.))
+
+    plt.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
+    plt.xlabel("epoch")
+    plt.ylabel("loss")
+    '''
+    return plt, figure
+
+def plot_4x4_derailed_boxes(plt, special_histories_dic):
+    y_min, y_max = figure_out_fromDic_y(special_histories_dic, just='val')
+
+    figure, axarr = plt.subplots(4, 4, sharex=True, sharey=True, figsize=(4, 7))
+
+    depths = [1, 2, 3, 4]
+    widths = [256, 128, 64, 32]
+
+    data_paths = {}
+
+    di = 0
+
+
+    for d in depths:
+        wi = 0
+        for w in widths:
+            ind = 'w' + str(w) + '_d' + str(d)
+            item = special_histories_dic[ind]
+            name = 'depth '+ str(d) + ', width ' + str(w)
+
+            boxplot = one_boxplot(axarr[wi, di], item, name, just='val', showtitle=False, showxdesc=False)
+
+            wi += 1
+        di += 1
+
+    for i, row in enumerate(axarr):
+        for j, cell in enumerate(row):
+            if i == len(axarr) - 1:
+                cell.set_xlabel("depth: {0:d}".format(depths[j]))
+            if j == 3:
+                cell.set_ylabel("width: {0:d}".format(widths[i]))
+                cell.yaxis.set_label_position("right")
+
+    # Fine-tune figure; hide x ticks for top plots and y ticks for right plots
+    figure.subplots_adjust(hspace=0.0, wspace=0.0, bottom=0.05, top=0.98, left=0.16, right=0.92)
+
+    plt.setp([a.get_xticklabels() for a in axarr[3, :]], visible=False)
+
+    #axarr[0, 0].yaxis.set_major_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/3.0))
+    #axarr[0, 0].yaxis.set_minor_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/6.0))
+
+    zoomOutY(axarr[0, 0], [y_min,y_max], 0.0)
+
+
+    # Big frame around
+    #ax = figure.add_subplot(111, frameon=False)
+
+    #plt.xlabel('depth 1', 'depth 2', 'depth 3', 'depth 4')
+    #plt.ylabel(['width 32', 'width 64', 'width 128', 'width 256'])
+
+    return plt, figure
