@@ -316,7 +316,9 @@ def boxplots_in_row_custom611(plt, special_histories, data_names, just='val'):
     figure.subplots_adjust(wspace=0, right=0.93, left=0.17, top=0.94)
 
     #plt.legend(numpoints=1, bbox_to_anchor=(1.1, 0.95))#, loc='upper right')
-    plt.setp([a.get_xticklabels() for a in axarr[:]], visible=False)
+
+    if just <> 'both':
+        plt.setp([a.get_xticklabels() for a in axarr[:]], visible=False)
 
     axarr[0].yaxis.set_major_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/10.0))
     axarr[0].yaxis.set_minor_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/100.0))

@@ -20,24 +20,28 @@ The idea:
     
     Its possible to generate these to separately and then join them in tex btw.
 """
+dataset1 = "5556x_markable_640x640"
+dataset2 = "5556x_minlen30_640px"
 
-model_txt = "mix" # or img
+dataset_txt = "minlen30" # markable or minlen30
 
-path_folder = dir_folder + '/data/k-fold-tests/6.1.1. pixel size/'
-out_folder_1 = dir_folder + '/graphs/6.1.1. pixel size/figLeft_boxplotcomp_val'
-out_folder_2 = dir_folder + '/graphs/6.1.1. pixel size/figRight_graphcomp_evol'
+path_folder = dir_folder + '/data/k-fold-tests/6.1.3. augmentation - original, expanded, agg expanded/'
+out_folder_1 = dir_folder + '/graphs/6.1.3. augmentation - original, expanded, agg expanded/figLeft_'
+out_folder_2 = dir_folder + '/graphs/6.1.3. augmentation - original, expanded, agg expanded/figRight_'
 
-if model_txt == "mix":
-    m299 = path_folder + "299_mixed_v1.npy"
-    m640 = path_folder + "640_mixed_1760999.npy"
+if dataset_txt == "markable":
+    original = path_folder + "mix_5556x_markable_640x640_original_1760999.npy"
+    expanded = path_folder + "mix_5556x_markable_640x640_expanded_1760987.npy"
+    aggresive = path_folder + ".npy"
 else:
-    m299 = path_folder + "299_image_v1.npy"
-    m640 = path_folder + "640_image_1769351.npy"
+    original = path_folder + "mix_5556x_minlen30_640px_original_1713895.npy"
+    expanded = path_folder + "mix_5556x_minlen30_640px_expanded_1714014.npy"
+    aggresive = path_folder + ".npy"
 
-data_paths = [m299, m640]
+data_paths = [original, expanded]
 data_names = [
-    "299x299",
-    "640x640"]
+    "original",
+    "expanded"]
 hard_colors = ['red', 'green', 'blue', 'orange']
 light_colors = ['pink', 'lightgreen', 'lightblue', 'yellow']
 
@@ -54,11 +58,10 @@ plt, figure = boxplots_in_row_custom611(plt, special_histories, data_names, just
 figure.suptitle(custom_title) # needs adjustment of the top value
 save_plot(plt, True, out_folder_1)
 
-#finally_show(plt)
 
-names_to_print  = ["299x299 average val", "299x299 val"]
-names_to_print += ["640x640 average val", "640x640 val"]
-custom_title = 'Pixel size comparison'
+names_to_print  = ["original average val", "original val"]
+names_to_print += ["expanded average val", "expanded val"]
+custom_title = 'Dataset Augmentation'
 
 colors = ["green", "green", "red", "red"]
 
