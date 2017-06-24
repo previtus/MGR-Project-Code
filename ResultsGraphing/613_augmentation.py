@@ -8,17 +8,11 @@ dir_folder = os.path.dirname(os.path.abspath(__file__))
 ###
 """
 The idea:
-    Compare dataset with 299x299 pixels versus 640x640 pixels.
-    We have datasets:
-        299   5556x_mark_res_299x299
-        640   5556x_markable_640x640
-    with both mixed and image model.
-    
-    Only one plot, but a complicated one.
-    On left side we compare validation error of last in box plot.
-    On right side we show evolution over epochs of the two datasets in one graph plot.
-    
-    Its possible to generate these to separately and then join them in tex btw.
+    Compare augmented datasets.
+    original
+    expanded
+    aggresively expanded
+
 """
 dataset1 = "5556x_markable_640x640"
 dataset2 = "5556x_minlen30_640px"
@@ -38,10 +32,11 @@ else:
     expanded = path_folder + "mix_5556x_minlen30_640px_expanded_1714014.npy"
     aggresive = path_folder + ".npy"
 
-data_paths = [original, expanded]
+data_paths = [original, expanded, expanded]
 data_names = [
     "original",
-    "expanded"]
+    "expanded",
+    "willbeexpanded"]
 hard_colors = ['red', 'green', 'blue', 'orange']
 light_colors = ['pink', 'lightgreen', 'lightblue', 'yellow']
 
@@ -61,9 +56,10 @@ save_plot(plt, True, out_folder_1)
 
 names_to_print  = ["original average val", "original val"]
 names_to_print += ["expanded average val", "expanded val"]
+names_to_print += ["willbemore average val", "willbemore val"]
 custom_title = 'Dataset Augmentation'
 
-colors = ["green", "green", "red", "red"]
+colors = ["green", "green", "red", "red", "blue", "blue"]
 
 plt = plot_together(special_histories, names_to_print, colors, custom_title)
 save_plot(plt, True, out_folder_2)

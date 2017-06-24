@@ -224,7 +224,7 @@ def plot_4x4_detailed(plt, special_histories, data_names):
 
     return plt, figure
 
-def figure_out_y(special_histories, just):
+def figure_out_y(special_histories, just, BestInstead=False):
     data = []
     y_max = -100.0
     y_min = 100.0
@@ -232,6 +232,10 @@ def figure_out_y(special_histories, just):
     for i in range(0,len(special_histories)):
         a = special_histories[i]["last_validation_errors"]
         b = special_histories[i]["last_training_errors"]
+
+        if BestInstead:
+            a = special_histories[i]["best_validation_errors"]
+            b = special_histories[i]["best_training_errors"]
 
         if just == 'val' or just == 'both':
             y_max = max(max(a), y_max)
@@ -246,9 +250,13 @@ def figure_out_y(special_histories, just):
     print y_min, y_max
     return y_min, y_max
 
-def one_boxplot(axarritem, data, title, legend_on=False, just='both', showtitle=True, showxdesc=False):
+def one_boxplot(axarritem, data, title, legend_on=False, just='both', showtitle=True, showxdesc=False, BestInstead=False):
     valdata = data["last_validation_errors"]
     traindata = data["last_training_errors"]
+
+    if BestInstead:
+        valdata = data["best_validation_errors"]
+        traindata = data["best_training_errors"]
 
     if just == 'val':
         data = valdata
@@ -303,15 +311,15 @@ def boxplots_in_row(plt, special_histories, data_names, just='both'):
     return plt, figure
 
 
-def boxplots_in_row_custom611(plt, special_histories, data_names, just='val'):
-    y_min, y_max = figure_out_y(special_histories, just=just)
+def boxplots_in_row_custom611(plt, special_histories, data_names, just='val', BestInstead=False):
+    y_min, y_max = figure_out_y(special_histories, just=just, BestInstead=BestInstead)
 
     figure, axarr = plt.subplots(1, len(special_histories), sharex=True, sharey=True, figsize=(4, 6))
 
     for i in range(0,len(special_histories)-1):
-        one_boxplot(axarr[i], special_histories[i], data_names[i], just=just, showtitle=False, showxdesc=True)
+        one_boxplot(axarr[i], special_histories[i], data_names[i], just=just, showtitle=False, showxdesc=True, BestInstead=BestInstead)
     i = len(special_histories)-1
-    one_boxplot(axarr[i], special_histories[i], data_names[i], legend_on=True, just=just, showtitle=False, showxdesc=True)
+    one_boxplot(axarr[i], special_histories[i], data_names[i], legend_on=True, just=just, showtitle=False, showxdesc=True, BestInstead=BestInstead)
 
     figure.subplots_adjust(wspace=0, right=0.93, left=0.17, top=0.94)
 
@@ -339,7 +347,9 @@ def plot_together(data, names, colors, custom_title):
 
 
     colors_to_use = [colors[1], colors[0], colors[3], colors[2]]
-    linestyles = ['solid', 'dashed', 'solid', 'dashed']
+    if len(colors)==6:
+        colors_to_use = [colors[1], colors[0], colors[3], colors[2], colors[5], colors[4]]
+    linestyles = ['solid', 'dashed', 'solid', 'dashed', 'solid', 'dashed']
 
     leg = []
     [plt, leg] = draw_items_for_legend(plt, leg, items_to_draw, names, colors_to_use, linestyles)
