@@ -12,5 +12,7 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["unique_id"] = 'testtesttest'
     Settings["models"][n]["cooking_method"] = 'generators' # 'direct' or 'generators'
     Settings["models"][n]["epochs"] = 2
+    Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables_expanded.dump'
+
 
     return Settings
