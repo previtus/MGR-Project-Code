@@ -514,3 +514,8 @@ def plot_4x4_derailed_boxes(plt, special_histories_dic):
     #plt.ylabel(['width 32', 'width 64', 'width 128', 'width 256'])
 
     return plt, figure
+
+def sign_off_with_dataset_and_model_id(plt, dataset, model):
+
+
+    return plt
