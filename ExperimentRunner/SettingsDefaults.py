@@ -6,6 +6,7 @@ def load_default_settings():
     # dataset settings
     DefaultSettings["experiment_name"] = "basic"
     DefaultSettings["interrupt"] = False
+    DefaultSettings["report_on_models"] = False
     DefaultSettings["models"] = []
 
     DefaultModel = {}

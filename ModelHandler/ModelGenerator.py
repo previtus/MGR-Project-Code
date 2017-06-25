@@ -167,6 +167,40 @@ def get_top_models(models, datasets, Settings):
         index += 1
     return models
 
+def report_models(models, Settings):
+    number_of_models = len(Settings["models"])
+    print "## Adding ",number_of_models," top models."
+
+    index = 0
+    for model_settings in Settings["models"]:
+        # TODO: MODEL_TYPE_SPLIT
+        from ModelHandler.ModelTester import load_feature_file
+
+        if model_settings["model_type"] is 'simple_cnn_with_top':
+            filename_features_train = model_settings["filename_features_train"]
+            model = models[index]
+
+            print "^^^^^^ base part of IMG model"
+            model[0].summary()
+            print "^^^^^^ top part of IMG model"
+            model[1].summary()
+
+        elif model_settings["model_type"] is 'img_osm_mix':
+
+            print "^^^^^^ base part of MIX model"
+            model[0].summary()
+            print "^^^^^^ top part of MIX model"
+            model[1].summary()
+
+        elif model_settings["model_type"] is 'osm_only':
+            print "^^^^^^ main part of OSM model"
+            model[0].summary()
+
+        else:
+            print "Yet to be programmed."
+
+        index += 1
+
 def get_cnn_models(Settings):
     '''
     Loads the cnn part of models
