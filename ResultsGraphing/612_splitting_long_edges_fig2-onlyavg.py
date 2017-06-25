@@ -34,7 +34,7 @@ The idea:
 model_txt = "mix" # or img
 
 path_folder = dir_folder + '/data/k-fold-tests/6.1.2. splitting long edges - minlen/'
-out_folder = dir_folder + '/graphs/6.1.2. splitting long edges - minlen/fig2_average_valerr'
+out_folder = dir_folder + '/graphs/6.1.2._splitting_long_edges-minlen/fig2_average_valerr_'+model_txt
 
 if model_txt == "mix":
     original = path_folder + "mix_original_1760999.npy"

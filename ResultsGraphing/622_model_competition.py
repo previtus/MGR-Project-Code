@@ -29,9 +29,9 @@ dataset_txt = "minlen30" # markable or minlen30 or expanded30
 SAVE = True
 
 path_folder = dir_folder + '/data/k-fold-tests/6.2.2. model competition - img vs osm vs mix/'
-out_folder_1 = dir_folder + '/graphs/6.2.2. model competition - img vs osm vs mix/fig1_evolution'
-out_folder_2 = dir_folder + '/graphs/6.2.2. model competition - img vs osm vs mix/fig2_last_epoch'
-out_folder_3 = dir_folder + '/graphs/6.2.2. model competition - img vs osm vs mix/fig3_best_epoch'
+out_folder_1 = dir_folder + '/graphs/6.2.2._model_competition-img-vs-osm-vs-mix/fig1_evolution_' + dataset_txt
+out_folder_2 = dir_folder + '/graphs/6.2.2._model_competition-img-vs-osm-vs-mix/fig2_last_epoch_' + dataset_txt
+out_folder_3 = dir_folder + '/graphs/6.2.2._model_competition-img-vs-osm-vs-mix/fig3_best_epoch_' + dataset_txt
 
 if dataset_txt == "markable":
     osm = path_folder + "5556x_markable_640x640_osm_1761330.npy"

@@ -20,8 +20,8 @@ dataset2 = "5556x_minlen30_640px"
 dataset_txt = "minlen30" # markable or minlen30
 
 path_folder = dir_folder + '/data/k-fold-tests/6.1.3. augmentation - original, expanded, agg expanded/'
-out_folder_1 = dir_folder + '/graphs/6.1.3. augmentation - original, expanded, agg expanded/figLeft_'
-out_folder_2 = dir_folder + '/graphs/6.1.3. augmentation - original, expanded, agg expanded/figRight_'
+out_folder_1 = dir_folder + '/graphs/6.1.3._augmentation-original,expanded,agg_expanded/figLeft_'+dataset_txt
+out_folder_2 = dir_folder + '/graphs/6.1.3._augmentation-original,expanded,agg_expanded/figRight_'+dataset_txt
 
 if dataset_txt == "markable":
     original = path_folder + "mix_5556x_markable_640x640_original_1760999.npy"

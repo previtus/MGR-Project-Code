@@ -25,8 +25,8 @@ The idea:
 SAVE = True
 
 path_folder = dir_folder + '/data/k-fold-tests/6.2.3. OSM model GRID 4x4/'
-out_folder_1 = dir_folder + '/graphs/6.2.3. OSM model GRID 4x4/fig1_4x4madness'
-out_folder_2 = dir_folder + '/graphs/6.2.3. OSM model GRID 4x4/fig2_cutOfD2fixed'
+out_folder_1 = dir_folder + '/graphs/6.2.3._OSM_model_GRID_4x4/fig1_4x4madness'
+out_folder_2 = dir_folder + '/graphs/6.2.3._OSM_model_GRID_4x4/fig2_cutOfD2fixed'
 
 depths = [1,2,3,4]
 #widths = [32,64,128,256]
