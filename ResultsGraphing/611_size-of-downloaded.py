@@ -21,11 +21,11 @@ The idea:
     Its possible to generate these to separately and then join them in tex btw.
 """
 
-model_txt = "mix" # or img
+model_txt = "img" # or img
 
 path_folder = dir_folder + '/data/k-fold-tests/6.1.1. pixel size/'
-out_folder_1 = dir_folder + '/graphs/6.1.1. pixel size/figLeft_boxplotcomp_val'
-out_folder_2 = dir_folder + '/graphs/6.1.1. pixel size/figRight_graphcomp_evol'
+out_folder_1 = dir_folder + '/graphs/6.1.1._pixel_size/figLeft_boxplotcomp_val_' + model_txt
+out_folder_2 = dir_folder + '/graphs/6.1.1._pixel_size/figRight_graphcomp_evol_' + model_txt
 
 if model_txt == "mix":
     m299 = path_folder + "299_mixed_v1.npy"
