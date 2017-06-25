@@ -175,10 +175,11 @@ def report_models(models, Settings):
     for model_settings in Settings["models"]:
         # TODO: MODEL_TYPE_SPLIT
         from ModelHandler.ModelTester import load_feature_file
+        model = models[index]
 
         if model_settings["model_type"] is 'simple_cnn_with_top':
             filename_features_train = model_settings["filename_features_train"]
-            model = models[index]
+
 
             print "^^^^^^ base part of IMG model"
             model[0].summary()
