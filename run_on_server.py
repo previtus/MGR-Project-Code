@@ -10,7 +10,7 @@ import sys
 #settings_file = 'Settings/shuffle_effective_1200.py'
 #settings_file = 'Settings/finetune_tests_varAlong.py'
 
-settings_file = 'Settings/set2_for_results/var_cnn_test_proper_dataset.py'
+settings_file = 'Settings/test_symbolic_links.py'
 
 job_id = ''
 
