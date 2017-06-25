@@ -11,7 +11,7 @@ The idea:
     Compare augmented datasets.
     original
     expanded
-    aggresively expanded
+    aggressively expanded
 
 """
 dataset1 = "5556x_markable_640x640"
@@ -36,7 +36,7 @@ data_paths = [original, expanded, aggresive]
 data_names = [
     "original",
     "expanded",
-    "willbeexpanded"]
+    "aggressively"]
 hard_colors = ['red', 'green', 'blue', 'orange']
 light_colors = ['pink', 'lightgreen', 'lightblue', 'yellow']
 
@@ -56,7 +56,7 @@ save_plot(plt, True, out_folder_1)
 
 names_to_print  = ["original average val", "original val"]
 names_to_print += ["expanded average val", "expanded val"]
-names_to_print += ["willbemore average val", "willbemore val"]
+names_to_print += ["aggressively average val", "aggressively val"]
 custom_title = 'Dataset Augmentation'
 
 colors = ["green", "green", "red", "red", "blue", "blue"]

@@ -21,7 +21,7 @@ The idea:
     Its possible to generate these to separately and then join them in tex btw.
 """
 
-model_txt = "img" # or img
+model_txt = "mix" # or img
 
 path_folder = dir_folder + '/data/k-fold-tests/6.1.1. pixel size/'
 out_folder_1 = dir_folder + '/graphs/6.1.1._pixel_size/figLeft_boxplotcomp_val_' + model_txt

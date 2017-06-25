@@ -25,7 +25,7 @@ dataset1 = "5556x_markable_640x640"
 dataset2 = "5556x_minlen30_640px"
 dataset3 = "5556x_minlen30_640px_2x_expanded"
 
-dataset_txt = "minlen30" # markable or minlen30 or expanded30
+dataset_txt = "expanded30" # markable or minlen30 or expanded30
 SAVE = True
 
 path_folder = dir_folder + '/data/k-fold-tests/6.2.2. model competition - img vs osm vs mix/'
