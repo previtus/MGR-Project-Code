@@ -339,8 +339,11 @@ def boxplots_in_row(plt, special_histories, data_names, just='both'):
     return plt, figure
 
 
-def boxplots_in_row_custom611(plt, special_histories, data_names, just='val', BestInstead=False):
+def boxplots_in_row_custom611(plt, special_histories, data_names, just='val', BestInstead=False, forced_ymax = 0.0):
     y_min, y_max = figure_out_y(special_histories, just=just, BestInstead=BestInstead)
+
+    if forced_ymax <> 0.0:
+        y_max = forced_ymax
 
     figure, axarr = plt.subplots(1, len(special_histories), sharex=True, sharey=True, figsize=(4, 6))
 

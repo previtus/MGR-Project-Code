@@ -25,7 +25,7 @@ dataset1 = "5556x_markable_640x640"
 dataset2 = "5556x_minlen30_640px"
 dataset3 = "5556x_minlen30_640px_2x_expanded"
 
-dataset_txt = "expanded30" # markable or minlen30 or expanded30
+dataset_txt = "markable" # markable or minlen30 or expanded30
 SAVE = True
 
 path_folder = dir_folder + '/data/k-fold-tests/6.2.2. model competition - img vs osm vs mix/'
@@ -76,7 +76,7 @@ save_plot(plt, SAVE, out_folder_1)
 # FIGURE 2 state in last
 
 custom_title = 'Validation error in last epoch'
-plt, figure = boxplots_in_row_custom611(plt, special_histories, data_names, just='both')
+plt, figure = boxplots_in_row_custom611(plt, special_histories, data_names, just='both', forced_ymax = 0.17)
 
 figure.suptitle(custom_title) # needs adjustment of the top value
 save_plot(plt, SAVE, out_folder_2)
@@ -85,7 +85,7 @@ save_plot(plt, SAVE, out_folder_2)
 # FIGURE 3 state in their best epoch
 
 custom_title = 'Validation error in best epoch'
-plt, figure = boxplots_in_row_custom611(plt, special_histories, data_names, just='both', BestInstead=True)
+plt, figure = boxplots_in_row_custom611(plt, special_histories, data_names, just='both', BestInstead=True, forced_ymax = 0.17)
 
 figure.suptitle(custom_title) # needs adjustment of the top value
 save_plot(plt, SAVE, out_folder_3)

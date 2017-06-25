@@ -17,7 +17,7 @@ The idea:
 dataset1 = "5556x_markable_640x640"
 dataset2 = "5556x_minlen30_640px"
 
-dataset_txt = "minlen30" # markable or minlen30
+dataset_txt = "markable" # markable or minlen30
 
 path_folder = dir_folder + '/data/k-fold-tests/6.1.3. augmentation - original, expanded, agg expanded/'
 out_folder_1 = dir_folder + '/graphs/6.1.3._augmentation-original,expanded,agg_expanded/figLeft_'+dataset_txt
@@ -48,7 +48,7 @@ for i in range(0,len(data_paths)):
 custom_title = 'Validation error in last epoch'
 
 import matplotlib.pyplot as plt
-plt, figure = boxplots_in_row_custom611(plt, special_histories, data_names, just='both')
+plt, figure = boxplots_in_row_custom611(plt, special_histories, data_names, just='both', forced_ymax = 0.16)
 
 figure.suptitle(custom_title) # needs adjustment of the top value
 save_plot(plt, True, out_folder_1)
