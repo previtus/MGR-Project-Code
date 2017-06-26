@@ -1,7 +1,7 @@
 def Setup(Settings, DefaultModel):
-    # set6/var_cnn_test_proper_dataset_resnet50_20.py
+    # set6b/var_cnn_test_proper_dataset_resnet50_kfold_4x50.py
 
-    Settings["experiment_name"] = "var_cnn_test_proper_dataset_resnet50_kfold_20"
+    Settings["experiment_name"] = "var_cnn_test_proper_dataset_resnet50_kfold_4x50"
 
     Settings["graph_histories"] = ['together']  # ['all','together',[],[1,0],[0,0,0],[]]
 
@@ -15,10 +15,10 @@ def Setup(Settings, DefaultModel):
     Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
     Settings["models"][n]["model_type"] = 'img_osm_mix'
 
-    Settings["models"][n]["epochs"] = 20
+    Settings["models"][n]["epochs"] = 50
 
     Settings["models"][n]["k_fold_crossvalidation"] = True
-    Settings["models"][n]["crossvalidation_k"] = 10
+    Settings["models"][n]["crossvalidation_k"] = 4
 
     Settings["graph_histories"] = []
 
