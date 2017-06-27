@@ -42,7 +42,7 @@ def draw_normal_data(plotvalues, items, color, linestyle, plt, alpha_def=0.2):
     return plt, lines
 
 def draw_avg_data(item, color, linestyle, plt):
-    line = plt.plot(item, linestyle=linestyle, color=color)
+    line = plt.plot(item, linestyle=linestyle, color=color, alpha=0.9)
 
     return plt, line
 
@@ -471,8 +471,12 @@ def plot_4x4_derailed_plots(plt, special_histories_dic):
     '''
     return plt, figure
 
-def plot_4x4_derailed_boxes(plt, special_histories_dic):
+def plot_4x4_derailed_boxes(plt, special_histories_dic, BestInstead=False, forced_ymin = 0.0, forced_ymax = 0.0):
     y_min, y_max = figure_out_fromDic_y(special_histories_dic, just='val')
+    if forced_ymin <> 0.0:
+        y_min = forced_ymin
+    if forced_ymax <> 0.0:
+        y_max = forced_ymax
 
     figure, axarr = plt.subplots(4, 4, sharex=True, sharey=True, figsize=(4, 7))
 
@@ -491,7 +495,7 @@ def plot_4x4_derailed_boxes(plt, special_histories_dic):
             item = special_histories_dic[ind]
             name = 'depth '+ str(d) + ', width ' + str(w)
 
-            boxplot = one_boxplot(axarr[wi, di], item, name, just='val', showtitle=False, showxdesc=False)
+            boxplot = one_boxplot(axarr[wi, di], item, name, just='val', showtitle=False, showxdesc=False, BestInstead=BestInstead)
 
             wi += 1
         di += 1
@@ -505,14 +509,16 @@ def plot_4x4_derailed_boxes(plt, special_histories_dic):
                 cell.yaxis.set_label_position("right")
 
     # Fine-tune figure; hide x ticks for top plots and y ticks for right plots
-    figure.subplots_adjust(hspace=0.0, wspace=0.0, bottom=0.05, top=0.98, left=0.16, right=0.92)
+    figure.subplots_adjust(hspace=0.0, wspace=0.0, bottom=0.05, top=0.94, left=0.16, right=0.92)
 
     plt.setp([a.get_xticklabels() for a in axarr[3, :]], visible=False)
 
-    #axarr[0, 0].yaxis.set_major_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/3.0))
-    #axarr[0, 0].yaxis.set_minor_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/6.0))
+    a = round(y_max, 1)
+    b = round(y_min, 1)
+    axarr[0, 0].yaxis.set_major_locator(ticker.MultipleLocator(np.abs(a-b)/5.0))
+    axarr[0, 0].yaxis.set_minor_locator(ticker.MultipleLocator(np.abs(a-b)/20.0))
 
-    zoomOutY(axarr[0, 0], [y_min,y_max], 0.0)
+    zoomOutY(axarr[0, 0], [y_min,y_max], 0.01)
 
 
     # Big frame around
