@@ -47,6 +47,8 @@ def draw_avg_data(item, color, linestyle, plt):
     return plt, line
 
 def draw_items_for_legend(plt, leg, items_to_draw, names_to_print, colors_to_use, linestyles, alphas=None):
+    print len(items_to_draw), items_to_draw
+    print len(colors_to_use), colors_to_use
     for i in range(0, len(items_to_draw)):
         item = items_to_draw[i][0]
 
@@ -376,11 +378,12 @@ def plot_together(data, names, colors, custom_title):
     import matplotlib.pyplot as plt
     plt.figure()
 
-
-    colors_to_use = [colors[1], colors[0], colors[3], colors[2]]
-    if len(colors)==6:
-        colors_to_use = [colors[1], colors[0], colors[3], colors[2], colors[5], colors[4]]
-    linestyles = ['solid', 'dashed', 'solid', 'dashed', 'solid', 'dashed']
+    colors_to_use = []
+    linestyles = []
+    for i in range(0,len(colors),2):
+        colors_to_use.append(colors[i+1])
+        colors_to_use.append(colors[i])
+        linestyles += ['solid', 'dashed']
 
     leg = []
     [plt, leg] = draw_items_for_legend(plt, leg, items_to_draw, names, colors_to_use, linestyles)
