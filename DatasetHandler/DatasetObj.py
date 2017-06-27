@@ -654,3 +654,12 @@ class Dataset:
         print "osm", len(self.__osm), len_(self.__osm), self.__osm[0][0:10]
         print "osm50", len(r50osm), len_(r50osm), r50osm[0][0:10]
         print "osm200", len(r200osm), len_(r200osm), r200osm[0][0:10]
+
+        new_osm = []
+        for i in range(0,len(self.__osm)):
+            osm_of_i = list(self.__osm[i]) + list(r50osm[i]) + list(r200osm[i])
+            new_osm.append(osm_of_i)
+            
+        print "enhanced", len(new_osm), len_(new_osm), new_osm[0][0:10]
+        self.__osm = new_osm
+        print "enhanced", len(self.__osm), len_(self.__osm), self.__osm[0][0:10]
