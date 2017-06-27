@@ -56,8 +56,13 @@ def prepare_folders(Settings, datasets, verbose=False):
 
     for model_settings in Settings["models"]:
         dataset = datasets[ model_settings["dataset_pointer"] ]
+
+        cnn_model = model_settings["cnn_model"]
+        if model_settings["special_case"] == 'base_cnn_custom_top':
+            cnn_model += "_SPECIAL-CUSTOM-TOP" + model_settings["mark"]
+
         [filename_features_train, filename_features_test] = get_feature_file_names(
-            shared_folder=Settings["folders"]["shared_features_folder"], dataset_uid=dataset.unique_id, model_name=model_settings["cnn_model"])
+            shared_folder=Settings["folders"]["shared_features_folder"], dataset_uid=dataset.unique_id, model_name=cnn_model)
 
         model_settings["filename_features_train"] = filename_features_train
         model_settings["filename_features_test"] = filename_features_test

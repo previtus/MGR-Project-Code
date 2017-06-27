@@ -1,6 +1,6 @@
 # Provides the rest of the ModelHandler code with models. Works with the lower level of code in /Create Model
 from keras.models import Sequential
-from keras.layers import Dropout, Flatten, Dense
+from keras.layers import Dropout, Flatten, Dense, Conv2D, MaxPooling2D
 from keras.models import Model
 from keras.layers import Input, concatenate
 import ModelHandler.CreateModel.KerasApplicationsModels as Models
@@ -61,6 +61,30 @@ def build_img_osm_mix_model(input_shape_img, input_shape_osm, number_of_repeats)
 
     img_features_input = Input(shape=input_shape_img)
     img_features = Flatten()(img_features_input)
+
+    top = concatenate([osm_features, img_features])
+    for i in range(0,number_of_repeats):
+        top = Dense(256, activation='relu')(top)
+        top = Dropout(0.5)(top)
+    top = Dense(1, activation='sigmoid')(top)
+
+    model = Model(inputs=[osm_features_input, img_features_input], outputs=top)
+    return model
+
+def build_img_osm_mix_model_custom_base_cnn_top(input_shape_img, input_shape_osm, number_of_repeats):
+    # Special case scenario where we are testing different base CNN which produce large features
+
+    osm_features_input = Input(shape=input_shape_osm)
+    osm_features = Dense(256, activation='relu')(osm_features_input)
+    osm_features = Dropout(0.5)(osm_features)
+
+    img_features_input = Input(shape=input_shape_img)
+    img_features = Conv2D(64, 3, padding='same', name='conv_topm')(img_features_input)
+    img_features = Dropout(0.5)(img_features)
+    img_features = MaxPooling2D(pool_size=(4, 4))(img_features)
+    img_features = Dropout(0.5)(img_features)
+
+    img_features = Flatten()(img_features)
 
     top = concatenate([osm_features, img_features])
     for i in range(0,number_of_repeats):
@@ -143,7 +167,11 @@ def get_top_models(models, datasets, Settings):
                 return None
             input_shape_osm = dataset.getShapeOfOsm()
 
-            model[1] = build_img_osm_mix_model(input_shape_img, input_shape_osm, number_of_repeats=model_settings["top_repeat_FC_block"])
+            if model_settings["special_case"] == 'base_cnn_custom_top':
+                model[1] = build_img_osm_mix_model_custom_base_cnn_top(input_shape_img, input_shape_osm,
+                                                   number_of_repeats=model_settings["top_repeat_FC_block"])
+            else:
+                model[1] = build_img_osm_mix_model(input_shape_img, input_shape_osm, number_of_repeats=model_settings["top_repeat_FC_block"])
             print model_settings["unique_id"], model
 
         elif model_settings["model_type"] is 'osm_only':
