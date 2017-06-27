@@ -2,12 +2,11 @@ def Setup(Settings,DefaultModel):
     # var_cnn_test___TEST.py
     
     Settings["experiment_name"] = "baseCNN_specialTOP"
-
     Settings["graph_histories"] = ['together'] #['all','together',[],[1,0],[0,0,0],[]]
+    Settings["report_on_models"] = True
 
     Settings["models"].append(DefaultModel.copy())
     n = 0
-    Settings["models"][n]["dataset_pointer"] = 0 # 0 - reuse the first dataset
     Settings["models"][n]["dataset_name"] = "5556x_mark_res_299x299"
     Settings["models"][n]["pixels"] = 299
     Settings["models"][n]["cnn_model"] = 'inception_v3'
