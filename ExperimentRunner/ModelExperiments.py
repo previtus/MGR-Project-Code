@@ -8,7 +8,7 @@ import ModelHandler.ModelGenerator as ModelGenerator
 import ModelHandler.ModelTester as ModelTester
 from Omnipresent import len_
 
-def run_many_models(settings_file=None, job_id=''):
+def experiment_runner(settings_file=None, job_id=''):
     Settings = SettingsDefaults.load_settings_from_file(settings_file, job_id, verbose=False)
     if Settings["interrupt"]:
         return 365
@@ -44,5 +44,5 @@ def run_many_models(settings_file=None, job_id=''):
     ModelOI.save_metacentrum_report(Settings)
 
 
-#run_many_models('../Settings/1200x-vs-5556x.py')
-#run_many_models('../Settings/top_number_of_fc_blocks.py')
+#experiment_runner('../Settings/1200x-vs-5556x.py')
+#experiment_runner('../Settings/top_number_of_fc_blocks.py')

@@ -1,4 +1,4 @@
-from ExperimentRunner.ModelExperiments import run_many_models
+from ExperimentRunner.ModelExperiments import experiment_runner
 import sys
 
 #settings_file = 'Settings/mix_model.py'
@@ -10,7 +10,7 @@ import sys
 #settings_file = 'Settings/shuffle_effective_1200.py'
 #settings_file = 'Settings/finetune_tests_varAlong.py'
 
-settings_file = 'Settings/test_symbolic_links.py'
+settings_file = 'Settings/osm_multiple_radii.py'
 
 job_id = ''
 
@@ -28,4 +28,4 @@ if len(sys.argv) > 2:
 
 print "job_id = ",job_id
 
-run_many_models(settings_file, job_id)
+experiment_runner(settings_file, job_id)
