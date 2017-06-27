@@ -314,7 +314,7 @@ def one_boxplot(axarritem, data, title, legend_on=False, just='both', showtitle=
         boxplot['fliers'][0].set_label('outlayers')
         # boxplot['boxes'][0].set_label('boxes')
         # boxplot['whiskers'][0].set_label('whiskers')
-        boxplot['caps'][0].set_label('caps')
+        # boxplot['caps'][0].set_label('caps')
 
         #axes.set_xlim([0.7, 2.7])
     return boxplot
@@ -331,7 +331,7 @@ def boxplots_in_row(plt, special_histories, data_names, just='both'):
 
     figure.subplots_adjust(wspace=0, right=0.81, left=0.1)
 
-    plt.legend(numpoints=1, bbox_to_anchor=(1.1, 0.95))#, loc='upper right')
+    plt.legend(numpoints=1, bbox_to_anchor=(1.99, 0.95))  # , loc='upper right')
 
     axarr[0].yaxis.set_major_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/10.0))
     axarr[0].yaxis.set_minor_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/100.0))
@@ -341,13 +341,13 @@ def boxplots_in_row(plt, special_histories, data_names, just='both'):
     return plt, figure
 
 
-def boxplots_in_row_custom611(plt, special_histories, data_names, just='val', BestInstead=False, forced_ymax = 0.0):
+def boxplots_in_row_custom611(plt, special_histories, data_names, just='val', BestInstead=False, forced_ymax = 0.0, show_legend=False, custom_size=(4,6)):
     y_min, y_max = figure_out_y(special_histories, just=just, BestInstead=BestInstead)
 
     if forced_ymax <> 0.0:
         y_max = forced_ymax
 
-    figure, axarr = plt.subplots(1, len(special_histories), sharex=True, sharey=True, figsize=(4, 6))
+    figure, axarr = plt.subplots(1, len(special_histories), sharex=True, sharey=True, figsize=custom_size)
 
     for i in range(0,len(special_histories)-1):
         one_boxplot(axarr[i], special_histories[i], data_names[i], just=just, showtitle=False, showxdesc=True, BestInstead=BestInstead)
@@ -356,7 +356,9 @@ def boxplots_in_row_custom611(plt, special_histories, data_names, just='val', Be
 
     figure.subplots_adjust(wspace=0, right=0.93, left=0.17, top=0.94)
 
-    #plt.legend(numpoints=1, bbox_to_anchor=(1.1, 0.95))#, loc='upper right')
+    if show_legend:
+        figure.subplots_adjust(wspace=0, right=0.75, left=0.12, top=0.94)
+        plt.legend(numpoints=1, bbox_to_anchor=(2.45, 0.95))#, loc='upper right')
 
     if just <> 'both':
         plt.setp([a.get_xticklabels() for a in axarr[:]], visible=False)

@@ -31,7 +31,7 @@ The idea:
 
 """
 
-model_txt = "img" # or img
+model_txt = "mix" # or img
 
 path_folder = dir_folder + '/data/k-fold-tests/6.1.2. splitting long edges - minlen/'
 out_folder = dir_folder + '/graphs/6.1.2._splitting_long_edges-minlen/fig1_boxplot_last_'+model_txt

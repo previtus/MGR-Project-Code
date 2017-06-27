@@ -21,7 +21,7 @@ The idea:
     Its possible to generate these to separately and then join them in tex btw.
 """
 
-SAVE = True
+SAVE = False
 model_txt = "img" # or img
 
 path_folder = dir_folder + '/data/k-fold-tests/6.1.1. pixel size/'
@@ -65,7 +65,7 @@ for i in range(0,len(data_paths)):
 custom_title = 'Validation error in last epoch'
 
 import matplotlib.pyplot as plt
-plt, figure = boxplots_in_row_custom611(plt, special_histories, data_names, just='both')
+plt, figure = boxplots_in_row_custom611(plt, special_histories, data_names, BestInstead=True, just='both', forced_ymax = 0.16)
 
 figure.suptitle(custom_title) # needs adjustment of the top value
 save_plot(plt, True, out_folder_1)
