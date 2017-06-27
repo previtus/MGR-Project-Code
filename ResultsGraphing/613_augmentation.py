@@ -17,7 +17,7 @@ The idea:
 dataset1 = "5556x_markable_640x640"
 dataset2 = "5556x_minlen30_640px"
 
-SAVE = True
+SAVE = False
 
 dataset_txt = "markable" # markable or minlen30
 
@@ -26,25 +26,31 @@ out_folder_1 = dir_folder + '/graphs/6.1.3._augmentation-original,expanded,agg_e
 out_folder_2 = dir_folder + '/graphs/6.1.3._augmentation-original,expanded,agg_expanded/figRight_'+dataset_txt
 
 # LR!
-markable_lr_expanded = '/home/ekmek/Vitek/Mgr project/MGR-Project-Code/ResultsGraphing/data/k-fold-tests/6.1.3. augmentation - original, expanded, agg expanded/_mix_markable_640_lr_expanded_1800155.npy'
-min30_lr_expanded = ''
 
 if dataset_txt == "markable":
     original = path_folder + "mix_5556x_markable_640x640_original_1760999.npy"
     expanded = path_folder + "mix_5556x_markable_640x640_expanded_1760987.npy"
     aggresive = path_folder + "5556x_markable_640x640_2x_agressive_expanded_1788956.npy"
 
-    expanded_lr = markable_lr_expanded
+    expanded_lr = path_folder + "_mix_markable_640_lr_expanded_1800155.npy"
+    aggresive_lr = path_folder + "_mix_markable_640_2x_agressive_expanded_lr_expanded_1800486.npy"
 else:
     original = path_folder + "mix_5556x_minlen30_640px_original_1713895.npy"
     expanded = path_folder + "mix_5556x_minlen30_640px_expanded_1714014.npy"
     aggresive = path_folder + "5556x_minlen30_640px_2x_agressive_expanded_1788474.npy"
 
+    expanded_lr = path_folder + ".npy"
+    aggresive_lr = path_folder + ".npy"
+
+
 data_paths = [original, expanded, aggresive]
 data_names = ["original","expanded","aggressively"]
 
-#data_paths = [original, expanded, expanded_lr]
-#data_names = ["original","expanded","expanded_lr"]
+#data_paths = [original, expanded_lr, aggresive_lr]
+#data_names = ["original","expanded","aggresive"]
+
+#data_paths = [expanded, aggresive, expanded_lr, aggresive_lr]
+#data_names = ["expanded", "aggresive","expanded_lr","aggresive_lr"]
 
 hard_colors = ['red', 'green', 'blue', 'orange']
 light_colors = ['pink', 'lightgreen', 'lightblue', 'yellow']
@@ -68,7 +74,7 @@ names_to_print += ["expanded average val", "expanded val"]
 names_to_print += ["aggressively average val", "aggressively val"]
 custom_title = 'Dataset Augmentation'
 
-colors = ["green", "green", "red", "red", "blue", "blue"]
+colors = ["green", "green", "red", "red", "blue", "blue", "purple", "purple"]
 
 plt = plot_together(special_histories, names_to_print, colors, custom_title)
 save_plot(plt, SAVE, out_folder_2)
