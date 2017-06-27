@@ -190,14 +190,17 @@ def get_top_models(models, datasets, Settings):
 
             if model_settings["special_case"] == 'OSM_Multiple_Radii':
                 dataset.expandOsmDataWithMultipleRadii(model_settings)
-                Settings["interrupt"] = True
-                return None
 
             input_shape = dataset.getShapeOfOsm()
             print "model shape is: ", input_shape
 
             model[0] = build_osm_only_model(input_shape=input_shape, number_of_repeats=model_settings["top_repeat_FC_block"], manual_width=model_settings["osm_manual_width"])
             print model_settings["unique_id"], model
+
+            if model_settings["special_case"] == 'OSM_Multiple_Radii':
+                print "Specially enhanced OSM model of shape:"
+                model[0].summary()
+
         else:
             print "Yet to be programmed."
 
