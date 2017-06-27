@@ -1,7 +1,7 @@
 def Setup(Settings,DefaultModel):
-    # set2_for_results/var_cnn_test_proper_dataset.py
+    # set2_for_results/var_cnn_test_proper_dataset_299x300ep.py
     
-    Settings["experiment_name"] = "Comparison_of_CNNs_on_5556x_640"
+    Settings["experiment_name"] = "var_cnn_test_proper_dataset_299x300ep"
 
     Settings["graph_histories"] = ['together', [0,1], [1,4], [2,3]] #['all','together',[],[1,0],[0,0,0],[]]
 
@@ -13,7 +13,7 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["cnn_model"] = 'resnet50'
     Settings["models"][n]["unique_id"] = 'resnet50_cnn'
     Settings["models"][n]["cooking_method"] = 'generators' # 'direct' or 'generators'
-    Settings["models"][n]["epochs"] = 2
+    Settings["models"][n]["epochs"] = 300
     Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
 
     Settings["models"].append(DefaultModel.copy())
@@ -24,7 +24,7 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["cnn_model"] = 'inception_v3'
     Settings["models"][n]["unique_id"] = 'inception_v3_cnn'
     Settings["models"][n]["cooking_method"] = 'generators' # 'direct' or 'generators'
-    Settings["models"][n]["epochs"] = 2
+    Settings["models"][n]["epochs"] = 300
     Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
     Settings["models"][n]["model_type"] = 'img_osm_mix'
 
@@ -36,7 +36,7 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["cnn_model"] = 'vgg19'
     Settings["models"][n]["unique_id"] = 'vgg19_cnn'
     Settings["models"][n]["cooking_method"] = 'generators' # 'direct' or 'generators'
-    Settings["models"][n]["epochs"] = 2
+    Settings["models"][n]["epochs"] = 300
     Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
     Settings["models"][n]["model_type"] = 'img_osm_mix'
 
@@ -48,7 +48,7 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["cnn_model"] = 'vgg16'
     Settings["models"][n]["unique_id"] = 'vgg16_cnn'
     Settings["models"][n]["cooking_method"] = 'generators' # 'direct' or 'generators'
-    Settings["models"][n]["epochs"] = 2
+    Settings["models"][n]["epochs"] = 300
     Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
     Settings["models"][n]["model_type"] = 'img_osm_mix'
 
@@ -60,7 +60,7 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["cnn_model"] = 'xception'
     Settings["models"][n]["unique_id"] = 'xception_cnn'
     Settings["models"][n]["cooking_method"] = 'generators' # 'direct' or 'generators'
-    Settings["models"][n]["epochs"] = 2
+    Settings["models"][n]["epochs"] = 300
     Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
     Settings["models"][n]["model_type"] = 'img_osm_mix'
 

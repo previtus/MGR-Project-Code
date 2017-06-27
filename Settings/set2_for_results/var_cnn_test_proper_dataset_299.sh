@@ -3,4 +3,4 @@
 export PATH="/storage/brno2/home/previtus/anaconda2/bin:$PATH"
 cd /auto/brno2/home/previtus/MGR-Project-Code/
 
-python run_on_server.py Settings/set2_for_results/var_cnn_test_proper_dataset_299.py $PBS_JOBID
+python run_on_server.py Settings/set2_for_results/var_cnn_test_proper_dataset_299x300ep.py $PBS_JOBID
