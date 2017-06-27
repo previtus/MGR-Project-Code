@@ -628,3 +628,29 @@ class Dataset:
 
         return newDataset
 
+    def getDataLabels_only_osm_raw(self):
+        return self.__osm
+
+    def expandOsmDataWithMultipleRadii(self, model_settings):
+        # idea is to load all the radii data we have available and add it to each of the segments
+
+        # we assume the basic experiment definition
+        r50 = 'SegmentsData_marked_R50_4Tables.dump'
+        r200 = 'SegmentsData_marked_R200_4Tables.dump'
+
+        import DatasetHandler
+        dataset_r50 = DatasetHandler.CreateDataset.load_custom(model_settings["dataset_name"], model_settings["pixels"],
+                                                           desired_number=model_settings["number_of_images"],
+                                                           seed=model_settings["seed"],
+                                                           filename_override=r50)
+        r50osm = dataset_r50.getDataLabels_only_osm_raw()
+        dataset_r200 = DatasetHandler.CreateDataset.load_custom(model_settings["dataset_name"], model_settings["pixels"],
+                                                           desired_number=model_settings["number_of_images"],
+                                                           seed=model_settings["seed"],
+                                                           filename_override=r200)
+        r200osm = dataset_r200.getDataLabels_only_osm_raw()
+
+        from Omnipresent import len_
+        print "osm", len(self.__osm), len_(self.__osm), self.__osm[0][0:10]
+        print "osm50", len(r50osm), len_(r50osm), r50osm[0][0:10]
+        print "osm200", len(r200osm), len_(r200osm), r200osm[0][0:10]

@@ -188,6 +188,11 @@ def get_top_models(models, datasets, Settings):
                 Settings["interrupt"] = True
                 return None
 
+            if model_settings["special_case"] == 'OSM_Multiple_Radii':
+                dataset.expandOsmDataWithMultipleRadii(model_settings)
+                Settings["interrupt"] = True
+                return None
+
             input_shape = dataset.getShapeOfOsm()
             print "model shape is: ", input_shape
 
