@@ -311,7 +311,7 @@ def one_boxplot(axarritem, data, title, legend_on=False, just='both', showtitle=
     if (legend_on):
         boxplot['medians'][0].set_label('median')
         boxplot['means'][0].set_label('mean')
-        boxplot['fliers'][0].set_label('outlayers')
+        boxplot['fliers'][0].set_label('outliers')
         # boxplot['boxes'][0].set_label('boxes')
         # boxplot['whiskers'][0].set_label('whiskers')
         # boxplot['caps'][0].set_label('caps')
