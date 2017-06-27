@@ -29,11 +29,11 @@ resnet50 = path_folder + "5556x_markable_640x640_resnet50_cnn_50_1803979.npy"
 vgg16 = path_folder + "5556x_markable_640x640_vgg16_cnn_50_1803978.npy"
 vgg19 = path_folder + "5556x_markable_640x640_vgg19_cnn_50_1803977.npy"
 inception_v3 = path_folder + "5556x_markable_640x640_inception_v3_cnn_50_1803975.npy"
-xception = path_folder + "MISSING.npy"
+xception = path_folder + "5556x_markable_640x640_xception_cnn_50_1803976.npy"
 
 xception20 = path_folder + "5556x_markable_640x640_xception_cnn_20_1795497.npy"
 
-data_paths = [resnet50, vgg16, vgg19, xception20, inception_v3]
+data_paths = [resnet50, vgg16, vgg19, xception, inception_v3]
 val_data_names = ["resnet50","vgg16","vgg19","xception","inception_v3"]
 train_data_names = ["resnet50","vgg16","vgg19","xception","inception_v3"]
 
