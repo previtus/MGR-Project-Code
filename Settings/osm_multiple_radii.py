@@ -11,9 +11,8 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["model_type"] = 'osm_only'
     Settings["models"][n]["unique_id"] = 'multiple_radii'
     Settings["models"][n]["top_repeat_FC_block"] = 2
-    Settings["models"][n]["epochs"] = 50
+    Settings["models"][n]["epochs"] = 500
     Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
-
     Settings["models"][n]["special_case"] = 'OSM_Multiple_Radii'
 
     Settings["models"].append(DefaultModel.copy())
@@ -23,7 +22,8 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["model_type"] = 'osm_only'
     Settings["models"][n]["unique_id"] = 'only_r100'
     Settings["models"][n]["top_repeat_FC_block"] = 2
-    Settings["models"][n]["epochs"] = 100
+    Settings["models"][n]["epochs"] = 500
     Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
+    Settings["models"][n]["special_case"] = ''
 
     return Settings
