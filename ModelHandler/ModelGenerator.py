@@ -152,7 +152,18 @@ def get_top_models(models, datasets, Settings):
             model = models[index]
 
             train_data = load_feature_file(filename_features_train)
-            input_shape = train_data.shape[1:]
+
+            if model_settings["evaluation_after_training"]:
+                # special case, when we dont actually need any features or images - just evaluation
+                if model_settings["pixels"] == 640:
+                    input_shape = (2,2,2048)
+                elif model_settings["pixels"] == 299:
+                    input_shape = (1, 1, 2048)
+                else:
+                    print "uncoded model combination"
+            else:
+                input_shape = train_data.shape[1:]
+
             model[1] = build_simple_top_model(input_shape=input_shape, number_of_repeats=model_settings["top_repeat_FC_block"])
             print model_settings["unique_id"], model
 

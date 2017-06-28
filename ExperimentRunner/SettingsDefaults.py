@@ -34,6 +34,8 @@ def load_default_settings():
     DefaultModel["loss_func"] = 'mean_squared_error' # 'mean_squared_error' or 'mean_absolute_error' etc.
     DefaultModel["metrics"] = ['mean_absolute_error'] # list of 'mean_squared_error' or 'mean_absolute_error' etc.
     DefaultModel["train_top"] = True # Always True??
+    DefaultModel["test_existence_of_images"] = True
+    DefaultModel["evaluation_after_training"] = False
 
     DefaultModel["k_fold_crossvalidation"] = False
     DefaultModel["crossvalidation_k"] = 4

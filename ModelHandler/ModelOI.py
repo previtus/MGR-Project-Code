@@ -202,7 +202,8 @@ def load_dataset(Settings):
                 # yup allow thin only for osm only model - that's when we have dualities
                 dataset.remove_dual_osms()
 
-            dataset.test_existence_of_all_images()
+            if model_settings["test_existence_of_images"]:
+                dataset.test_existence_of_all_images()
 
             datasets.append(dataset)
             model_settings["dataset_pointer"] = index
