@@ -657,7 +657,14 @@ class Dataset:
 
         new_osm = []
         for i in range(0,len(r50osm)):
-            osm_of_i = list(self.__osm[i]) + list(r50osm[i]) + list(r200osm[i])
+            osm_of_i = []
+            if model_settings["multiple_radii_mark"] == 'I':
+                osm_of_i = list(self.__osm[i]) + list(r50osm[i]) + list(r200osm[i])
+            elif model_settings["multiple_radii_mark"] == 'II':
+                osm_of_i = list(self.__osm[i]) + list(r200osm[i])
+            elif model_settings["multiple_radii_mark"] == 'III':
+                osm_of_i = list(self.__osm[i]) + list(r50osm[i])
+
             new_osm.append(osm_of_i)
 
         print "enhanced", len(new_osm), len_(new_osm), new_osm[0][0:10]
