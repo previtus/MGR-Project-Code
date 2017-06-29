@@ -17,15 +17,16 @@ The idea:
 dataset1 = "5556x_markable_640x640"
 dataset2 = "5556x_minlen30_640px"
 
-SAVE = False
+SAVE = True
 
-dataset_txt = "markable" # markable or minlen30
+dataset_txt = "minlen30" # markable or minlen30
 
 path_folder = dir_folder + '/data/k-fold-tests/6.1.3. augmentation - original, expanded, agg expanded/'
 out_folder_1 = dir_folder + '/graphs/6.1.3._augmentation-original,expanded,agg_expanded/figLeft_'+dataset_txt
 out_folder_2 = dir_folder + '/graphs/6.1.3._augmentation-original,expanded,agg_expanded/figRight_'+dataset_txt
 
 # LR!
+
 
 if dataset_txt == "markable":
     original = path_folder + "mix_5556x_markable_640x640_original_1760999.npy"
@@ -39,15 +40,16 @@ else:
     expanded = path_folder + "mix_5556x_minlen30_640px_expanded_1714014.npy"
     aggresive = path_folder + "5556x_minlen30_640px_2x_agressive_expanded_1788474.npy"
 
-    expanded_lr = path_folder + ".npy"
-    aggresive_lr = path_folder + ".npy"
+    expanded_lr = path_folder + '_mix_5556x_minlen30_640px_2x_expanded_lr_expanded__1829023.npy'
+    aggresive_lr = path_folder + '_mix_5556x_minlen30_640px_2x_agressive_expanded_lr_expanded__1829024.npy'
 
 
-data_paths = [original, expanded, aggresive]
-data_names = ["original","expanded","aggressively"]
+#data_paths = [original, expanded, aggresive]
+#data_names = ["original","expanded","aggressively"]
 
-#data_paths = [original, expanded_lr, aggresive_lr]
-#data_names = ["original","expanded","aggresive"]
+data_paths = [original, expanded_lr, aggresive_lr]
+data_names = ["original","expanded","aggresive"]
+data_names = ["original","expanded_lr","aggresive_lr"]
 
 #data_paths = [expanded, aggresive, expanded_lr, aggresive_lr]
 #data_names = ["expanded", "aggresive","expanded_lr","aggresive_lr"]
