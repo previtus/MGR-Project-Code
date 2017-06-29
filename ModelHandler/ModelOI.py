@@ -198,6 +198,9 @@ def load_dataset(Settings):
             elif model_settings["edit_osm_vec"] == 'low-mid-high':
                 dataset.cast_osm_to_one_hot_categories()
 
+            elif model_settings["edit_osm_vec"] == 'log':
+                dataset.log_the_osm()
+
             if model_settings["osm_only_unique_osms"] and model_settings["model_type"] == 'osm_only':
                 # yup allow thin only for osm only model - that's when we have dualities
                 dataset.remove_dual_osms()

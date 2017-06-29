@@ -4,6 +4,7 @@ import os
 import shutil
 import numpy as np
 import random
+import math
 import Downloader.Defaults
 from Omnipresent import file_exists_and_accesible
 
@@ -330,6 +331,15 @@ class Dataset:
         #print new_osm_vector[0][0:90]
         #print self.__osm[0][0:30]
         self.__osm = new_osm_vector
+
+    def log_the_osm(self):
+        for i in range(len(self.__osm)):
+            for j in range(len(self.__osm[i])):
+                val = self.__osm[i][j]
+                if val > 1:
+                    val = math.log(val)
+
+                self.__osm[i][j] = val
 
     # Data access: ---------------------------------------------------------------------------------------------
     def getJustLabels(self, validation_split=0.2):
