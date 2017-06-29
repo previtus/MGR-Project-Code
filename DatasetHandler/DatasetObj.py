@@ -635,8 +635,9 @@ class Dataset:
         # idea is to load all the radii data we have available and add it to each of the segments
 
         # we assume the basic experiment definition
-        r50 = 'SegmentsData_marked_R50_4Tables.dump'
-        r200 = 'SegmentsData_marked_R200_4Tables.dump'
+        r50 = 'SegmentsData_marked_R50_4TablesN.dump'
+        r100 = 'SegmentsData_marked_R50_4TablesN.dump'
+        r200 = 'SegmentsData_marked_R200_4TablesN.dump'
 
         import DatasetHandler
         dataset_r50 = DatasetHandler.CreateDataset.load_custom(model_settings["dataset_name"], model_settings["pixels"],
@@ -644,6 +645,11 @@ class Dataset:
                                                            seed=model_settings["seed"],
                                                            filename_override=r50)
         r50osm = dataset_r50.getDataLabels_only_osm_raw()
+        dataset_r100 = DatasetHandler.CreateDataset.load_custom(model_settings["dataset_name"], model_settings["pixels"],
+                                                           desired_number=model_settings["number_of_images"],
+                                                           seed=model_settings["seed"],
+                                                           filename_override=r100)
+        r100osm = dataset_r100.getDataLabels_only_osm_raw()
         dataset_r200 = DatasetHandler.CreateDataset.load_custom(model_settings["dataset_name"], model_settings["pixels"],
                                                            desired_number=model_settings["number_of_images"],
                                                            seed=model_settings["seed"],
@@ -653,17 +659,18 @@ class Dataset:
         from Omnipresent import len_
         print "osm", len(self.__osm), len_(self.__osm), self.__osm[0][0:10]
         print "osm50", len(r50osm), len_(r50osm), r50osm[0][0:10]
+        print "osm50", len(r100osm), len_(r100osm), r100osm[0][0:10]
         print "osm200", len(r200osm), len_(r200osm), r200osm[0][0:10]
 
         new_osm = []
         for i in range(0,len(r50osm)):
             osm_of_i = []
             if model_settings["multiple_radii_mark"] == 'I':
-                osm_of_i = list(self.__osm[i]) + list(r50osm[i]) + list(r200osm[i])
+                osm_of_i = list(r100osm[i]) + list(r50osm[i]) + list(r200osm[i])
             elif model_settings["multiple_radii_mark"] == 'II':
-                osm_of_i = list(self.__osm[i]) + list(r200osm[i])
+                osm_of_i = list(r100osm[i]) + list(r200osm[i])
             elif model_settings["multiple_radii_mark"] == 'III':
-                osm_of_i = list(self.__osm[i]) + list(r50osm[i])
+                osm_of_i = list(r100osm[i]) + list(r50osm[i])
 
             new_osm.append(osm_of_i)
 
