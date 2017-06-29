@@ -301,6 +301,10 @@ def one_boxplot(axarritem, data, title, legend_on=False, just='both', showtitle=
         labels = ['val', 'train']
 
     print labels
+    print data
+    print "mean: ", np.mean(data), "+/-", np.std(data)
+    stat = [np.mean(data), np.std(data)]
+
     boxplot = axarritem.boxplot(data, labels=labels, widths = 0.6, showmeans=True, meanline=True)
     if showtitle:
         axarritem.set_title(title)
@@ -317,7 +321,7 @@ def one_boxplot(axarritem, data, title, legend_on=False, just='both', showtitle=
         # boxplot['caps'][0].set_label('caps')
 
         #axes.set_xlim([0.7, 2.7])
-    return boxplot
+    return boxplot, stat
 
 def boxplots_in_row(plt, special_histories, data_names, just='both'):
     y_min, y_max = figure_out_y(special_histories, just=just)
@@ -487,6 +491,7 @@ def plot_4x4_derailed_boxes(plt, special_histories_dic, BestInstead=False, force
 
     di = 0
 
+    stats = []
 
     for d in depths:
         wi = 0
@@ -494,8 +499,11 @@ def plot_4x4_derailed_boxes(plt, special_histories_dic, BestInstead=False, force
             ind = 'w' + str(w) + '_d' + str(d)
             item = special_histories_dic[ind]
             name = 'depth '+ str(d) + ', width ' + str(w)
-
-            boxplot = one_boxplot(axarr[wi, di], item, name, just='val', showtitle=False, showxdesc=False, BestInstead=BestInstead)
+            print name
+            boxplot,stat = one_boxplot(axarr[wi, di], item, name, just='val', showtitle=False, showxdesc=False, BestInstead=BestInstead)
+            stat.append(w)
+            stat.append(d)
+            stats.append(stat)
 
             wi += 1
         di += 1
@@ -527,7 +535,7 @@ def plot_4x4_derailed_boxes(plt, special_histories_dic, BestInstead=False, force
     #plt.xlabel('depth 1', 'depth 2', 'depth 3', 'depth 4')
     #plt.ylabel(['width 32', 'width 64', 'width 128', 'width 256'])
 
-    return plt, figure
+    return plt, figure, stats
 
 def sign_off_with_dataset_and_model_id(plt, dataset, model):
 

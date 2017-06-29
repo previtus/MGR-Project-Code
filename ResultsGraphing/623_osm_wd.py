@@ -22,7 +22,7 @@ The idea:
         
 
 """
-SAVE = True
+SAVE = False
 
 path_folder = dir_folder + '/data/k-fold-tests/6.2.3. OSM model GRID 4x4/'
 out_folder_1 = dir_folder + '/graphs/6.2.3._OSM_model_GRID_4x4/fig1_4x4madness'
@@ -54,13 +54,62 @@ for key in data_paths.keys():
 
 print special_histories.keys()
 
+
 import matplotlib.pyplot as plt
-plt, figure = plot_4x4_derailed_boxes(plt, special_histories, BestInstead=True, forced_ymin = 0.04, forced_ymax = 0.11)
+plt, figure, stats = plot_4x4_derailed_boxes(plt, special_histories, BestInstead=True, forced_ymin = 0.04, forced_ymax = 0.11)
 
 custom_title = 'Best validation error'
 figure.suptitle(custom_title) # needs adjustment of the top value
 
 save_plot(plt, SAVE, out_folder_1)
+
+
+min_v = 1
+min_i = -1
+for i in range(0,len(stats)):
+    if stats[i][0] < min_v:
+        min_v = stats[i][0]
+        min_i = i
+    print stats[i]
+
+print " === "
+print stats[min_i]
+
+#sorted_stats = sorted(stats,key=lambda x: x[0])
+sorted_stats = sorted(stats,key=lambda x: 100 * float("%.4f" % x[0]) + 0.0001 * float("%.4f" % x[0]))
+
+for i in sorted_stats:
+    #print "mean: ", "%.4f" % i[0], "+/-", "%.4f" % i[1], " - ", i[2], "x", i[3]
+
+    w = i[2]
+    d = i[3]
+    print w, "&", d, "&", "%.4f" % i[0], "&", "%.4f" % i[1]
+
+
+stats = []
+for key in special_histories:
+    item = special_histories[key]
+    print key, item.keys()
+    a = min(item["avg_val_loss"])
+    print a
+    stats.append([a, key])
+
+min_v = 1
+min_i = -1
+for i in range(0,len(stats)):
+    if stats[i][0] < min_v:
+        min_v = stats[i][0]
+        min_i = i
+    print stats[i]
+
+sorted_stats = sorted(stats,key=lambda x: x[0])
+for i in sorted_stats:
+    tmp = i[1].split("_")
+    w = tmp[0][1:]
+    d = tmp[1][1:]
+
+    #print "min: ", "%.4f" % i[0], " is ", w, d, i[1]
+    print w, "&", d, "&", "%.4f" % i[0]
 
 # FIGURE 2
 
