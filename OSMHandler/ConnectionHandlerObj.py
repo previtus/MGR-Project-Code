@@ -46,6 +46,12 @@ class ConnectionHandler:
             key_attr_pairs_file, limit_number=number_of_loaded_pairs,
             dont_take_keys_which_are_not_in_list = columns_we_have_in_database )
 
+        verbal = False
+        if verbal == True:
+            for i in range(0, len(self.__list_of_watched_pairs)):
+                print i, self.__list_of_watched_pairs[i]
+
+
         return None
 
     def final_vec_invert_indices(self, i):
