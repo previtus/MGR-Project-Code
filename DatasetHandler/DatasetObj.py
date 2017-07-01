@@ -536,7 +536,7 @@ class Dataset:
         labels = np.array(self.__labels)
         DatasetVizualizators.plotHistogram(labels, 'Score distribution histogram')
         DatasetVizualizators.plotWhisker(labels, 'Whisker box plot')
-        DatasetVizualizators.plotX_sortValues(labels, 'Distribution of score (sorted)')
+        DatasetVizualizators.plotX_sortValues(labels, 'Distribution of score (sorted)', notReverse=True)
         if save_to_pdf:
             DatasetVizualizators.saveAllPlotsToPDF()
         DatasetVizualizators.show()
