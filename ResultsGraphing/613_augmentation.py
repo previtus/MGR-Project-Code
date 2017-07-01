@@ -19,7 +19,7 @@ dataset2 = "5556x_minlen30_640px"
 
 SAVE = True
 
-dataset_txt = "minlen30" # markable or minlen30
+dataset_txt = "markable" # markable or minlen30
 
 path_folder = dir_folder + '/data/k-fold-tests/6.1.3. augmentation - original, expanded, agg expanded/'
 out_folder_1 = dir_folder + '/graphs/6.1.3._augmentation-original,expanded,agg_expanded/figLeft_'+dataset_txt
@@ -41,6 +41,7 @@ else:
     aggresive = path_folder + "5556x_minlen30_640px_2x_agressive_expanded_1788474.npy"
 
     expanded_lr = path_folder + '_mix_5556x_minlen30_640px_2x_expanded_lr_expanded__1829023.npy'
+    expanded_lr = path_folder + '_v2_5556x_minlen30_640px_2x_expanded_lr_expanded_1842005.npy'
     aggresive_lr = path_folder + '_mix_5556x_minlen30_640px_2x_agressive_expanded_lr_expanded__1829024.npy'
 
 
@@ -49,7 +50,7 @@ else:
 
 data_paths = [original, expanded_lr, aggresive_lr]
 data_names = ["original","expanded","aggresive"]
-data_names = ["original","expanded_lr","aggresive_lr"]
+#data_names = ["original","expanded_lr","aggresive_lr"]
 
 #data_paths = [expanded, aggresive, expanded_lr, aggresive_lr]
 #data_names = ["expanded", "aggresive","expanded_lr","aggresive_lr"]
@@ -73,7 +74,7 @@ save_plot(plt, SAVE, out_folder_1)
 
 names_to_print  = ["original average val", "original val"]
 names_to_print += ["expanded average val", "expanded val"]
-names_to_print += ["aggressively average val", "aggressively val"]
+names_to_print += ["aggressive average val", "aggressive val"]
 custom_title = 'Dataset Augmentation'
 
 colors = ["green", "green", "red", "red", "blue", "blue", "purple", "purple"]
