@@ -208,6 +208,11 @@ def load_dataset(Settings):
             if model_settings["test_existence_of_images"]:
                 dataset.test_existence_of_all_images()
 
+            if model_settings["special_case"] == 'debug':
+                print "DEBUG OUTPUT ABOUT"
+                print dataset
+                print dataset.plotHistogram()
+
             datasets.append(dataset)
             model_settings["dataset_pointer"] = index
 
