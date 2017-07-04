@@ -148,10 +148,7 @@ def get_top_models(models, datasets, Settings):
         from ModelHandler.ModelTester import load_feature_file
 
         if model_settings["model_type"] is 'simple_cnn_with_top':
-            filename_features_train = model_settings["filename_features_train"]
             model = models[index]
-
-            train_data = load_feature_file(filename_features_train)
 
             if model_settings["evaluation_after_training"]:
                 # special case, when we dont actually need any features or images - just evaluation
@@ -162,25 +159,42 @@ def get_top_models(models, datasets, Settings):
                 else:
                     print "uncoded model combination"
             else:
+                filename_features_train = model_settings["filename_features_train"]
+                train_data = load_feature_file(filename_features_train)
                 input_shape = train_data.shape[1:]
 
             model[1] = build_simple_top_model(input_shape=input_shape, number_of_repeats=model_settings["top_repeat_FC_block"])
             print model_settings["unique_id"], model
 
         elif model_settings["model_type"] is 'img_osm_mix':
-            filename_features_train = model_settings["filename_features_train"]
             model = models[index]
 
-            train_data = load_feature_file(filename_features_train)
-            input_shape_img = train_data.shape[1:]
+            if model_settings["evaluation_after_training"]:
+                # special case, when we dont actually need any features or images - just evaluation
+                input_shape_osm = (594,)
 
-            dataset = datasets[ model_settings["dataset_pointer"] ]
+                if model_settings["pixels"] == 640:
+                    input_shape_img = (2,2,2048)
+                elif model_settings["pixels"] == 299:
+                    input_shape_img = (1, 1, 2048)
+                else:
+                    print "uncoded model combination"
+            else:
 
-            if not dataset.has_osm_loaded:
-                print "For this model type, we need OSM vectors, choose dataset accordingly."
-                Settings["interrupt"] = True
-                return None
-            input_shape_osm = dataset.getShapeOfOsm()
+                filename_features_train = model_settings["filename_features_train"]
+
+                train_data = load_feature_file(filename_features_train)
+                input_shape_img = train_data.shape[1:]
+
+                dataset = datasets[ model_settings["dataset_pointer"] ]
+
+                if not dataset.has_osm_loaded:
+                    print "For this model type, we need OSM vectors, choose dataset accordingly."
+                    Settings["interrupt"] = True
+                    return None
+                input_shape_osm = dataset.getShapeOfOsm()
+
+                print "input_shape_osm", input_shape_osm
 
             if model_settings["special_case"] == 'base_cnn_custom_top':
                 model[1] = build_img_osm_mix_model_custom_base_cnn_top(input_shape_img, input_shape_osm,
@@ -192,18 +206,22 @@ def get_top_models(models, datasets, Settings):
         elif model_settings["model_type"] is 'osm_only':
             model = models[index]
 
-            dataset = datasets[ model_settings["dataset_pointer"] ]
+            if model_settings["evaluation_after_training"]:
+                # special case, when we dont actually need any features or images - just evaluation
+                input_shape = (594,)
+            else:
+                dataset = datasets[ model_settings["dataset_pointer"] ]
 
-            if not dataset.has_osm_loaded:
-                print "For this model type, we need OSM vectors, choose dataset accordingly."
-                Settings["interrupt"] = True
-                return None
+                if not dataset.has_osm_loaded:
+                    print "For this model type, we need OSM vectors, choose dataset accordingly."
+                    Settings["interrupt"] = True
+                    return None
 
-            if model_settings["special_case"] == 'OSM_Multiple_Radii':
-                dataset.expandOsmDataWithMultipleRadii(model_settings)
+                if model_settings["special_case"] == 'OSM_Multiple_Radii':
+                    dataset.expandOsmDataWithMultipleRadii(model_settings)
 
-            input_shape = dataset.getShapeOfOsm()
-            print "model shape is: ", input_shape
+                input_shape = dataset.getShapeOfOsm()
+                print "input_shape", input_shape
 
             model[0] = build_osm_only_model(input_shape=input_shape, number_of_repeats=model_settings["top_repeat_FC_block"], manual_width=model_settings["osm_manual_width"])
             print model_settings["unique_id"], model
@@ -339,3 +357,27 @@ def join_two_models(one, two):
     from keras.models import Model
     finetune_model = Model(input=one.input, output=two(one.output))
     return finetune_model
+
+'''
+def join_two_models_MIX(one, two, a):
+
+    number_of_repeats = 2
+    input_shape_osm = (594,)
+    osm_features_input = Input(shape=input_shape_osm)
+    osm_features = Dense(256, activation='relu')(osm_features_input)
+    osm_features = Dropout(0.5)(osm_features)
+
+    img_features_input = one.output
+    img_features = Flatten()(img_features_input)
+
+    top = concatenate([osm_features, img_features])
+    for i in range(0,number_of_repeats):
+        top = Dense(256, activation='relu')(top)
+        top = Dropout(0.5)(top)
+    top = Dense(1, activation='sigmoid')(top)
+
+    model = Model(inputs=[osm_features_input, img_features_input], outputs=top)
+
+
+    return model
+'''
