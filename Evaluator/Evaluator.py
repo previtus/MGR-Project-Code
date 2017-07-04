@@ -53,11 +53,7 @@ def evaluator_load_model(model_file, settings_file, verbose=False):
 
     return model_base, model_top, model_settings
 
-def evaluator_test_on_dataset(model_base, model_top, model_settings, dataset):
-    [x, y] = dataset.getDataLabels()
-    osm = dataset.getDataLabels_only_osm()
-    print len_(x), len_(y)
-
+def evaluator_test_on_dataset(model_base, model_top, model_settings, x, osm):
     if model_settings["model_type"] is 'simple_cnn_with_top':
         labels_base = model_base.predict(x, batch_size=32, verbose=1)
         labels_predicted = model_top.predict(labels_base, batch_size=32, verbose=1)
@@ -70,7 +66,10 @@ def evaluator_test_on_dataset(model_base, model_top, model_settings, dataset):
         labels_predicted = model_top.predict(osm_input, batch_size=32, verbose=1)
 
     print len_(labels_predicted)
-    print labels_predicted
+    labels_return = []
+    for label in labels_predicted:
+        labels_return.append(label[0])
+    return labels_return
 
 def load_tmp_dataset():
     model_settings = {}
@@ -87,12 +86,24 @@ def load_tmp_dataset():
                                                        desired_number=model_settings["number_of_images"],
                                                        seed=model_settings["seed"],
                                                        filename_override=model_settings["dump_file_override"])
-    # hack over
-    return dataset
+
+    [x, y] = dataset.getDataLabels()
+    osm = dataset.getDataLabels_only_osm()
+    print len_(x), len_(y), len_(osm)
+
+    return x, y, osm
 
 def evaluator(model_file, settings_file):
     model_base, model_top, model_settings = evaluator_load_model(model_file, settings_file)
 
-    dataset = load_tmp_dataset()
+    x, y_ref, osm = load_tmp_dataset()
 
-    evaluator_test_on_dataset(model_base, model_top, model_settings, dataset)
+    y_pred = evaluator_test_on_dataset(model_base, model_top, model_settings, x, osm)
+
+    print y_ref, y_pred
+
+    from sklearn.metrics import mean_squared_error, mean_absolute_error
+    mae = mean_absolute_error(y_ref, y_pred)
+    mse = mean_squared_error(y_ref, y_pred)
+
+    return mse, mae

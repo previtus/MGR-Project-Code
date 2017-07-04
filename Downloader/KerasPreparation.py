@@ -107,13 +107,15 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
                     labels.append(Segment.getScore())
                     segment_ids.append(segment_id)
 
-                if Segment.Segment_OSM_MARKING_VERSION == OSM_MARKING_VERSION:
-                    # only if we have one - checkOSMVersion could be used too
+                    if Segment.Segment_OSM_MARKING_VERSION == OSM_MARKING_VERSION:
+                        # only if we have one - checkOSMVersion could be used too
 
-                    # Aaardwark, fix Segment.getNearbyVector(i_th_image) in Segment.LocationsIndex(i_th_image) -> Segment.LocationsIndex[i_th_image]
-                    osm = Segment.DistinctNearbyVector[location_index]
+                        # Aaardwark, fix Segment.getNearbyVector(i_th_image) in Segment.LocationsIndex(i_th_image) -> Segment.LocationsIndex[i_th_image]
+                        osm = Segment.DistinctNearbyVector[location_index]
 
-                    osm_vectors.append(osm)
+                        osm_vectors.append(osm)
+
+            #print len(list_of_images), len(labels), len(osm_vectors), len(segment_ids)
 
         segment_id += 1
 
