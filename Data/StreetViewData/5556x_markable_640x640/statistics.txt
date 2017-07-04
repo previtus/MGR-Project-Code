@@ -6,3 +6,6 @@ number_no_score_no_img 3264
 number_yes_score_yes_img 8376
 number_yes_score_no_img 0
  
+Loaded | 5556 | segments.
+Lists contain 5058 of Segments with 30072 images.
+Unscored  3662  Segments with 21696 images.
