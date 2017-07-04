@@ -6,6 +6,11 @@ def loadGeoJson(path):
         GeoJSON = json.load(f)
     return GeoJSON
 
+def saveGeoJson(GeoJSON, path):
+    print "Saving GeoJSON object to:", path
+    with open(path, 'a') as f:
+        json.dump(GeoJSON, f)
+
 def loadDefaultGEOJSON():
     from DatasetHandler.FileHelperFunc import get_geojson_path
     path = get_geojson_path()
@@ -16,6 +21,21 @@ def internalToExternal(score):
         return int(round(score * 100))
     return score
 
+def tmpMarkGeoJSON(GeoJSON, Segments):
+    SegmentId = 0
+    for feature in GeoJSON['features']:
+        if (feature['geometry']['type'] == 'LineString'):
+            json_score = feature['properties']['attractivity']
+            internal_score = Segments[SegmentId].getScore()
+            segments_score = internalToExternal(internal_score)
+
+            if json_score == -1:
+                feature['properties']['attractivity'] = 200
+
+            SegmentId += 1
+
+    return GeoJSON
+
 def traverseGeoJSON(GeoJSON, Segments):
     SegmentId = 0
     for feature in GeoJSON['features']:
@@ -25,8 +45,7 @@ def traverseGeoJSON(GeoJSON, Segments):
             segments_score = internalToExternal(internal_score)
 
             if json_score <> segments_score:
-                print SegmentId, json_score, segments_score, internal_score
-
+                print SegmentId, json_score, segments_score
 
             Coordinates = feature['geometry']['coordinates']
             Start = tuple([Coordinates[0][1], Coordinates[0][0]])
@@ -35,11 +54,6 @@ def traverseGeoJSON(GeoJSON, Segments):
             #segment = SegmentObj(Start, End, Score, SegmentId)
             #if verbose: segment.displaySegment()
             SegmentId += 1
-
-            #Segments.append(segment)
-
-        else:
-            print feature
 
 
 GeoJSON = loadDefaultGEOJSON()
@@ -52,3 +66,10 @@ import Downloader.DataOperations as DataOperations
 Segments = DataOperations.LoadDataFile(path_to_segments_file)
 
 traverseGeoJSON(GeoJSON, Segments)
+
+
+evaluated_geojson = tmpMarkGeoJSON(GeoJSON, Segments)
+path_geojson_out = 'temp.geojson'
+saveGeoJson(evaluated_geojson, path_geojson_out)
+
+#traverseGeoJSON(a, Segments)
