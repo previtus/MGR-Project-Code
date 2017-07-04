@@ -6,7 +6,6 @@ import ModelHandler.ModelTester as ModelTester
 import DatasetHandler as DatasetHandler
 from Omnipresent import len_
 
-
 def evaluator_load_model(model_file, settings_file, verbose=False):
     ### LOAD skeleton of model and dataset
     Settings = SettingsDefaults.load_settings_from_file(settings_file, '', verbose=False)
@@ -71,6 +70,7 @@ def evaluator_test_on_dataset(model_base, model_top, model_settings, x, osm):
         labels_return.append(label[0])
     return labels_return
 
+## ---------- debug test functions
 def load_tmp_dataset():
     model_settings = {}
     # HACK
@@ -86,24 +86,80 @@ def load_tmp_dataset():
                                                        desired_number=model_settings["number_of_images"],
                                                        seed=model_settings["seed"],
                                                        filename_override=model_settings["dump_file_override"])
-
     [x, y] = dataset.getDataLabels()
     osm = dataset.getDataLabels_only_osm()
     print len_(x), len_(y), len_(osm)
-
     return x, y, osm
 
+def evaluator_on_tmp(model_file, settings_file):
+    model_base, model_top, model_settings = evaluator_load_model(model_file, settings_file)
+    x, y_ref, osm = load_tmp_dataset()
+    y_pred = evaluator_test_on_dataset(model_base, model_top, model_settings, x, osm)
+    print y_ref, y_pred
+    from sklearn.metrics import mean_squared_error, mean_absolute_error
+    mae = mean_absolute_error(y_ref, y_pred)
+    mse = mean_squared_error(y_ref, y_pred)
+    return mse, mae
+## ENDOF---------- debug test functions
+
+
+def test_marking(geo_json_path):
+    path_to_segments_file = default_segments_path()
+    lists, Segments = loadDataFromSegments(path_to_segments_file, None)
+    GeoJSON = loadGeoJson(geo_json_path)
+
+    from Functions import traverseGeoJSON
+    traverseGeoJSON(GeoJSON, Segments)
+
+
+from Functions import *
 def evaluator(model_file, settings_file):
     model_base, model_top, model_settings = evaluator_load_model(model_file, settings_file)
 
-    x, y_ref, osm = load_tmp_dataset()
+    # Load data!
+    path_to_segments_file = default_segments_path()
+    lists, Segments = loadDataFromSegments(path_to_segments_file, None)
+    #lists = small_lists(lists)
+
+    print "BEFORE MARKING"
+    analyze_lists(lists)
+
+    y_ref = lists[1]
+    osm = osm_from_lists(lists)
+    x = None
+    segment_ids = lists[3]
+
+    #print "i have", len_(osm)
+    #x, y_ref, osm = load_tmp_dataset()
+    #print "this works though", len_(osm)
 
     y_pred = evaluator_test_on_dataset(model_base, model_top, model_settings, x, osm)
 
-    print y_ref, y_pred
+    pred_list = [lists[0], y_pred, lists[2], lists[3]]
+    print "AFTER MARKING"
+    analyze_lists(pred_list)
+
+    EvaluatedData = prepEvaluatedData(y_pred, segment_ids)
+    Altered = AlterSegments(EvaluatedData, Segments, only_unknown_scores=True)
+
+    GeoJSON = loadDefaultGEOJSON()
+    evaluated_geojson = markGeoJSON(GeoJSON, Altered)
+    path_geojson_out = 'marked_from_osm-set3type_of_model_osm_kfold_d3.geojson'
+    saveGeoJson(evaluated_geojson, path_geojson_out)
+
+    # Ex post testing
+    DefaultSegments = DataOperations.LoadDataFile(path_to_segments_file)
+    traverseGeoJSON(evaluated_geojson, DefaultSegments)
+
+
+    #print y_ref, y_pred
 
     from sklearn.metrics import mean_squared_error, mean_absolute_error
     mae = mean_absolute_error(y_ref, y_pred)
     mse = mean_squared_error(y_ref, y_pred)
 
+    np.savetxt('y_ref.out', y_ref, delimiter=',')
+    np.savetxt('y_pred.out', y_pred, delimiter=',')
+
     return mse, mae
+

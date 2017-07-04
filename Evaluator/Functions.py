@@ -3,6 +3,7 @@ from Omnipresent import len_
 import Downloader.DataOperations as DataOperations
 from Downloader import KerasPreparation
 import os
+import numpy as np
 
 def loadGeoJson(path):
     with open(path) as f:
@@ -24,7 +25,7 @@ def internalToExternal(score):
         return int(round(score * 100))
     return score
 
-def tmpMarkGeoJSON(GeoJSON, Segments):
+def markGeoJSON(GeoJSON, Segments):
     SegmentId = 0
     for feature in GeoJSON['features']:
         if (feature['geometry']['type'] == 'LineString'):
@@ -32,8 +33,9 @@ def tmpMarkGeoJSON(GeoJSON, Segments):
             internal_score = Segments[SegmentId].getScore()
             segments_score = internalToExternal(internal_score)
 
-            if json_score == -1:
-                feature['properties']['attractivity'] = 200
+            #if json_score == -1:
+            #    feature['properties']['attractivity'] = 200
+            feature['properties']['attractivity'] = segments_score
 
             SegmentId += 1
 
@@ -57,6 +59,41 @@ def traverseGeoJSON(GeoJSON, Segments):
             #segment = SegmentObj(Start, End, Score, SegmentId)
             #if verbose: segment.displaySegment()
             SegmentId += 1
+
+def prepEvaluatedData(y_pred, segment_ids):
+    EvaluatedData = {}
+    for i in range(0,len(y_pred)):
+        id = segment_ids[i]
+        predicted_score = y_pred[i]
+        if id in EvaluatedData:
+            EvaluatedData[id].append(predicted_score)
+        else:
+            EvaluatedData[id] = [predicted_score]
+    return EvaluatedData
+
+def AlterSegments(EvaluatedData, Segments, only_unknown_scores=True):
+    SegmentId = 0
+    for SegmentId in range(0, len(Segments)):
+        Segment = Segments[SegmentId]
+        has_no_score = Segment.hasUnknownScore()
+        internal_score = Segments[SegmentId].getScore()
+
+        mark = False
+
+        if only_unknown_scores:
+            if has_no_score:
+                mark = True
+        if not only_unknown_scores:
+            mark = True
+
+        if mark:
+            if SegmentId in EvaluatedData:
+                scores = EvaluatedData[SegmentId]
+                avg_score = np.mean(scores)
+
+                Segment.Score = avg_score
+
+    return Segments
 
 '''
 def UnknownSegmentsSubset(Segments):
@@ -82,7 +119,13 @@ def loadDataFromSegments(path_to_segments_file, SCORE, verbose=False):
         print "__segment_ids", len_(__segment_ids), __segment_ids[0:5]
         print "flag_is_extended", flag_is_extended
 
-    return [__list_of_images, __labels, __osm, __segment_ids]
+    return [__list_of_images, __labels, __osm, __segment_ids], Segments
+
+def small_lists(lists, n=50):
+    small = []
+    for item in lists:
+        small.append(item[0:n])
+    return small
 
 def filter_lists_only_unknown_score(lists, verbose):
     __list_of_images, __labels, __osm, __segment_ids = lists
@@ -127,7 +170,70 @@ def analyze_lists(lists):
 
     print "Lists contain", number_of_segments, "of Segments with", number_of_images, "images."
     print "Unscored ", number_of_segments_without_score, " Segments with", number_of_images_without_score, "images."
+    print "Scored ", (number_of_segments-number_of_segments_without_score), " Segments with", (number_of_images-number_of_images_without_score), "images."
 
+def x_osm_from_lists(lists):
+    __list_of_images, __labels, __osm, __segment_ids = lists
+
+    x = KerasPreparation.LoadActualImages(__list_of_images)
+    osm = np.asarray(__osm)
+
+    return [x, osm]
+
+def osm_from_lists(lists):
+    __list_of_images, __labels, __osm, __segment_ids = lists
+    osm = np.asarray(__osm)
+    return osm
+
+#### GENERATORS
+def getMixGenerator_from_lists(lists):
+    __list_of_images, __labels, __osm, __segment_ids = lists
+
+    size = len(__list_of_images)
+    order = range(size)
+
+    image_generator = generator_mix(order, image_paths=__list_of_images, osms=__osm)
+    return [order, image_generator, size]
+
+def getImgGenerator_from_lists(lists):
+    __list_of_images, __labels, __osm, __segment_ids = lists
+
+    size = len(__list_of_images)
+    order = range(size)
+
+    image_generator = generator_img(order, image_paths=__list_of_images)
+    return [order, image_generator, size]
+
+def getOsmGenerator_from_lists(lists):
+    __list_of_images, __labels, __osm, __segment_ids = lists
+
+    size = len(__list_of_images)
+    order = range(size)
+
+    image_generator = generator_osm(order, osms=__osm)
+    return [order, image_generator, size]
+
+def generator_mix(order, image_paths, osms, resize=None):
+    while True:
+        for index in order:
+            image = KerasPreparation.LoadActualImages([image_paths[index]], resize=resize)
+            osm = osms[index]
+            yield (image, osm)
+def generator_img(order, image_paths, resize=None):
+    while True:
+        for index in order:
+            image = KerasPreparation.LoadActualImages([image_paths[index]], resize=resize)
+            yield (image)
+def generator_osm(order, osms, resize=None):
+    while True:
+        for index in order:
+            osm = osms[index]
+            yield (osm)
+
+def default_segments_path():
+    folder = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/'
+    path_to_segments_file = folder + '5556x_markable_640x640/SegmentsData_marked_R100_4TablesN.dump'
+    return path_to_segments_file
 
 def main():
 
@@ -135,8 +241,11 @@ def main():
     #print GeoJSON.keys()
 
     folder = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/'
-    path_to_segments_file = folder + '5556x_minlen30_640px/SegmentsData_marked_R100_4Tables.dump'
-    path_to_segments_file = folder + '5556x_markable_640x640/SegmentsData_marked_R100.dump'
+    path_to_segments_file = folder + '5556x_markable_640x640/SegmentsData_marked_R100_4TablesN.dump'
+
+    #path_to_segments_file = folder + '5556x_markable_640x640/SegmentsData_marked_R100.dump'
+    #path_to_segments_file = folder + '5556x_markable_640x640/SegmentsData_marked_R100_4Tables.dump'
+    print path_to_segments_file
 
     '''
     Segments = DataOperations.LoadDataFile(path_to_segments_file)
@@ -152,8 +261,11 @@ def main():
     '''
 
     lists = loadDataFromSegments(path_to_segments_file, None)
-
     analyze_lists(lists)
 
+    getOsmGenerator_from_lists(lists)
+    getImgGenerator_from_lists(lists)
+    getMixGenerator_from_lists(lists)
 
-main()
+
+#main()

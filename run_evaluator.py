@@ -19,11 +19,17 @@ if len(sys.argv) > 2:
     model_file = (sys.argv[1])  # var1
     settings_file = (sys.argv[2])  # var2
 
-img_mse, img_mae = evaluator(IMG_model_file, IMG_settings_file)
-mix_mse, mix_mae = evaluator(MIX_model_file, MIX_settings_file)
+#img_mse, img_mae = evaluator(IMG_model_file, IMG_settings_file)
+#mix_mse, mix_mae = evaluator(MIX_model_file, MIX_settings_file)
 osm_mse, osm_mae = evaluator(OSM_model_file, OSM_settings_file)
 
+'''
 print "-------------------------------------"
 print "IMG mse =", img_mse, "; mae = ", img_mae
 print "MIX mse =", mix_mse, "; mae = ", mix_mae
+'''
 print "OSM mse =", osm_mse, "; mae = ", osm_mae
+
+#from Evaluator.Evaluator import test_marking
+#geojsonpath = '/home/ekmek/Vitek/____out_marked-json-files/marked_from_osm-set3type_of_model_osm_kfold_d3.geojson'
+#test_marking(geojsonpath)
