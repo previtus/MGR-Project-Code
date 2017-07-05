@@ -29,3 +29,5 @@ ConnectionSettingsSecrets.py
 !/ResultsGraphing/*.[jJ][pP][gG]
 /*.[nN][pP][yY]
 !/ResultsGraphing/*.[nN][pP][yY]
+
+Data/ModelFiles/SelectedModels/*
