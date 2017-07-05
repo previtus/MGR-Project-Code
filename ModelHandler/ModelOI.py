@@ -170,6 +170,9 @@ def load_dataset(Settings):
             dataset = DatasetHandler.CreateDataset.load_custom(model_settings["dataset_name"], model_settings["pixels"],
                     desired_number=model_settings["number_of_images"], seed=model_settings["seed"], filename_override=model_settings["dump_file_override"])
 
+            if model_settings["special_case"] == 'debug':
+                dataset.debug_print_first(200)
+
             # Shuffling
             #  shuffle the individual block of images from different places, to get more uniformly distributed data
             #  but be careful not to separate [img1,osm1,vec1] and [img2,osm1,osm1] into training and valid sets

@@ -531,6 +531,11 @@ class Dataset:
         #print x
         #print len(x)
 
+    def debug_print_first(self, n):
+        for i in range(0,n):
+            print self.__segment_ids[i], self.__labels[i], self.__list_of_images[i]
+
+
     def plotHistogram(self, save_to_pdf=False):
         import DatasetVizualizators
         labels = np.array(self.__labels)

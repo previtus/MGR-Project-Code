@@ -10,7 +10,7 @@ import sys
 #settings_file = 'Settings/shuffle_effective_1200.py'
 #settings_file = 'Settings/finetune_tests_varAlong.py'
 
-settings_file = 'Settings/osm_multiple_radii.py'
+settings_file = 'Settings/debug_setting.py'
 
 job_id = ''
 
