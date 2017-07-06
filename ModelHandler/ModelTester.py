@@ -1,11 +1,10 @@
 # Runs tests on Models - will perform all calls to Keras functions like fit, predics, etc. and produce history of the
 # process.
 # Takes models as inputs.
-# Can run either simple tests, or the more complicated ones separeted into:
-# - train top > finetune CNN > finetune everything
+# Can run either simple tests, or the more complicated ones
 # Can perform the more precise k-fold cross validation
 
-from ModelHandler.ModelGenerator import build_simple_top_model, build_full_mixed_model, build_finetune_model, join_two_models
+from ModelHandler.ModelGenerator import build_img_only_top_model, build_full_mixed_model, build_finetune_model, join_two_models
 from ModelHandler.KfoldTester import k_fold_crossvalidation
 from Omnipresent import len_
 import numpy as np
@@ -27,8 +26,6 @@ def cook_features(models, datasets, Settings):
     index = 0
     for model in models:
         model_settings = Settings["models"][index]
-
-        # TODO: MODEL_TYPE_SPLIT
 
         if model_settings["model_type"] is 'simple_cnn_with_top' or model_settings["model_type"] is 'img_osm_mix':
 
@@ -77,16 +74,6 @@ def cook_features(models, datasets, Settings):
                     #n = len(model[0].layers) - model_settings["finetune_num_of_cnn_layers"]
                     n = model_settings["finetune_num_of_cnn_layers"]
 
-                    '''
-                    for layer in model[0].layers[:n]:
-                        print layer
-                        #layer.trainable = False
-                    print "----------------"
-                    for layer in model[0].layers[n:]:
-                        print layer
-                    print model[0].layers[n]
-                    '''
-
                     print "------ Omitting layers:"
                     for layer in model[0].layers[n:]:
                         print layer.get_config()['name'], layer
@@ -122,8 +109,8 @@ def train_models(models, datasets, Settings):
     '''
     Training on all models - dataset pairs from models.
     :param models: array of models to run
-    :param dataset:
-    :param Settings:
+    :param dataset: datasets for the models
+    :param Settings: settings which also describe which dataset belongs to which model
     :return:
     '''
     number_of_models = len(Settings["models"])
@@ -149,8 +136,14 @@ def train_models(models, datasets, Settings):
     return histories
 
 def train_model(model, dataset, model_settings):
+    '''
+    Train model on a dataset using these settings
+    :param model: model to be trained
+    :param dataset: dataset to be used
+    :param model_settings: model setting to be read for specifics
+    :return:
+    '''
     history = None
-    # TODO: MODEL_TYPE_SPLIT
 
     if model_settings["model_type"] is 'simple_cnn_with_top':
 
@@ -196,12 +189,6 @@ def train_model(model, dataset, model_settings):
 
                 plot_model(finetune_model, to_file='TEST_FINETUNE.png', show_shapes=True)
 
-                '''
-                Total params: 5,128,193
-                Trainable params: 5,122,049
-                Non-trainable params: 6,144
-                '''
-
             # Its possible to do it anywhere, but that will bring it lengthy evaluation here on the spot without cooking
             else:
 
@@ -226,11 +213,6 @@ def train_model(model, dataset, model_settings):
 
                 [train_data, train_labels, validation_data, validation_labels] = dataset.getDataLabels_split(validation_split=model_settings["validation_split"])
 
-                '''
-                Total params: 24,244,097
-                Trainable params: 5,122,049
-                Non-trainable params: 19,122,048
-                '''
             # We have the model, now lets compute
 
             epochs_tmp = model_settings["epochs"]
@@ -257,12 +239,9 @@ def train_model(model, dataset, model_settings):
     elif model_settings["model_type"] is 'img_osm_mix':
 
         if (model_settings["special_case"] is 'hack_dont_use_features'):
-            # 0 Get data
+            # Get data
             # ps: be careful about their order when enhancing...
             # ImageGenerator for multiple inputs
-            # check - https://github.com/fchollet/keras/issues/3386
-            # >> DatasetObj >> generator_triple_with_enhancement
-
             # 1 Build whole model now
             osm_shape = dataset.getShapeOfOsm()
             model = build_full_mixed_model(osm_shape)
@@ -273,7 +252,7 @@ def train_model(model, dataset, model_settings):
 
             history = train_top_model(model, model_settings, [x, osm], y, [x_val, osm_val], y_val)
 
-            print "foo"
+            print "special case scenario, mixed model, hack_dont_use_features"
         else:
 
             filename_features_train = model_settings["filename_features_train"]
@@ -292,9 +271,6 @@ def train_model(model, dataset, model_settings):
 
         [osm, osm_val] = dataset.getDataLabels_split_only_osm(validation_split=model_settings["validation_split"])
         [y, y_val] = dataset.getDataLabels_split_only_y(validation_split=model_settings["validation_split"])
-
-        #if model_settings["intermix"]:
-        #    [osm, y, osm_val, y_val] = dataset.mix_within_groups([osm, y], [osm_val, y_val], model_settings["seed"])
 
         osm_model = model[0]
         history = train_top_model(osm_model, model_settings, osm, y, osm_val, y_val)
@@ -324,6 +300,7 @@ def predict_and_save_features(x, y, x_val, y_val, filename_features_train, filen
     np.save(open(filename_features_test, 'w'), bottleneck_features_validation)
 
 def load_features(filename_features_train, filename_features_test, y, y_val):
+    # Load features from feature files
     train_data = np.load(open(filename_features_train))
     train_labels = np.array(y)
 
@@ -346,6 +323,16 @@ def load_feature_file(path):
 
 # Test Whole model = Fit
 def train_top_model(model, model_settings, train_data, train_labels, validation_data, validation_labels):
+    '''
+    Train the whole model
+    :param model: model with base and top
+    :param model_settings:
+    :param train_data: data for training
+    :param train_labels:  labels for training
+    :param validation_data:  data for validation (and validation error)
+    :param validation_labels:  labels for validation (and validation error)
+    :return:
+    '''
     if len(train_data) <> 2:
         train_data = np.array(train_data)
         validation_data = np.array(validation_data)

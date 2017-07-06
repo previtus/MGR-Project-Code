@@ -8,7 +8,7 @@ import ModelHandler.CreateModel.KerasApplicationsModels as Models
 from Omnipresent import len_
 
 # Generate Model Parts
-def build_simple_top_model(input_shape, number_of_repeats):
+def build_img_only_top_model(input_shape, number_of_repeats):
     '''
     Builds simple model of repeated FC blocks.
     :param input_shape: Keras needs to know the input shape.
@@ -26,21 +26,12 @@ def build_simple_top_model(input_shape, number_of_repeats):
     model = Model(inputs=img_features_input, outputs=output)
     return model
 
-    '''
-    model = Sequential()
-    model.add(Flatten(input_shape=input_shape))
-    for i in range(0,number_of_repeats):
-        model.add(Dense(256, activation='relu'))
-        model.add(Dropout(0.5))
-    model.add(Dense(1, activation='sigmoid'))
-    return model
-    '''
-
 def build_osm_only_model(input_shape, number_of_repeats, manual_width=256):
     '''
     Build a simple model with just OSM vector as it's input, couple of FC blocks and then sigmoid output of 1 score value
-    :param input_shape:
-    :param number_of_repeats:
+    :param input_shape: Keras needs to know the input shape.
+    :param number_of_repeats: repeats of FC block additional to the first Flatten layer and the last sigmoid output layer.
+    :param manual_width: manual width of the fc layers
     :return:
     '''
     osm_features_input = Input(shape=input_shape)
@@ -55,6 +46,14 @@ def build_osm_only_model(input_shape, number_of_repeats, manual_width=256):
     return model
 
 def build_img_osm_mix_model(input_shape_img, input_shape_osm, number_of_repeats):
+    '''
+    Build a combined model using both imgs and osm data.
+    :param input_shape_img: Keras needs to know the input shapes for imgs.
+    :param input_shape_osm: Keras needs to know the input shapes for osm vectors.
+    :param number_of_repeats: repeats of FC block additional to the first Flatten layer and the last sigmoid output layer.
+    :return:
+    '''
+
     osm_features_input = Input(shape=input_shape_osm)
     osm_features = Dense(256, activation='relu')(osm_features_input)
     osm_features = Dropout(0.5)(osm_features)
@@ -72,8 +71,9 @@ def build_img_osm_mix_model(input_shape_img, input_shape_osm, number_of_repeats)
     return model
 
 def build_img_osm_mix_model_custom_base_cnn_top(input_shape_img, input_shape_osm, number_of_repeats):
+    # Special case
     # Special case scenario where we are testing different base CNN which produce large features
-
+    # Here we tested if using couple of Pooling and Convolutional layers before the input would help.
     osm_features_input = Input(shape=input_shape_osm)
     osm_features = Dense(256, activation='relu')(osm_features_input)
     osm_features = Dropout(0.5)(osm_features)
@@ -99,12 +99,19 @@ def build_img_osm_mix_model_custom_base_cnn_top(input_shape_img, input_shape_osm
     model = Model(inputs=[osm_features_input, img_features_input], outputs=top)
     return model
 
-def build_full_mixed_model(osm_shape):
+def build_full_mixed_model(osm_shape, img_shape = Input(shape=(299, 299, 3))):
+    # Special case
+    '''
+    Tests with the mixed model without using features for cooking.
+    :param osm_shape: shape of the osm data
+    :param img_shape: shape of the imgs data
+    :return:
+    '''
     input_shape_osm = osm_shape
 
     number_of_repeats = 2
 
-    input_tensor = Input(shape=(299, 299, 3))
+    input_tensor = img_shape
     from keras.applications.resnet50 import ResNet50
     from keras.utils import plot_model
 
@@ -128,23 +135,22 @@ def build_full_mixed_model(osm_shape):
 
     plot_model(model, to_file='TEST.png', show_shapes=True)
 
-
     return model
 
 # Generate Whole Models
 def get_top_models(models, datasets, Settings):
     '''
     Adds the right top models, now with proper knowledge of shapes of feature files.
-    :param models:
-    :param Settings:
-    :return:
+    :param models: list of models where we will add new ones
+    :param datasets: using information about databases
+    :param Settings: and using information from Settings
+    :return: models are generated and returned
     '''
     number_of_models = len(Settings["models"])
     print "## Adding ",number_of_models," top models."
 
     index = 0
     for model_settings in Settings["models"]:
-        # TODO: MODEL_TYPE_SPLIT
         from ModelHandler.ModelTester import load_feature_file
 
         if model_settings["model_type"] is 'simple_cnn_with_top':
@@ -163,7 +169,7 @@ def get_top_models(models, datasets, Settings):
                 train_data = load_feature_file(filename_features_train)
                 input_shape = train_data.shape[1:]
 
-            model[1] = build_simple_top_model(input_shape=input_shape, number_of_repeats=model_settings["top_repeat_FC_block"])
+            model[1] = build_img_only_top_model(input_shape=input_shape, number_of_repeats=model_settings["top_repeat_FC_block"])
             print model_settings["unique_id"], model
 
         elif model_settings["model_type"] is 'img_osm_mix':
@@ -237,13 +243,17 @@ def get_top_models(models, datasets, Settings):
     return models
 
 def report_models(models, Settings):
+    '''
+    Debug method - report all models
+    :param models: list of models
+    :param Settings: settings files to get the individual model settings
+    :return:
+    '''
     number_of_models = len(Settings["models"])
     print "## Adding ",number_of_models," top models."
 
     index = 0
     for model_settings in Settings["models"]:
-        # TODO: MODEL_TYPE_SPLIT
-        from ModelHandler.ModelTester import load_feature_file
         model = models[index]
 
         if model_settings["model_type"] is 'simple_cnn_with_top':
@@ -273,8 +283,8 @@ def report_models(models, Settings):
 
 def get_cnn_models(Settings):
     '''
-    Loads the cnn part of models
-    :param Settings:
+    Loads the base CNN part of models
+    :param Settings: settings used to get individual model settings
     :return:
     '''
     models = []
@@ -282,8 +292,6 @@ def get_cnn_models(Settings):
     print "## Loading",number_of_models,"models with their CNNs."
 
     for model_settings in Settings["models"]:
-
-        # TODO: MODEL_TYPE_SPLIT
 
         if model_settings["model_type"] is 'simple_cnn_with_top' or model_settings["model_type"] is 'img_osm_mix':
             cnn_model = model_settings["cnn_model"]
@@ -304,8 +312,16 @@ def get_cnn_models(Settings):
 
     return models
 
-# Thank you https://github.com/fchollet/keras/issues/5074#issuecomment-274259404
 def split_model(model, start, end):
+    '''
+    Split model by the start and end flags - we get the subset of a model.
+    # Thanks to https://github.com/fchollet/keras/issues/5074#issuecomment-274259404
+
+    :param model: model to be split
+    :param start: from layer
+    :param end: to layer
+    :return: subset of the model
+    '''
     confs = model.get_config()
     weights = {l.name:l.get_weights() for l in model.layers}
     # split model
@@ -334,6 +350,8 @@ def split_model(model, start, end):
 
 # building models for fine tuning
 def build_finetune_model(cnn, top, cut, input_shape):
+    # Special case
+    # experiments with finetuning whole models (base and top)
     from keras.models import Model
 
     for n in range(0,len(cnn.layers)):
@@ -354,30 +372,12 @@ def build_finetune_model(cnn, top, cut, input_shape):
     return model_middle
 
 def join_two_models(one, two):
+    '''
+    Join two models in a chain after each other
+    :param one: first model
+    :param two: second model
+    :return:  joined model
+    '''
     from keras.models import Model
     finetune_model = Model(input=one.input, output=two(one.output))
     return finetune_model
-
-'''
-def join_two_models_MIX(one, two, a):
-
-    number_of_repeats = 2
-    input_shape_osm = (594,)
-    osm_features_input = Input(shape=input_shape_osm)
-    osm_features = Dense(256, activation='relu')(osm_features_input)
-    osm_features = Dropout(0.5)(osm_features)
-
-    img_features_input = one.output
-    img_features = Flatten()(img_features_input)
-
-    top = concatenate([osm_features, img_features])
-    for i in range(0,number_of_repeats):
-        top = Dense(256, activation='relu')(top)
-        top = Dropout(0.5)(top)
-    top = Dense(1, activation='sigmoid')(top)
-
-    model = Model(inputs=[osm_features_input, img_features_input], outputs=top)
-
-
-    return model
-'''
