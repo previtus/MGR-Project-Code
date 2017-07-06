@@ -32,28 +32,20 @@ def prepare_folders(Settings, datasets, verbose=False):
     make_folder_ifItDoesntExist(log_folder+job_str+experiment_name+'/')
     folders["local_logs_folder"] = log_folder + job_str + experiment_name+'/'
 
-    # VERSION A - folders history and models
+    # folders history and models
     folders["history_folder"] = folders["local_logs_folder"]+'history/'
     folders["models_folder"] = folders["local_logs_folder"]+'models/'
     make_folder_ifItDoesntExist(folders["history_folder"])
     make_folder_ifItDoesntExist(folders["models_folder"])
-
-    # VERSION B - just with names history_* and models_*
-    '''
-    folders["history_folder"] = folders["local_logs_folder"]+'history_'
-    folders["models_folder"] = folders["local_logs_folder"]+'models_'
-    '''
-
     folders["shared_features_folder"] = getSharedDirectory()
-
     folders["together_graph_filename"] = folders["local_logs_folder"] + "graph_together_" + experiment_name + '.png'
     folders["together_graph_title"] = experiment_name + " together graph"
-
     folders["report_txt_file"] = folders["local_logs_folder"] + "report.txt"
     folders["report_html_file"] = folders["local_logs_folder"] + "report_"
 
     Settings["folders"] = folders
 
+    # individual model settings, manage their feature paths
     for model_settings in Settings["models"]:
         dataset = datasets[ model_settings["dataset_pointer"] ]
 
@@ -77,8 +69,6 @@ def prepare_folders(Settings, datasets, verbose=False):
 
             model_settings["finetune_features_train"] = finetune_features_train
             model_settings["finetune_features_test"] = finetune_features_test
-
-
 
         model_identificator = model_settings["dataset_name"]+"_"+model_settings["unique_id"]+"_"+str(model_settings["epochs"])
         model_settings["history_filename"] = Settings["folders"]["history_folder"] + model_identificator+".npy"
@@ -117,27 +107,31 @@ def prepare_folders(Settings, datasets, verbose=False):
             if model_settings["finetune"]:
                 print model_settings["finetune_features_test"]
 
-
-
     return Settings
 
 def getLogDirectory():
+    '''
+    Get established Log directories. Code will use the one of these paths which is available on the machine.
+    :return: working path to Logs directory
+    '''
     log_folders = ['/home/ekmek/Desktop/Project II/MGR-Project-Code/Logs/',
                     '/home/ekmek/Vitek/Logs/',
                     '/storage/plzen1/home/previtus/Logs/'
                     ]
-                    #'/storage/brno2/home/previtus/Logs/'
-                    #'/home/ekmek/Vitek/Logs-VALID ONE-run of 1200x set on 299x299 imgs/'
     local_folder = use_path_which_exists(log_folders)
     make_folder_ifItDoesntExist(local_folder+'shared/')
 
     return local_folder
 
 def getSharedDirectory():
+    '''
+    Get established Log directories. Code will use the one of these paths which is available on the machine.
+    :return: working path to Logs/shared directory
+    '''
     shared_folders = ['/home/ekmek/Desktop/Project II/MGR-Project-Code/Logs/',
                     '/home/ekmek/Vitek/Logs/',
                     '/storage/plzen1/home/previtus/Logs/'
-                    ] # /storage/brno2/home/previtus/Logs/
+                    ]
     shared_folder = use_path_which_exists(shared_folders)
     make_folder_ifItDoesntExist(shared_folder+'shared/')
     shared_folder += 'shared/'
@@ -145,9 +139,10 @@ def getSharedDirectory():
 
 def load_dataset(Settings):
     '''
-    Loads datasets according to the Settings parameters "dataset_name", "pixels", "number_of_images", "seed"
+    Loads datasets according to the Settings parameters "dataset_name", "pixels", "number_of_images", "seed".
+    Also manages shuffling and other initial editations of the dataset.
     :param Settings:
-    :return:
+    :return: dataset object
     '''
     datasets = []
     index = 0
@@ -228,6 +223,12 @@ def load_dataset(Settings):
 
 # Cooking
 def do_we_need_to_cook(filename_features_train, filename_features_test):
+    '''
+    Checks for the existence of cooked feature files.
+    :param filename_features_train: path to training features
+    :param filename_features_test: path to testing features
+    :return:
+    '''
     return not(os.path.exists(filename_features_train) and os.path.getsize(filename_features_train) > 0
         and os.path.exists(filename_features_test) and os.path.getsize(filename_features_test) > 0)
 
@@ -235,7 +236,8 @@ def get_feature_file_names(shared_folder, dataset_uid, model_name, cut = 0):
     '''
     :param shared_folder: taken from getSharedDirectory()
     :param dataset_uid: taken from dataset.unique_id
-    :param model_name: can be 'resnet50'
+    :param model_name: can be for example 'resnet50'
+    :param cut: special case scenario, if we were cutting base CNN shorter
     :return:
     '''
 
@@ -248,12 +250,11 @@ def get_feature_file_names(shared_folder, dataset_uid, model_name, cut = 0):
     return [filename_features_train, filename_features_test]
 
 # Outputs
-
 def save_visualizations(models, Settings):
     '''
     Save visualizations of the models, if we have set it in Settings
-    :param models:
-    :param Settings:
+    :param models: list of models to be plotted
+    :param Settings: the main Setting, used to access output paths
     :return:
     '''
     index = 0
@@ -281,8 +282,8 @@ def save_visualizations(models, Settings):
 def save_histories(histories, Settings):
     '''
     Save histories into .npy files, which can be used to reproduce the results.
-    :param histories:
-    :param Settings:
+    :param histories: histories to be saved
+    :param Settings: Main setting dict containing the path values
     :return:
     '''
     index = 0
@@ -298,8 +299,8 @@ def save_histories(histories, Settings):
 def graph_histories(histories, Settings):
     '''
     Graphs histories according to Settings["graph_histories"] ~ ['all',[]] #['all',[],[0,2]]
-    :param histories:
-    :param Settings:
+    :param histories: histories to be graphed
+    :param Settings: Main setting dict containing the path values
     :return:
     '''
     from Downloader.VisualizeHistory import visualize_history, visualize_histories, visualize_special_histories, visualize_whiskered_boxed
@@ -418,6 +419,11 @@ def graph_histories(histories, Settings):
     return 0
 
 def generate_report_string(Settings):
+    '''
+    Generation of text based report.
+    :param Settings: main settings used for the experiment.
+    :return:
+    '''
     text = ''
     text += ("Experiment [%s] report: \n" % (Settings["experiment_name"]))
     text += ("With %s models: \n" % (len(Settings["models"])))
@@ -441,7 +447,6 @@ def generate_report_string(Settings):
 def save_report(Settings):
     '''
     Saves report of the most important settings.
-    :param models:
     :param Settings:
     :return:
     '''
@@ -454,7 +459,8 @@ def save_report(Settings):
 def save_models(models, Settings):
     '''
     Saves the trained models alongside with the experiments settings.
-    :param models:
+    :param models: list of models, each can contain base cnn model or just the top model. We differentiate according
+    according to the Settings of model_type.
     :param Settings:
     :return:
     '''
@@ -481,6 +487,11 @@ def save_models(models, Settings):
         index += 1
 
 def load_model(path):
+    '''
+    Load Keras model from path.
+    :param path:
+    :return: the loaded model
+    '''
     from keras.models import load_model
     return load_model(path)
 
@@ -488,6 +499,11 @@ def load_model(path):
 # Further potentially useful reports
 
 def send_mail_with_graph(Settings):
+    '''
+    Reporting method by sending mail with graph as an attachment.
+    :param Settings:
+    :return:
+    '''
     subject='Report of Experiment finishing'
     message=generate_report_string(Settings)
     attachment_path=None
@@ -509,6 +525,11 @@ def send_mail_with_graph(Settings):
         send_mail(subject, message, second_path)
 
 def save_metacentrum_report(Settings):
+    '''
+    Downloads and saves the Metacentrum generated file, according to the unique id value in Settings.
+    :param Settings:
+    :return:
+    '''
     job_id = Settings["job_id"]
     if job_id <> '':
         print "## Downloading ", job_id+'.html'

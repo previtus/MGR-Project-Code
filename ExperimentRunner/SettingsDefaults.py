@@ -1,5 +1,9 @@
 
 def load_default_settings():
+    '''
+    Default setting definition.
+    :return: Default setting for whole experiment and for first model in dictionaries.
+    '''
 
     DefaultSettings = {}
 
@@ -77,6 +81,12 @@ def load_default_settings():
     return DefaultSettings, DefaultModel
 
 def print_settings(Settings, ignore_default_values = True):
+    '''
+    Debug of Settings, prints values which are not like the ones in Default setting file.
+    :param Settings: Custom setting to be checked
+    :param ignore_default_values: Flag to ignore default values (for better clarity)
+    :return:
+    '''
     print "## Loaded Settings:"
     t = ' '
     DefaultSettings, DefaultModel = load_default_settings()
@@ -93,6 +103,13 @@ def print_settings(Settings, ignore_default_values = True):
 
 
 def load_settings_from_file(file=None, job_id='', verbose=False):
+    '''
+    Load Settings from a custom settings description file.
+    :param file: Load from file
+    :param job_id: Unique id
+    :param verbose: Flag to debug info about loaded Settings
+    :return: Settings dictionary
+    '''
     print "## Job: ", job_id," Loading Settings from ",file
 
     Settings, DefaultModel = load_default_settings()
@@ -113,8 +130,8 @@ def load_settings_from_file(file=None, job_id='', verbose=False):
 
     return Settings
 
+## Typical usage example
 #load_settings_from_file('setting_example.py', verbose=True)
-
 # EXAMPLE OF SETTINGS FILE <setting_example.py>:
 '''
 

@@ -9,19 +9,28 @@ import ModelHandler.ModelTester as ModelTester
 from Omnipresent import len_
 
 def experiment_runner(settings_file=None, job_id=''):
+    '''
+    Main experiment runner function, controls the run of the whole testing scheme.
+    :param settings_file: specification of path to Settings file
+    :param job_id: unque id, given by the scheduling program
+    :return:
+    '''
+
+    # Load settings
     Settings = SettingsDefaults.load_settings_from_file(settings_file, job_id, verbose=False)
     if Settings["interrupt"]:
         return 365
 
-    # preparation
+    # Preparation of dataset and models
     datasets = ModelOI.load_dataset(Settings)
 
     Settings = ModelOI.prepare_folders(Settings, datasets, verbose=True)
 
     models = ModelGenerator.get_cnn_models(Settings)
 
-    # cooking
+    # cooking of reusable features
     ModelTester.cook_features(models, datasets, Settings)
+    # build the rest of the model (now with information about feature files available)
     models = ModelGenerator.get_top_models(models, datasets, Settings)
     if Settings["interrupt"]:
         return 365
@@ -42,7 +51,3 @@ def experiment_runner(settings_file=None, job_id=''):
 
     ModelOI.send_mail_with_graph(Settings)
     ModelOI.save_metacentrum_report(Settings)
-
-
-#experiment_runner('../Settings/1200x-vs-5556x.py')
-#experiment_runner('../Settings/top_number_of_fc_blocks.py')
