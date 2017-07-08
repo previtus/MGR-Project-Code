@@ -1,10 +1,11 @@
 from Omnipresent import len_
 import os
 import shutil
-from DatasetHandler.FileHelperFunc import use_path_which_exists, make_folder_ifItDoesntExist, copy_folder, copy_file, file_exists, folder_exists, md5
+from DatasetHandler.FileHelperFunc import copy_folder, copy_file, file_exists, folder_exists, md5
 
 def handle_noncanon_dataset(Settings, model_settings):
     '''
+    Special case scenario.
     We are creating a new custom dataset, instead of using one of the big officially used, "canon" datasets
     :param Settings: Setting for the whole experiment
     :param model_settings: Setting for our one dataset
@@ -112,7 +113,6 @@ def handle_noncanon_dataset(Settings, model_settings):
 
         image_generator = model_settings["noncanon_dataset_imagegenerator"]
         print "image_generator", image_generator
-        #image_generator.fit(X_train)
 
         Segments = LoadDataFile(source_segments_path)
 
@@ -209,7 +209,6 @@ def handle_noncanon_dataset(Settings, model_settings):
                     if debug_txt_output:
                         print "Save new images from id", y, " in", len_(X_batch)
         print "number_of_images_parsed", number_of_images_parsed
-
 
         from Downloader.DataOperations import SaveDataFile
         print "Saving new Segments file into ", target_segments_path

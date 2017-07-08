@@ -1,5 +1,4 @@
 from DatasetObj import Dataset
-import random
 import os.path
 from FileHelperFunc import get_project_folder
 
@@ -24,14 +23,18 @@ def determineUniqueId(dataset_nickname, desired_number,seed):
     return unique_id
 
 def prepareDataset(path, dims, desired_number, seed):
+    '''
+    Create dataset object and prepare it from the suggested Segments file.
+    :param path: path
+    :param dims: pixel sizes list (width and height)
+    :param desired_number: number of images, can be None if all
+    :param seed: seed for random data shuffling
+    :return: dataset object
+    '''
     dataset = Dataset()
     dataset.init_from_segments(path, img_width=dims[0], img_height=dims[1])
     if desired_number is None:
         return dataset
-
-    # CAREFUL! when we want the whole dataset, we are not shuffling the arrays here...
-    if seed is not None:
-        random.seed(seed)
 
     subset = dataset.spawnUniformSubset(desired_number)
     return subset

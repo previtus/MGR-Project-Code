@@ -38,65 +38,6 @@ class Dataset:
     def __init__(self):
         return None
 
-    def randomize_all_list_order_deterministically(self, local_seed):
-        # CAREFUL MESSES UP OSM DATA, BECAUSE OF DUALITY IN DATA
-        '''
-        According to a chosen seed number will shuffle contents of lists (of urls, of scores, of osm) so they are kept
-         intact.
-        :return:
-        '''
-
-        a = self.__list_of_images
-        b = self.__labels
-        c = self.__osm
-
-        lists = list(zip(a, b, c))
-        random.Random(local_seed).shuffle(lists)
-
-        a, b, c = zip(*lists)
-        self.__list_of_images = a
-        self.__labels = np.array(b)
-        self.__osm = c
-
-    def randomize_all_list_order_deterministically_modulo(self, local_seed):
-        # CAREFUL WHAT IF WE DON'T HAVE MODULO 6
-        '''
-        According to a chosen seed number will shuffle contents of lists (of urls, of scores, of osm) so they are kept
-         intact.
-        :return:
-        '''
-
-        images_per_segment = 6
-        n = len(self.__list_of_images)
-        indices = range(0,int(n/images_per_segment))
-        #print indices
-        #print n, self.__list_of_images
-
-
-        a = self.__list_of_images
-        b = self.__labels
-        c = self.__osm
-        d = self.__segment_ids
-
-        lists = list(zip(a, b, c, d))
-        shuffled_lists = []
-
-        random.Random(local_seed).shuffle(indices)
-        for i in indices:
-            str_ = ''
-            for k in range(0,images_per_segment):
-                index = i*images_per_segment+k
-                #str_ += str(i*images_per_segment+k)+', '
-                str_ += str(i*images_per_segment+k)+'('+str(lists[index][3])+'), '
-                shuffled_lists.append(lists[index])
-            #print str_
-
-        a, b, c, d = zip(*shuffled_lists)
-        self.__list_of_images = a
-        self.__labels = np.array(b)
-        self.__osm = c
-        self.__segment_ids = d
-
     def randomize_all_list_order_deterministically_same_segment(self, local_seed):
         '''
         According to a chosen seed number will shuffle contents of lists (of urls, of scores, of osm) so they are kept
@@ -168,15 +109,8 @@ class Dataset:
                 shuffled_lists.append(lists[i])
                 already_used_data.append(i)
             #print str_
-
-
-
             #print 'pre', first_index-1, lists[first_index-1][3]
             #print 'post', last_index+1, lists[last_index+1][3]
-
-
-
-            # we are now in SOME data entry, we should look how many around it are of the same
 
             '''
             for k in range(0,images_per_segment):
@@ -193,32 +127,6 @@ class Dataset:
         self.__segment_ids = d
 
         #print len(a), len(b), len(c), len(d), d[0:10]
-
-    def mix_within_groups(self, array_train, array_validation, local_seed):
-        lists = []
-        lists_val = []
-
-        if len(array_train) == 2:
-            lists = list(zip(array_train[0], array_train[1]))
-            lists_val = list(zip(array_validation[0], array_validation[1]))
-
-        if len(array_train) == 3:
-            lists = list(zip(array_train[0], array_train[1], array_train[2]))
-            lists_val = list(zip(array_validation[0], array_validation[1], array_validation[2]))
-
-        random.Random(local_seed+1).shuffle(lists)
-        random.Random(local_seed+2).shuffle(lists_val)
-
-        if len(array_train) == 2:
-            a, b = zip(*lists)
-            c, d = zip(*lists_val)
-            return [a,b,c,d]
-
-        if len(array_train) == 3:
-            a, b, c = zip(*lists)
-            d, e, f = zip(*lists_val)
-            return [a,b,c,d,e,f]
-
 
     def remove_dual_osms(self):
         '''
@@ -243,13 +151,17 @@ class Dataset:
         print len(self.__list_of_images), len(self.__labels), len(self.__osm), len(self.__segment_ids)
 
     def test_existence_of_all_images(self):
+        '''
+        Test physical presence of the images - useful for debuging.
+        :return:
+        '''
         for url in self.__list_of_images:
             b = file_exists_and_accesible(url)
             if not b:
                 print "File cannot be accessed! ", url
 
-
     def init_from_lists(self, list_of_images, labels, osm, segment_ids, img_width, img_height):
+        # Initialization from lists of data
         self.img_width = img_width
         self.img_height = img_height
         self.__list_of_images = list_of_images
@@ -261,6 +173,7 @@ class Dataset:
         self.has_osm_loaded = (len(self.__osm)>0)
 
     def init_from_segments(self, path_to_segments_file, img_width, img_height):
+        # Initialization from loaded Segment in path_to_segments_file
         # Segments are not used apart from initialization
         Segments = DataOperations.LoadDataFile(path_to_segments_file)
         segments_dir = os.path.dirname(path_to_segments_file) + '/'
@@ -276,8 +189,6 @@ class Dataset:
         :return:
         '''
 
-        #print self.__osm[0][0:30]
-
         def boo(x):
             if x > 0:
                 return 1
@@ -286,13 +197,12 @@ class Dataset:
         for i in range(len(self.__osm)):
             for j in range(len(self.__osm[i])):
                 self.__osm[i][j] = boo(self.__osm[i][j])
-            #self.__osm[i] = [boo(x) for x in self.__osm[i]]
-
-        #print self.__osm[0][0:30]
 
     def cast_osm_to_one_hot_categories(self):
-
-        #print self.__osm[0][0:30]
+        '''
+        Transforms the osm vector data to one hot categories - low,mid,high represented as 001,010,100 binary.
+        :return:
+        '''
         if len(self.__osm) == 0:
             return False
 
@@ -310,8 +220,6 @@ class Dataset:
             #print attribute_id, q1, q3
             statistics_for_attributes.append([q1, q3])
 
-            #self.__osm[i] = [boo(x) for x in self.__osm[i]]
-
         new_osm_vector = []
         for vector_id in range(len(self.__osm)):
             new_osm_vector.append([])
@@ -326,13 +234,13 @@ class Dataset:
                 else: # bigger than percentiles -> "high"
                     new_osm_vector[vector_id] += [1,0,0]
 
-        #print len(self.__osm), len(self.__osm[0])
-        #print len(new_osm_vector), len(new_osm_vector[0])
-        #print new_osm_vector[0][0:90]
-        #print self.__osm[0][0:30]
         self.__osm = new_osm_vector
 
     def log_the_osm(self):
+        '''
+        Apply log to values in OSM vector.
+        :return:
+        '''
         for i in range(len(self.__osm)):
             for j in range(len(self.__osm[i])):
                 val = self.__osm[i][j]
@@ -342,19 +250,14 @@ class Dataset:
                 self.__osm[i][j] = val
 
     # Data access: ---------------------------------------------------------------------------------------------
-    def getJustLabels(self, validation_split=0.2):
-        y = np.array(self.__labels)
-        y, y_val = KerasPreparation.split_one_array(y, validation_split)
-        return [y, y_val]
-
     def getDataLabels(self, resize=None):
-        # ([x],[y]) as image data and labels
+        # ([x,y]) as image data and labels
         x = KerasPreparation.LoadActualImages(self.__list_of_images, resize=resize, dim_ordering=Downloader.Defaults.KERAS_SETTING_DIMENSIONS)
         y = np.array(self.__labels)
         return [x, y]
 
     def getDataLabels_split(self, resize=None, validation_split=0.2):
-        # ([x],[y]) as image data and labels
+        # ([x, y, x_val, y_val]) as image data and labels after being split
         x = KerasPreparation.LoadActualImages(self.__list_of_images, resize=resize, dim_ordering=Downloader.Defaults.KERAS_SETTING_DIMENSIONS) # th or tf
         y = np.array(self.__labels)
 
@@ -362,15 +265,18 @@ class Dataset:
         return [x, y, x_val, y_val]
 
     def getDataLabels_split_only_y(self, resize=None, validation_split=0.2):
+        # Get just label data, after validation split
         y = np.array(self.__labels)
         y, y_val = KerasPreparation.split_one_array(y, validation_split)
         return [y, y_val]
 
     def getDataLabels_only_y(self):
+        # Get just label data
         y = np.array(self.__labels)
         return y
 
     def getDataLabels_split_only_osm(self, validation_split=0.2):
+        # Get just osm data, after validation split
         osm, osm_val = KerasPreparation.split_one_array(self.__osm, validation_split)
         osm = np.asarray(osm)
         osm_val = np.asarray(osm_val)
@@ -378,31 +284,27 @@ class Dataset:
         return [osm, osm_val]
 
     def getDataLabels_only_osm(self):
+        # Get just osm data
         osm = np.array(self.__osm)
         return osm
 
-    def DEBUGgetDataLabels_split_only_osm(self, validation_split=0.2):
-        osm, osm_val = KerasPreparation.split_one_array(self.__osm, validation_split)
-        ids, ids_val = KerasPreparation.split_one_array(self.__segment_ids, validation_split)
-        osm = np.asarray(osm)
-        osm_val = np.asarray(osm_val)
-
-        return [osm, osm_val, ids, ids_val]
-
-
-    def getDataLabels_split_with_osm(self, resize=None, validation_split=0.2):
-        [x, y, x_val, y_val] = self.getDataLabels_split(resize, validation_split)
-        osm, osm_val = KerasPreparation.split_osm(self.__osm,validation_split)
-
-        return [x, y, x_val, y_val, osm, osm_val]
-
     def getShapeOfOsm(self):
+        '''
+        Get shape of the osm data - aka dimension of the vectors, traditionally (594,) needed for building Keras models.
+        :return:
+        '''
         return np.asarray(self.__osm).shape[1:]
 
     # For generators
     def generator_images_scores(self, order, image_paths, scores, resize=None):
-        # possibly: change it to give batches of predefined sizes, like batch_size = 32
-
+        '''
+        Get generator of images
+        :param order: prearanged order (1,2,3...) or (2,55,1,980, ...)
+        :param image_paths: paths to images, these are kept in memory while the big 640x640x3 image data is not
+        :param scores: score to be associated with returned image
+        :param resize: parameter to resize loaded images on the fly
+        :return: generator, which yields (image, score)
+        '''
         while True:
             for index in order:
                 img_path = image_paths[index]
@@ -411,73 +313,8 @@ class Dataset:
                 score = scores[index]
                 yield (image, score)
 
-    def generator_features_osm_scores(self, order, all_features, osm_vectors, scores):
-
-        while True:
-            for index in order:
-                score = scores[index]
-                features = all_features[index]
-
-                #osm_vector = osm_vectors[index]
-                #yield ([osm_vector, features], score)
-                #yield np.asarray(features), np.asarray(score)
-                yield [features, score]
-
-                #yield (features, score)
-                #yield (np.array([features]), score)
-
-    def generator_triple_with_enhancement(self, order, image_paths, scores, osms, resize=None):
-        # yield ([image, osm], score)
-
-        # Somehow include datagen = ImageDataGenerator(...)
-        # batches = datagen.flow( ... ) so it gives us all what we need
-
-        while True:
-            for index in order:
-                img_path = image_paths[index]
-
-                image = KerasPreparation.LoadActualImages([img_path], resize=resize)
-                score = scores[index]
-                osm = osms[index]
-                yield ([image, osm], score)
-
-    def generator_of_all_data(self):
-        '''
-        Usage:
-
-        xy_generator = dataset.generator_of_all_data()
-        for X_batch, y_batch in xy_generator:
-            #print y_batch
-            print len_(X_batch), len_(y_batch), y_batch
-
-        '''
-        index_at = 0
-
-        while True:
-            batch_size = 32
-            X = []
-            y = []
-
-            for index in range(0,batch_size):
-                if (index+index_at)>len(self.__list_of_images):
-                    index_at = 0
-
-                a = self.__list_of_images[index+index_at]
-                b = self.__labels[index+index_at]
-                c = self.__osm[index+index_at]
-                d = self.__segment_ids[index+index_at]
-
-                image = KerasPreparation.LoadActualImages([a])
-                X.append(image)
-                y.append([a,b,c,d])
-
-            index_at += batch_size
-
-            yield (X,y)
-
-
     def getImageGenerator(self, validation_split, resize=None):
-        # idea:
+        # Return generators
         # take the lists on images and their labels - split these two arrays by the validation split
         y = np.array(self.__labels)
         images_paths, scores, images_paths_val, scores_val = KerasPreparation.split_data(self.__list_of_images, y, validation_split)
@@ -494,27 +331,10 @@ class Dataset:
 
         return [order, order_val, image_generator, size, image_generator_val, size_val]
 
-        # [test_generator, val_generator, number_in_test, number_in_val]
-
-    def getFeatureGenerator(self, order, order_val, validation_split, features, features_val):
-        #osm, osm_val = KerasPreparation.split_one_array(self.__osm, validation_split)
-        osm=[]
-        osm_val=[]
-        y = np.array(self.__labels)
-        scores, scores_val = KerasPreparation.split_one_array(y, validation_split)
-
-        feature_generator = self.generator_features_osm_scores(order, features, osm_vectors=osm, scores=scores)
-
-        feature_generator_val = self.generator_features_osm_scores(order_val, features_val, osm_vectors=osm_val,
-                                                               scores=scores_val)
-
-        size = len(scores)
-        size_val = len(scores_val)
-        return [feature_generator, feature_generator_val, size, size_val]
-
     # Dataset reporting: ---------------------------------------------------------------------------------------------
 
     def statistics(self):
+        # Report important information about the dataset.
         print "Dataset of", len(self.__list_of_images), " scored images of", self.img_width, "x", self.img_height, "resolution."
         labels = np.array(self.__labels)
         min = np.amin(labels)
@@ -525,18 +345,18 @@ class Dataset:
         print min, "|---[", q1, "{", mean, "}", q3, "]---|", max
         print "min |---[ 25perc { mean } 75perc ]---| max"
 
-        #print labels
-        #x = copy.copy(labels)
-        #x.sort(reverse=True)
-        #print x
-        #print len(x)
-
     def debug_print_first(self, n):
+        # Debug print first n values in this dataset.
         for i in range(0,n):
             print self.__segment_ids[i], self.__labels[i], self.__list_of_images[i]
 
 
     def plotHistogram(self, save_to_pdf=False):
+        '''
+        Plot score of this dataset as histogram.
+        :param save_to_pdf: flag to save into output.pdf
+        :return:
+        '''
         import DatasetVizualizators
         labels = np.array(self.__labels)
         DatasetVizualizators.plotHistogram(labels, 'Score distribution histogram')
@@ -591,34 +411,10 @@ class Dataset:
             shutil.copy2(name, filename)
         return new_names
 
-    def DebugGetDatasetArrays(self):
-        return [self.__list_of_images, self.__labels, self.__osm, self.__segment_ids]
-
     def sampleUniform(self, desired_number):
-        # this is without repetition
-        #print self.num_of_images, desired_number
-
+        # randomized subsample of a dataset
         indices = random.sample(xrange(self.num_of_images), desired_number)
-
-        #print indices
         return indices
-
-    # TODO sample wanted number of images, so that the resulting set is uniform with its scores
-    '''
-    def sampleUniformNumberOfImagesPerScore(self, desired_number=0):
-        X = self.__list_of_images
-        Y = self.__labels
-        sorted_list_of_images = [x for (y, x) in sorted(zip(Y, X), key=lambda pair: pair[0])]
-        sorted_labels = copy.copy(Y)
-        sorted_labels.sort()
-
-        for i in range(0,len(sorted_labels)):
-            print sorted_labels[i], sorted_list_of_images[i]
-
-        # not yet done, dont know if we need it
-
-        return [] #[sorted_list_of_images, sorted_labels]
-    '''
 
     def spawnUniformSubset(self, desired_number):
         '''
@@ -644,11 +440,11 @@ class Dataset:
         return newDataset
 
     def getDataLabels_only_osm_raw(self):
+        # return list of osm without coversion to numpy format
         return self.__osm
 
     def expandOsmDataWithMultipleRadii(self, model_settings):
         # idea is to load all the radii data we have available and add it to each of the segments
-
         # we assume the basic experiment definition
         r50 = 'SegmentsData_marked_R50_4TablesN.dump'
         r100 = 'SegmentsData_marked_R50_4TablesN.dump'

@@ -16,6 +16,7 @@ import copy
 # customization: http://matplotlib.org/users/customizing.html
 
 def saveAllPlotsToPDF():
+    # Save all created plots into a pdf file.
     pdf = matplotlib.backends.backend_pdf.PdfPages("output.pdf")
     for i in plt.get_fignums():
         fig = plt.figure(i)
@@ -23,9 +24,11 @@ def saveAllPlotsToPDF():
     pdf.close()
 
 def xkcd():
+    # special style
     plt.xkcd()
 
 def show():
+    # show plots on screen
     plt.show()
 
 def GenerateAverageImagesFromDictionary(dict, save_to_dir=None, output_folder=None):
@@ -56,6 +59,7 @@ def GenerateAverageImagesFromDictionary(dict, save_to_dir=None, output_folder=No
     return dict_of_images
 
 def plotX_sortValues(dont_touch_this_x, title='', x_min=0.0, x_max=1.0, notReverse=False, custom_x_label = '# of images', custom_y_label = 'Score value'):
+    # Visualization of dataset by the method of sorting array by value and plotting.
     x = copy.copy(dont_touch_this_x)
     if notReverse:
         x.sort()
@@ -77,10 +81,9 @@ def plotX_sortValues(dont_touch_this_x, title='', x_min=0.0, x_max=1.0, notRever
     axes.set_title(title)
 
 def plotHistogram(x, title='', num_bins=100, x_min=0.0, x_max=1.0, custom_x_label = 'Score value', custom_y_label = 'Count of occurances'):
+    # Plot histogram from the x data.
     plt.figure()
     axes = plt.axes()
-    #plt.style.use('ggplot')
-
 
     hist, bins = np.histogram(x, bins=num_bins)
     width = 0.7 * (bins[1] - bins[0])
@@ -102,6 +105,7 @@ def plotHistogram(x, title='', num_bins=100, x_min=0.0, x_max=1.0, custom_x_labe
     axes.set_title(title)
 
 def plotWhisker(data, title='', y_min=0.0, y_max=1.0, legend_on=True, notch=True):
+    # Plot box plot / whisker graph from data.
     plt.figure(figsize=(5, 8))
     axes = plt.axes()
     axes.yaxis.set_major_locator(ticker.MultipleLocator(np.abs(y_max-y_min)/10.0))
@@ -128,6 +132,21 @@ def plotWhisker(data, title='', y_min=0.0, y_max=1.0, legend_on=True, notch=True
     axes.set_title(title)
 
 def plotMultipleWhiskerPlots(datas, whiskers, labels):
+    # support of generating multiple box plots
+    '''
+    Example run:
+
+    means_men = (20, 35, 30, 35, 27)
+    std_men = (2, 3, 4, 1, 2)
+    means_women = (25, 32, 34, 20, 25)
+    std_women = (3, 5, 2, 3, 3)
+
+    datas = [means_men, means_women, means_men]
+    whiskers = [std_men, std_women, std_women]
+    labels = ['1', '2', '3']
+
+    plotMultipleWhiskerPlots(datas,whiskers,labels)
+    '''
     fig, ax = plt.subplots()
 
     index = np.arange(len(datas[0]))
@@ -150,19 +169,6 @@ def plotMultipleWhiskerPlots(datas, whiskers, labels):
     plt.legend()
     plt.tight_layout()
 
-'''
-means_men = (20, 35, 30, 35, 27)
-std_men = (2, 3, 4, 1, 2)
-means_women = (25, 32, 34, 20, 25)
-std_women = (3, 5, 2, 3, 3)
-
-datas = [means_men, means_women, means_men]
-whiskers = [std_men, std_women, std_women]
-labels = ['1', '2', '3']
-
-plotMultipleWhiskerPlots(datas,whiskers,labels)
-'''
-
 def subPlot2(fce1, fce2, param1=None, param2=None):
     '''
     Join two plots.
@@ -179,14 +185,24 @@ def subPlot2(fce1, fce2, param1=None, param2=None):
     plt.show()
 
 def zoomOut(axes, xlim=None, ylim=None, factor=0.05):
+    '''
+    Set size to fit in limitations.
+    :param axes: handler to matlibplot
+    :param xlim: list of [from x, to x] values
+    :param ylim: list of [from y, to y] values
+    :param factor: zoom factor
+    :return:
+    '''
     zoomOutX(axes, xlim, factor)
     zoomOutY(axes, ylim, factor)
 
 def zoomOutX(axes,xlim=None,factor=0.05):
+    # handle the X axis
     if xlim == None:
         xlim = axes.get_xlim()
     axes.set_xlim((xlim[0] + xlim[1]) / 2 + np.array((-0.5, 0.5)) * (xlim[1] - xlim[0]) * (1 + factor))
 def zoomOutY(axes,ylim=None,factor=0.05, only_up = False):
+    # handle the Y axis
     if ylim == None:
         ylim = axes.get_ylim()
     bottom = -0.5

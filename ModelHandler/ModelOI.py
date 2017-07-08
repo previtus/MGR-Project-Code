@@ -175,14 +175,8 @@ def load_dataset(Settings):
             #  This would also be problematic in mixed model case.
             # ps: different shuffle should end up with different dataset.unique_id, as the feature files are also different.
             if model_settings["shuffle_dataset"]:
-                if model_settings["special_case"] == 'hack_mix_everything_not_modulo6_cheating_osm_vec':
-                    dataset.randomize_all_list_order_deterministically(model_settings["seed"])
-                    dataset.unique_id = dataset.unique_id + "_shuffled_non_modulo"
-                else:
-                    if model_settings["shuffle_dataset_method"] == 'default-same-segment':
-                        dataset.randomize_all_list_order_deterministically_same_segment(model_settings["seed"])
-                    elif model_settings["shuffle_dataset_method"] == 'modulo':
-                        dataset.randomize_all_list_order_deterministically_modulo(model_settings["seed"])
+                if model_settings["shuffle_dataset_method"] == 'default-same-segment':
+                    dataset.randomize_all_list_order_deterministically_same_segment(model_settings["seed"])
 
             else:
                 dataset.unique_id = dataset.unique_id + "_notshuffled"
