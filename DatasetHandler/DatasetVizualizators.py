@@ -67,8 +67,8 @@ def plotX_sortValues(dont_touch_this_x, title='', x_min=0.0, x_max=1.0, notRever
     axes.set_xlabel(custom_x_label)
     axes.set_ylabel(custom_y_label)
 
-    plt.plot(x)
-    axes.fill_between(range(len(x)), x, facecolor='b', alpha=0.4)
+    plt.plot(x, color='red')
+    axes.fill_between(range(len(x)), x, facecolor='orange', edgecolor='red', alpha=1)
 
     zoomOut(axes, [0.0, len(x)-1], [x_min, x_max], factor=0.05)
 
@@ -79,11 +79,13 @@ def plotX_sortValues(dont_touch_this_x, title='', x_min=0.0, x_max=1.0, notRever
 def plotHistogram(x, title='', num_bins=100, x_min=0.0, x_max=1.0, custom_x_label = 'Score value', custom_y_label = 'Count of occurances'):
     plt.figure()
     axes = plt.axes()
+    #plt.style.use('ggplot')
+
 
     hist, bins = np.histogram(x, bins=num_bins)
     width = 0.7 * (bins[1] - bins[0])
     center = (bins[:-1] + bins[1:]) / 2
-    plt.bar(center, hist, align='center', width=width)
+    plt.bar(center, hist, align='center', width=width, color='orange', edgecolor='red')
 
     axes.xaxis.set_major_locator(ticker.MultipleLocator(np.abs(x_max-x_min)/10.0))
     axes.xaxis.set_minor_locator(ticker.MultipleLocator(np.abs(x_max-x_min)/100.0))
