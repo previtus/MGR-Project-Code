@@ -132,7 +132,7 @@ def test_marking(geo_json_path):
 
 
 from Functions import *
-def evaluator(model_file, settings_file):
+def evaluator(model_file, settings_file, name_output_file):
     model_base, model_top, model_settings = evaluator_load_model(model_file, settings_file)
 
     # Load data!
@@ -171,7 +171,7 @@ def evaluator(model_file, settings_file):
 
     GeoJSON = loadDefaultGEOJSON()
     evaluated_geojson = markGeoJSON(GeoJSON, Altered)
-    path_geojson_out = 'marked_from_mix1761335.geojson'
+    path_geojson_out = name_output_file
     saveGeoJson(evaluated_geojson, path_geojson_out)
 
     # Ex post testing

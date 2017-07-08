@@ -29,8 +29,8 @@ if len(sys.argv) > 2:
     model_file = (sys.argv[1])  # var1
     settings_file = (sys.argv[2])  # var2
 
-img_mse, img_mae = evaluator(IMG_model_file, IMG_settings_file)
-#mix_mse, mix_mae = evaluator(MIX_model_file, MIX_settings_file)
+img_mse, img_mae = evaluator(IMG_model_file, IMG_settings_file, 'marked_from_img_1769353.geojson')
+mix_mse, mix_mae = evaluator(MIX_model_file, MIX_settings_file, 'marked_from_mix_1761335.geojson')
 #osm_mse, osm_mae = evaluator(OSM_model_file, OSM_settings_file)
 
 '''
