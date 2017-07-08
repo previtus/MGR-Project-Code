@@ -1,7 +1,10 @@
+# Collection of helper functions easily accessible in the entire project.
+
 import numpy as np
 import urllib2
 
 def len_(L):
+    # Ultimate report on any kind of list.
     try:
         return np.array(L).shape
     except Exception:
@@ -13,6 +16,13 @@ def len_(L):
         return comb
 
 def send_mail(subject, message, attachment_path = None):
+    '''
+    Send mail!
+    :param subject: Mail subject
+    :param message: Mail message
+    :param attachment_path: Login details and specifics of mails.
+    :return:
+    '''
     try:
         import smtplib, os
         from email.mime.multipart import MIMEMultipart
@@ -58,8 +68,9 @@ def send_mail(subject, message, attachment_path = None):
         print inst           # __str__ allows args to be printed directly
         return False
 
+    # Usage example:
+    # send_mail('automatic mail', 'test', '/home/ekmek/Vitek/Logs/Number_of_FC_blocks_test/graph_together_Number_of_FC_blocks_test.png')
 
-#send_mail('automatic mail', 'test', '/home/ekmek/Vitek/Logs/Number_of_FC_blocks_test/graph_together_Number_of_FC_blocks_test.png')
 
 def save_job_report_page(folder_path, job_id, cut = True):
     '''
@@ -96,14 +107,15 @@ def save_job_report_page(folder_path, job_id, cut = True):
         print inst           # __str__ allows args to be printed directly
         return False
 
-
-#save_job_report_page(folder_path='',job_id='1398409.arien-pro.ics.muni.cz')
+    # example usage:
+    #save_job_report_page(folder_path='',job_id='1398409.arien-pro.ics.muni.cz')
 
 import os
 def file_exists_and_accesible(PATH):
     return os.path.isfile(PATH) and os.access(PATH, os.R_OK)
 
 def array_md5(arr):
+    # get md5 value of a list, for their comparison or duality checks
     import hashlib
     import cPickle as pickle
     data_pickle = pickle.dumps(arr)
