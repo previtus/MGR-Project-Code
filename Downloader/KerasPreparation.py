@@ -45,7 +45,7 @@ def split_osm(osm,validation_split=0.2):
     osm_val = osm[split_at:]
     return osm_test, osm_val
 
-def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
+def LoadDataFromSegments(Segments, has_score=True, path_to_images=None, we_dont_care_about_missing_images=False):
     '''
     Turns loaded segments into data we will need for keras.
     :param Segments: Loaded segments
@@ -97,7 +97,7 @@ def LoadDataFromSegments(Segments, has_score=True, path_to_images=None):
                     is_extended = True
                     location_index -= 1000
                     flag_is_extended = True
-                if Segment.hasLoadedImageI(i_th_image):
+                if Segment.hasLoadedImageI(i_th_image) or (we_dont_care_about_missing_images):
 
                     filename = Segment.getImageFilename(i_th_image)
                     if is_extended:

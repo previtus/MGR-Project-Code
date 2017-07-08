@@ -52,7 +52,7 @@ def evaluator_load_model(model_file, settings_file, verbose=False):
 
     return model_base, model_top, model_settings
 
-def evaluator_test_on_dataset(model_base, model_top, model_settings, x, osm):
+def evaluator_predict_on_dataset(model_base, model_top, model_settings, x, osm):
     if model_settings["model_type"] is 'simple_cnn_with_top':
         labels_base = model_base.predict(x, batch_size=32, verbose=1)
         labels_predicted = model_top.predict(labels_base, batch_size=32, verbose=1)
@@ -63,6 +63,25 @@ def evaluator_test_on_dataset(model_base, model_top, model_settings, x, osm):
     elif model_settings["model_type"] is 'osm_only':
         osm_input = osm
         labels_predicted = model_top.predict(osm_input, batch_size=32, verbose=1)
+
+    print len_(labels_predicted)
+    labels_return = []
+    for label in labels_predicted:
+        labels_return.append(label[0])
+    return labels_return
+
+def evaluator_generators_predict(model_base, model_top, model_settings, img_generator, osm, size):
+    print img_generator, size
+
+    if model_settings["model_type"] is 'simple_cnn_with_top':
+        labels_base = model_base.predict_generator(img_generator, steps=size, verbose=1)
+        print "len_(labels_base)", len_(labels_base)
+        labels_predicted = model_top.predict(labels_base, batch_size=32, verbose=1)
+    elif model_settings["model_type"] is 'img_osm_mix':
+        labels_base = model_base.predict_generator(img_generator, steps=size, verbose=1)
+        print "len_(labels_base)", len_(labels_base)
+        osm_input = osm
+        labels_predicted = model_top.predict([osm_input, labels_base], batch_size=32, verbose=1)
 
     print len_(labels_predicted)
     labels_return = []
@@ -94,7 +113,7 @@ def load_tmp_dataset():
 def evaluator_on_tmp(model_file, settings_file):
     model_base, model_top, model_settings = evaluator_load_model(model_file, settings_file)
     x, y_ref, osm = load_tmp_dataset()
-    y_pred = evaluator_test_on_dataset(model_base, model_top, model_settings, x, osm)
+    y_pred = evaluator_predict_on_dataset(model_base, model_top, model_settings, x, osm)
     print y_ref, y_pred
     from sklearn.metrics import mean_squared_error, mean_absolute_error
     mae = mean_absolute_error(y_ref, y_pred)
@@ -118,7 +137,11 @@ def evaluator(model_file, settings_file):
 
     # Load data!
     path_to_segments_file = default_segments_path()
-    lists, Segments = loadDataFromSegments(path_to_segments_file, None)
+
+    we_dont_care_about_missing_images = False
+    if model_settings["model_type"] is 'osm_only':
+        we_dont_care_about_missing_images = True
+    lists, Segments = loadDataFromSegments(path_to_segments_file, None, we_dont_care_about_missing_images=we_dont_care_about_missing_images)
     #lists = small_lists(lists)
 
     print "BEFORE MARKING"
@@ -126,14 +149,18 @@ def evaluator(model_file, settings_file):
 
     y_ref = lists[1]
     osm = osm_from_lists(lists)
-    x = None
     segment_ids = lists[3]
 
-    #print "i have", len_(osm)
-    #x, y_ref, osm = load_tmp_dataset()
-    #print "this works though", len_(osm)
+    if model_settings["model_type"] is 'osm_only':
+        x = None
+        y_pred = evaluator_predict_on_dataset(model_base, model_top, model_settings, x, osm)
 
-    y_pred = evaluator_test_on_dataset(model_base, model_top, model_settings, x, osm)
+    else:
+        # these models rely on images, lets use generators for reasonable memory requirements
+        img_generator = getImgGenerator_from_lists(lists)
+
+        y_pred = evaluator_generators_predict(model_base, model_top, model_settings, img_generator[1], osm, img_generator[2])
+
 
     pred_list = [lists[0], y_pred, lists[2], lists[3]]
     print "AFTER MARKING"
@@ -144,7 +171,7 @@ def evaluator(model_file, settings_file):
 
     GeoJSON = loadDefaultGEOJSON()
     evaluated_geojson = markGeoJSON(GeoJSON, Altered)
-    path_geojson_out = 'marked_from_osm-set3type_of_model_osm_kfold_d3.geojson'
+    path_geojson_out = 'marked_from_mix1761335.geojson'
     saveGeoJson(evaluated_geojson, path_geojson_out)
 
     # Ex post testing
@@ -154,12 +181,14 @@ def evaluator(model_file, settings_file):
 
     #print y_ref, y_pred
 
+    np.savetxt('y_ref.out', y_ref, delimiter=',')
+    np.savetxt('y_pred.out', y_pred, delimiter=',')
+
+    return 0, 0
+
     from sklearn.metrics import mean_squared_error, mean_absolute_error
     mae = mean_absolute_error(y_ref, y_pred)
     mse = mean_squared_error(y_ref, y_pred)
-
-    np.savetxt('y_ref.out', y_ref, delimiter=',')
-    np.savetxt('y_pred.out', y_pred, delimiter=',')
 
     return mse, mae
 

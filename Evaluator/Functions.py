@@ -5,6 +5,15 @@ from Downloader import KerasPreparation
 import os
 import numpy as np
 
+from DatasetHandler.FileHelperFunc import get_project_folder
+ABS_PATH_TO_PRJ = get_project_folder()
+
+# path_to_streetview_folder = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/'
+#path_to_streetview_folder = "/home/ekmek/Vitek/Mgr project/MGR-Project-Code/Data/StreetViewData/"
+path_to_streetview_folder = ABS_PATH_TO_PRJ + 'Data/StreetViewData/'
+name_of_segments_file = "5556x_markable_640x640/SegmentsData_marked_R100_4Tables.dump"
+
+
 def loadGeoJson(path):
     with open(path) as f:
         GeoJSON = json.load(f)
@@ -107,10 +116,10 @@ def UnknownSegmentsSubset(Segments):
         print internal_score
 '''
 
-def loadDataFromSegments(path_to_segments_file, SCORE, verbose=False):
+def loadDataFromSegments(path_to_segments_file, SCORE, verbose=False, we_dont_care_about_missing_images=False):
     Segments = DataOperations.LoadDataFile(path_to_segments_file)
     segments_dir = os.path.dirname(path_to_segments_file) + '/'
-    __list_of_images, __labels, __osm, __segment_ids, flag_is_extended = KerasPreparation.LoadDataFromSegments(Segments, has_score=SCORE, path_to_images=segments_dir)
+    __list_of_images, __labels, __osm, __segment_ids, flag_is_extended = KerasPreparation.LoadDataFromSegments(Segments, has_score=SCORE, path_to_images=segments_dir, we_dont_care_about_missing_images=we_dont_care_about_missing_images)
 
     if verbose:
         print "__list_of_images", len_(__list_of_images), __list_of_images[0:5]
@@ -224,15 +233,16 @@ def generator_img(order, image_paths, resize=None):
         for index in order:
             image = KerasPreparation.LoadActualImages([image_paths[index]], resize=resize)
             yield (image)
-def generator_osm(order, osms, resize=None):
+def generator_osm(order, osms):
     while True:
         for index in order:
             osm = osms[index]
             yield (osm)
 
 def default_segments_path():
-    folder = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/'
-    path_to_segments_file = folder + '5556x_markable_640x640/SegmentsData_marked_R100_4TablesN.dump'
+    folder = path_to_streetview_folder
+    path_to_segments_file = folder + name_of_segments_file
+
     return path_to_segments_file
 
 def main():
@@ -240,8 +250,8 @@ def main():
     #GeoJSON = loadDefaultGEOJSON()
     #print GeoJSON.keys()
 
-    folder = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/'
-    path_to_segments_file = folder + '5556x_markable_640x640/SegmentsData_marked_R100_4TablesN.dump'
+    folder = path_to_streetview_folder
+    path_to_segments_file = folder + name_of_segments_file
 
     #path_to_segments_file = folder + '5556x_markable_640x640/SegmentsData_marked_R100.dump'
     #path_to_segments_file = folder + '5556x_markable_640x640/SegmentsData_marked_R100_4Tables.dump'

@@ -209,7 +209,7 @@ def load_dataset(Settings):
             if model_settings["special_case"] == 'debug':
                 print "DEBUG OUTPUT ABOUT"
                 print dataset
-                print dataset.plotHistogram()
+                print dataset.plotHistogram(save_to_pdf=True)
 
             datasets.append(dataset)
             model_settings["dataset_pointer"] = index
