@@ -1,5 +1,4 @@
 # Provides the rest of the ModelHandler code with models. Works with the lower level of code in /Create Model
-from keras.models import Sequential
 from keras.layers import Dropout, Flatten, Dense, Conv2D, MaxPooling2D
 from keras.models import Model
 from keras.layers import Input, concatenate

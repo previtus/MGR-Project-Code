@@ -1,9 +1,10 @@
+# Get Keras models used as base CNNs for feature transfer.
+
 from keras.applications.vgg16 import VGG16
 from keras.applications.vgg19 import VGG19
 from keras.applications.resnet50 import ResNet50
 from keras.applications.inception_v3 import InceptionV3
 from keras.applications.xception import Xception
-
 
 def vgg16(input_shape=None):
     model = VGG16(weights='imagenet', include_top=False, input_shape=input_shape)
@@ -29,15 +30,6 @@ def xception(input_shape=None):
     model = Xception(weights='imagenet', include_top=False, input_shape=input_shape)
     print 'Xception (TensorFlow only) partial model loaded with input shape ', input_shape
     return model
-
-#def all_models():
-#    #return [['vgg16', vgg16()]]
-#    return [['vgg16', vgg16()], ['vgg19', vgg19()], ['resnet50', resnet50()],
-#            ['inception_v3', inception_v3()], ['xception', xception()]]
-
-def all_model_names():
-    #return [['vgg16', vgg16()]]
-    return ['vgg16', 'vgg19', 'resnet50', 'inception_v3', 'xception']
 
 def get_model(name, pixels=None):
     input_shape=None

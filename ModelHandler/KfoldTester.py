@@ -3,6 +3,7 @@ import numpy
 from Omnipresent import len_
 
 def chunks(l, n):
+    # Chunk data from list l into n fjords.
     a = numpy.array_split(numpy.array(l), n)
     b = []
     for i in a:
@@ -47,6 +48,8 @@ def best_min(arr):
     return min(arr)
 
 def k_fold_crossvalidation(model, dataset, model_settings):
+    # K fold crossvalidation scheme
+    # includes proper loading of models, testing and processing of the results.
     from ModelHandler.ModelTester import load_features
     from ModelHandler.ModelTester import train_top_model
 

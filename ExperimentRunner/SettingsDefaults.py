@@ -130,24 +130,24 @@ def load_settings_from_file(file=None, job_id='', verbose=False):
 
     return Settings
 
-## Typical usage example
-#load_settings_from_file('setting_example.py', verbose=True)
-# EXAMPLE OF SETTINGS FILE <setting_example.py>:
-'''
-
-def Setup(Settings,DefaultModel):
-    Settings["dataset_name"] = 'foo'
-
-    Settings["seed"] = 20
-
-    n = len(Settings["models"])
-    Settings["models"].append(DefaultModel.copy())
-
-    Settings["models"][n]["unique_id"] = 'test'
-    Settings["models"][n]["finetune_cnn"] = True
-
-    Settings["graph_histories"] = ['all',[0]]
-
-    return Settings
-
-'''
+    ## Typical usage example
+    #load_settings_from_file('setting_example.py', verbose=True)
+    # EXAMPLE OF SETTINGS FILE <setting_example.py>:
+    '''
+    
+    def Setup(Settings,DefaultModel):
+        Settings["dataset_name"] = 'foo'
+    
+        Settings["seed"] = 20
+    
+        n = len(Settings["models"])
+        Settings["models"].append(DefaultModel.copy())
+    
+        Settings["models"][n]["unique_id"] = 'test'
+        Settings["models"][n]["finetune_cnn"] = True
+    
+        Settings["graph_histories"] = ['all',[0]]
+    
+        return Settings
+    
+    '''

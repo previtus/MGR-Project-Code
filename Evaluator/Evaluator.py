@@ -2,12 +2,17 @@ import ExperimentRunner.SettingsDefaults as SettingsDefaults
 
 import ModelHandler.ModelOI as ModelOI
 import ModelHandler.ModelGenerator as ModelGenerator
-import ModelHandler.ModelTester as ModelTester
 import DatasetHandler as DatasetHandler
 from Omnipresent import len_
 
 def evaluator_load_model(model_file, settings_file, verbose=False):
-    ### LOAD skeleton of model and dataset
+    '''
+    Load skeleton of model and dataset
+    :param model_file: model h5 file
+    :param settings_file: corresponding settings file
+    :param verbose:
+    :return: model_base, model_top, model_settings
+    '''
     Settings = SettingsDefaults.load_settings_from_file(settings_file, '', verbose=False)
     if verbose:
         print Settings
@@ -53,6 +58,17 @@ def evaluator_load_model(model_file, settings_file, verbose=False):
     return model_base, model_top, model_settings
 
 def evaluator_predict_on_dataset(model_base, model_top, model_settings, x, osm):
+    '''
+    Evaluate model by just loading data into memory. This is effective with OSM models, but with others it will likely
+    flood the memory and be terminated - use generators in that case.
+
+    :param model_base: base CNN model
+    :param model_top: attached custom top classifier model
+    :param model_settings: settings of the model (to recognize the type of the model)
+    :param x: image data
+    :param osm: list of corresponding osm vectors
+    :return: Returns labeled data (labeled from images and osm)
+    '''
     if model_settings["model_type"] is 'simple_cnn_with_top':
         labels_base = model_base.predict(x, batch_size=32, verbose=1)
         labels_predicted = model_top.predict(labels_base, batch_size=32, verbose=1)
@@ -71,6 +87,16 @@ def evaluator_predict_on_dataset(model_base, model_top, model_settings, x, osm):
     return labels_return
 
 def evaluator_generators_predict(model_base, model_top, model_settings, img_generator, osm, size):
+    '''
+    Use generators to evaluate model.
+    :param model_base: base CNN model
+    :param model_top: attached custom top classifier model
+    :param model_settings: settings of the model (to recognize the type of the model)
+    :param img_generator: image generator
+    :param osm: list of corresponding osm vectors
+    :param size: amount of images.
+    :return: Returns labeled data (labeled from images and osm)
+    '''
     print img_generator, size
 
     if model_settings["model_type"] is 'simple_cnn_with_top':
@@ -89,8 +115,11 @@ def evaluator_generators_predict(model_base, model_top, model_settings, img_gene
         labels_return.append(label[0])
     return labels_return
 
-## ---------- debug test functions
 def load_tmp_dataset():
+    '''
+    Example of how a dataset can be loaded.
+    :return:
+    '''
     model_settings = {}
     # HACK
     model_settings["dataset_name"] = "miniset_640px"
@@ -110,29 +139,15 @@ def load_tmp_dataset():
     print len_(x), len_(y), len_(osm)
     return x, y, osm
 
-def evaluator_on_tmp(model_file, settings_file):
-    model_base, model_top, model_settings = evaluator_load_model(model_file, settings_file)
-    x, y_ref, osm = load_tmp_dataset()
-    y_pred = evaluator_predict_on_dataset(model_base, model_top, model_settings, x, osm)
-    print y_ref, y_pred
-    from sklearn.metrics import mean_squared_error, mean_absolute_error
-    mae = mean_absolute_error(y_ref, y_pred)
-    mse = mean_squared_error(y_ref, y_pred)
-    return mse, mae
-## ENDOF---------- debug test functions
-
-
-def test_marking(geo_json_path):
-    path_to_segments_file = default_segments_path()
-    lists, Segments = loadDataFromSegments(path_to_segments_file, None)
-    GeoJSON = loadGeoJson(geo_json_path)
-
-    from Functions import traverseGeoJSON
-    traverseGeoJSON(GeoJSON, Segments)
-
-
 from Functions import *
 def evaluator(model_file, settings_file, name_output_file):
+    '''
+    Main Evaluator function.
+    :param model_file: path to model .h5 file.
+    :param settings_file: path to settings file which was used to train this model.
+    :param name_output_file: name of labeled geojson data
+    :return:
+    '''
     model_base, model_top, model_settings = evaluator_load_model(model_file, settings_file)
 
     # Load data!
@@ -185,7 +200,7 @@ def evaluator(model_file, settings_file, name_output_file):
     np.savetxt('y_pred.out', y_pred, delimiter=',')
 
     return 0, 0
-
+    # Additional metrics
     from sklearn.metrics import mean_squared_error, mean_absolute_error
     mae = mean_absolute_error(y_ref, y_pred)
     mse = mean_squared_error(y_ref, y_pred)

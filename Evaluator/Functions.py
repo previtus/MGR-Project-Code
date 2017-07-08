@@ -15,26 +15,36 @@ name_of_segments_file = "5556x_markable_640x640/SegmentsData_marked_R100_4Tables
 
 
 def loadGeoJson(path):
+    # Load GeoJSON file
     with open(path) as f:
         GeoJSON = json.load(f)
     return GeoJSON
 
 def saveGeoJson(GeoJSON, path):
+    # Save GeoJSON file
     print "Saving GeoJSON object to:", path
     with open(path, 'a') as f:
         json.dump(GeoJSON, f)
 
 def loadDefaultGEOJSON():
+    # Load default GeoJSON file, which is the initial attractivity_previtus_data_1_edges.geojson file
     from DatasetHandler.FileHelperFunc import get_geojson_path
     path = get_geojson_path()
     return loadGeoJson(path)
 
 def internalToExternal(score):
+    # Convert score notations back to how geojson file used it.
     if score <> -1:
         return int(round(score * 100))
     return score
 
 def markGeoJSON(GeoJSON, Segments):
+    '''
+    Mark geojson object with data from corresponding Segment object in Segments
+    :param GeoJSON: geojson object
+    :param Segments: list of objects
+    :return: altered GeoJSON object
+    '''
     SegmentId = 0
     for feature in GeoJSON['features']:
         if (feature['geometry']['type'] == 'LineString'):
@@ -51,6 +61,13 @@ def markGeoJSON(GeoJSON, Segments):
     return GeoJSON
 
 def traverseGeoJSON(GeoJSON, Segments):
+    '''
+    For testing purposes we go through all entries in GeoJSON and check for scores in Segments,
+    we report the altered values.
+    :param GeoJSON:
+    :param Segments:
+    :return:
+    '''
     SegmentId = 0
     for feature in GeoJSON['features']:
         if (feature['geometry']['type'] == 'LineString'):
@@ -70,6 +87,7 @@ def traverseGeoJSON(GeoJSON, Segments):
             SegmentId += 1
 
 def prepEvaluatedData(y_pred, segment_ids):
+    # prepare dictionary which will give us scores of certain segment id all clustered together into one list.
     EvaluatedData = {}
     for i in range(0,len(y_pred)):
         id = segment_ids[i]
@@ -81,6 +99,14 @@ def prepEvaluatedData(y_pred, segment_ids):
     return EvaluatedData
 
 def AlterSegments(EvaluatedData, Segments, only_unknown_scores=True):
+    '''
+    Edit internal values of Segments depending on what data we got.
+    :param EvaluatedData: processed dictionary which can give us list of values for segment id
+    :param Segments: list of Segment objects, which we iterate through and change their scores.
+    :param only_unknown_scores: Flag whether we overwrite only those Segments which had unknown score in
+    the initial dataset.
+    :return: Altered Segments list
+    '''
     SegmentId = 0
     for SegmentId in range(0, len(Segments)):
         Segment = Segments[SegmentId]
@@ -104,19 +130,16 @@ def AlterSegments(EvaluatedData, Segments, only_unknown_scores=True):
 
     return Segments
 
-'''
-def UnknownSegmentsSubset(Segments):
-    SegmentId = 0
-    for SegmentId in range(0, len(Segments)):
-        Segment = Segments[SegmentId]
-        has_score = Segment.hasUnknownScore()
-
-        internal_score = Segments[SegmentId].getScore()
-
-        print internal_score
-'''
-
 def loadDataFromSegments(path_to_segments_file, SCORE, verbose=False, we_dont_care_about_missing_images=False):
+    '''
+    Load lists from Segments
+    :param path_to_segments_file: Segments file to be loaded.
+    :param SCORE: flag for if we care for only scored Segments
+    :param verbose:
+    :param we_dont_care_about_missing_images: flag for if we care for only those Segments with images
+    (OSM model doesnt need them.)
+    :return: lists and Segments
+    '''
     Segments = DataOperations.LoadDataFile(path_to_segments_file)
     segments_dir = os.path.dirname(path_to_segments_file) + '/'
     __list_of_images, __labels, __osm, __segment_ids, flag_is_extended = KerasPreparation.LoadDataFromSegments(Segments, has_score=SCORE, path_to_images=segments_dir, we_dont_care_about_missing_images=we_dont_care_about_missing_images)
@@ -131,31 +154,23 @@ def loadDataFromSegments(path_to_segments_file, SCORE, verbose=False, we_dont_ca
     return [__list_of_images, __labels, __osm, __segment_ids], Segments
 
 def small_lists(lists, n=50):
+    '''
+    Subset of first n values.
+    :param lists:
+    :param n:
+    :return: subsets of lists
+    '''
     small = []
     for item in lists:
         small.append(item[0:n])
     return small
 
-def filter_lists_only_unknown_score(lists, verbose):
-    __list_of_images, __labels, __osm, __segment_ids = lists
-
-    f__list_of_images, f__labels, f__osm, f__segment_ids = [[],[],[],[]]
-    for i in range(0, len(__list_of_images)):
-        if __labels[i] == -1:
-            f__list_of_images.append(__list_of_images[i])
-            f__labels.append(__labels[i])
-            f__osm.append(__osm[i])
-            f__segment_ids.append(__segment_ids[i])
-
-    if verbose:
-        print "f__list_of_images", len_(f__list_of_images), f__list_of_images[0:5]
-        print "f__labels", len_(f__labels), f__labels[0:5]
-        print "f__osm", len_(f__osm)
-        print "f__segment_ids", len_(f__segment_ids), f__segment_ids[0:5]
-
-    return [f__list_of_images, f__labels, f__osm, f__segment_ids]
-
 def analyze_lists(lists):
+    '''
+    Analyze statistics inside lists. Count for unique segments and numbers of images.
+    :param lists:
+    :return:
+    '''
     __list_of_images, __labels, __osm, __segment_ids = lists
     number_of_images = len(__list_of_images)
     number_of_images_without_score = 0
@@ -181,30 +196,19 @@ def analyze_lists(lists):
     print "Unscored ", number_of_segments_without_score, " Segments with", number_of_images_without_score, "images."
     print "Scored ", (number_of_segments-number_of_segments_without_score), " Segments with", (number_of_images-number_of_images_without_score), "images."
 
-def x_osm_from_lists(lists):
-    __list_of_images, __labels, __osm, __segment_ids = lists
-
-    x = KerasPreparation.LoadActualImages(__list_of_images)
-    osm = np.asarray(__osm)
-
-    return [x, osm]
-
 def osm_from_lists(lists):
+    # Get osm data
     __list_of_images, __labels, __osm, __segment_ids = lists
     osm = np.asarray(__osm)
     return osm
 
 #### GENERATORS
-def getMixGenerator_from_lists(lists):
-    __list_of_images, __labels, __osm, __segment_ids = lists
-
-    size = len(__list_of_images)
-    order = range(size)
-
-    image_generator = generator_mix(order, image_paths=__list_of_images, osms=__osm)
-    return [order, image_generator, size]
-
 def getImgGenerator_from_lists(lists):
+    '''
+    Create generator on given list, yielding imagery data.
+    :param lists:
+    :return:
+    '''
     __list_of_images, __labels, __osm, __segment_ids = lists
 
     size = len(__list_of_images)
@@ -214,68 +218,35 @@ def getImgGenerator_from_lists(lists):
     return [order, image_generator, size]
 
 def getOsmGenerator_from_lists(lists):
+    '''
+    Create generator on given list, yielding vector data.
+    :param lists:
+    :return:
+    '''
     __list_of_images, __labels, __osm, __segment_ids = lists
 
     size = len(__list_of_images)
     order = range(size)
 
-    image_generator = generator_osm(order, osms=__osm)
-    return [order, image_generator, size]
+    osm_generator = generator_osm(order, osms=__osm)
+    return [order, osm_generator, size]
 
-def generator_mix(order, image_paths, osms, resize=None):
-    while True:
-        for index in order:
-            image = KerasPreparation.LoadActualImages([image_paths[index]], resize=resize)
-            osm = osms[index]
-            yield (image, osm)
 def generator_img(order, image_paths, resize=None):
+    # generator yields loaded images one by one, needed to save memory
     while True:
         for index in order:
             image = KerasPreparation.LoadActualImages([image_paths[index]], resize=resize)
             yield (image)
 def generator_osm(order, osms):
+    # generator yields osm vectors one by one, not really needed
     while True:
         for index in order:
             osm = osms[index]
             yield (osm)
 
 def default_segments_path():
+    # assembles path to the segments files
     folder = path_to_streetview_folder
     path_to_segments_file = folder + name_of_segments_file
 
     return path_to_segments_file
-
-def main():
-
-    #GeoJSON = loadDefaultGEOJSON()
-    #print GeoJSON.keys()
-
-    folder = path_to_streetview_folder
-    path_to_segments_file = folder + name_of_segments_file
-
-    #path_to_segments_file = folder + '5556x_markable_640x640/SegmentsData_marked_R100.dump'
-    #path_to_segments_file = folder + '5556x_markable_640x640/SegmentsData_marked_R100_4Tables.dump'
-    print path_to_segments_file
-
-    '''
-    Segments = DataOperations.LoadDataFile(path_to_segments_file)
-
-    traverseGeoJSON(GeoJSON, Segments)
-
-
-    evaluated_geojson = tmpMarkGeoJSON(GeoJSON, Segments)
-    path_geojson_out = 'temp.geojson'
-    saveGeoJson(evaluated_geojson, path_geojson_out)
-
-    #traverseGeoJSON(a, Segments)
-    '''
-
-    lists = loadDataFromSegments(path_to_segments_file, None)
-    analyze_lists(lists)
-
-    getOsmGenerator_from_lists(lists)
-    getImgGenerator_from_lists(lists)
-    getMixGenerator_from_lists(lists)
-
-
-#main()

@@ -5,11 +5,9 @@
 
 from DatasetHandler.FileHelperFunc import use_path_which_exists, make_folder_ifItDoesntExist
 import os
-import ModelHandler.CreateModel.KerasApplicationsModels as Models
 import DatasetHandler.CreateDataset
 from DatasetHandler.DataAugmentation import handle_noncanon_dataset
-from Omnipresent import save_job_report_page, send_mail, len_, array_md5
-import Downloader.VisualizeHistory
+from Omnipresent import save_job_report_page, send_mail, len_
 
 def prepare_folders(Settings, datasets, verbose=False):
     '''
@@ -462,7 +460,6 @@ def save_models(models, Settings):
     index = 0
     for model in models:
         model_settings = Settings["models"][index]
-        # TODO: MODEL_TYPE_SPLIT
 
         if model_settings["model_type"] is 'simple_cnn_with_top' or model_settings["model_type"] is 'img_osm_mix':
             if model_settings["model_save"] > 0:

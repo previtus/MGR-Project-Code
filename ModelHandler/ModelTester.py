@@ -4,12 +4,11 @@
 # Can run either simple tests, or the more complicated ones
 # Can perform the more precise k-fold cross validation
 
-from ModelHandler.ModelGenerator import build_img_only_top_model, build_full_mixed_model, build_finetune_model, join_two_models
+from ModelHandler.ModelGenerator import build_full_mixed_model, build_finetune_model, join_two_models
 from ModelHandler.KfoldTester import k_fold_crossvalidation
 from Omnipresent import len_
 import numpy as np
 from keras.utils import plot_model
-from Downloader.VisualizeHistory import saveHistory, visualize_history
 
 def cook_features(models, datasets, Settings):
     '''
@@ -282,7 +281,7 @@ def train_model(model, dataset, model_settings):
 
 # Generate Feature files = Predict
 def predict_from_generators(test_generator, val_generator, number_in_test, number_in_val, filename_features_train, filename_features_test, model):
-    # generators should yield:
+    # Predict using generators (memory sensitive)
     bottleneck_features_train = model.predict_generator(test_generator, steps=number_in_test,verbose=1)
     print "saving train_features of size", len_(bottleneck_features_train), " into ",filename_features_train
     np.save(open(filename_features_train, 'w'), bottleneck_features_train)
@@ -350,14 +349,8 @@ def train_top_model(model, model_settings, train_data, train_labels, validation_
               epochs=model_settings["epochs"], batch_size=32,
               validation_data=(validation_data, validation_labels))
 
-    #history = model.fit_generator(generator_train, steps_per_epoch, epochs=epochs,
-    #                              validation_data=(generator_valid), validation_steps)
-
     return history.history
 
-
-# CUSTOM KERAS CALLBACK
-# inspired by Kerutils at https://github.com/samyzaf/kerutils
 from keras.callbacks import Callback
 import datetime, sys
 
@@ -373,6 +366,9 @@ def format_time(seconds):
         return "%.2f hours" % (h,)
 
 class RunMonitor(Callback):
+    # CUSTOM KERAS CALLBACK
+    # inspired by Kerutils at https://github.com/samyzaf/kerutils
+
     def __init__(self, **opt):
         super(Callback, self).__init__()
         self.verbose = opt.get('verbose', 1)
