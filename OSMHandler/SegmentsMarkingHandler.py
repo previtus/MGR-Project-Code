@@ -2,6 +2,7 @@
 
 
 def testConnection():
+    # Test connection
     from OSMHandler.ConnectionHandlerObj import ConnectionHandler
     conHand = ConnectionHandler()
     [vec_a, _] = conHand.query_location(location=[14.4310467875143, 50.0631591705215], radius=10)
@@ -11,17 +12,20 @@ def testConnection():
     print len(vec_b), vec_b
 
 
-def testCheckingSegments(input_path, output_path, radius = 100, close=False):
+def markSegmentsWithRadius(input_path, output_path, radius = 100, close=False):
+    '''
+    Mark these Segments with OSM data of said radius.
+    :param input_path: path to initial Segments file (without any osm data)
+    :param output_path: output where we want to save marked Segments
+    :param radius: radius in meters.
+    :param close: Flag to close connection after being done.
+    :return:
+    '''
     import OSMHandler.Checker as Checker
     import OSMHandler.Marker as Marker
     import Downloader.DataOperations
 
-    #path_to_segments_file = '/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/StreetViewData/50_rewritingObj_299x299/SegmentsData.dump'
-    #path_to_segments_file = '/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/StreetViewData/50_rewritingObj_299x299/SegmentsData_marked.dump'
-    #path_to_segments_file = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_markable_640x640/SegmentsData.dump'
     Segments = Downloader.DataOperations.LoadDataFile(input_path)
-
-    #Segments = Segments[0:3]
 
     allright = Checker.Check(Segments)
     print "checks out as ", allright
@@ -40,14 +44,14 @@ path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_minlen30_64
 input_path = path+'SegmentsData_images_generated_2flipshift_expanded.dump'
 output_path = path+'SegmentsData_mark100_images_generated_2flipshift_expanded.dump'
 r = 100
-testCheckingSegments(input_path, output_path, radius = r,close=False)
+markSegmentsWithRadius(input_path, output_path, radius = r, close=False)
 
 input_path = path+'SegmentsData_images_generated_2flipshift_expanded.dump'
 output_path = path+'SegmentsData_mark200_images_generated_2flipshift_expanded.dump'
 r = 200
-testCheckingSegments(input_path, output_path, radius = r,close=False)
+markSegmentsWithRadius(input_path, output_path, radius = r, close=False)
 
 input_path = path+'SegmentsData_images_generated_2flipshift_expanded.dump'
 output_path = path+'SegmentsData_mark50_images_generated_2flipshift_expanded.dump'
 r = 50
-testCheckingSegments(input_path, output_path, radius = r,close=False)
+markSegmentsWithRadius(input_path, output_path, radius = r, close=False)

@@ -11,6 +11,12 @@ print "imported Marker.py, inside DB requiring section."
 ConnHandler = None
 
 def Mark(Segments, radius = 50):
+    '''
+    Mark Segments with radius. Call MarkSegment on each Segment.
+    :param Segments:
+    :param radius: radius in meters
+    :return:
+    '''
     from OSMHandler.ConnectionHandlerObj import ConnectionHandler
 
     global ConnHandler
@@ -27,11 +33,17 @@ def Mark(Segments, radius = 50):
         MarkSegment(Segment, radius = radius)
 
 def MarkSegment(Segment, radius = 50):
+    '''
+    Mark Segment with new OSM vector depending on what the PosgreSQL db will tell us about the neighborhood.
+    :param Segment: One Segment object initially without OSM data.
+    :param radius: radius in meters
+    :return:
+    '''
     index = 0
     for distinctLocation in Segment.DistinctLocations:
         print "We are in ", distinctLocation
 
-        # we mark it here!
+        # we combine them here!
         table_names = ["planet_osm_line", "planet_osm_point", "planet_osm_polygon", "planet_osm_roads"]
 
         global ConnHandler
@@ -52,6 +64,7 @@ def MarkSegment(Segment, radius = 50):
     print Segment
 
 def closeConnection():
+    # Close connection please.
     global ConnHandler
     ConnHandler.close_connection()
     ConnHandler.report()

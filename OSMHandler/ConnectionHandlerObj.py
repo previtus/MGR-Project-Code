@@ -35,6 +35,7 @@ class ConnectionHandler:
     foo = -1
 
     def __init__(self):
+        # Initialization and loading of pairs
         key_attr_pairs_file = 'key-attr-pairs.csv'
         number_of_loaded_pairs = 1103 # out of 1103 rows
 
@@ -55,6 +56,7 @@ class ConnectionHandler:
         return None
 
     def final_vec_invert_indices(self, i):
+        # inverted indices, get pairs
         return self.__list_of_watched_pairs[i]
 
     def setup_db_connection(self, hostname, username, password, database):
@@ -72,6 +74,7 @@ class ConnectionHandler:
         return connection
 
     def close_connection(self):
+        # Close connection
         self.__connection.close()
         self.opened = False
 
@@ -144,12 +147,14 @@ class ConnectionHandler:
         return [rows, colnames]
 
     def get_column_names_in_db(self):
+        # Get which column names we in fact have in our table
         table_name = 'planet_osm_line'
         command = 'SELECT * FROM ' + table_name + " LIMIT 1"
         [_, columns_we_have] = self.run_command(command)
         return columns_we_have
 
     def extract_all_pairs(self, rows, colnames, excluded_column='dist_meters'):
+        # Extract all pairs from the query result
         key_attr_pairs = []
 
         for row in rows:
@@ -173,7 +178,6 @@ class ConnectionHandler:
 
     def query_location(self, location, radius, table_name):
         # run query to get neighborhood
-        #sql_command = self.sql_cmd_everywhere(column_names = self.__distinct_keys)
         sql_command = self.sql_cmd_radius(column_names = self.__distinct_keys, location=location, radius=radius, table_name=table_name)
         #print sql_command
 
@@ -207,6 +211,7 @@ class ConnectionHandler:
 
         sorted_final_vec.sort(key=lambda x: -x[1])
 
+        # For debug purposes:
         #for itm in sorted_final_vec:
         #    print itm[0], itm[1]
         #    if int(itm[1]) == 0:
@@ -256,13 +261,13 @@ class ConnectionHandler:
             list.append(" LIMIT ")
             list.append(str(sql_limit_rows))
 
-        # TODO> WHERE location is nearby location
         list.append(";")
 
         command = ''.join(list)
         return command
 
     def report(self):
+        # Report on the state of connection.
         if self.opened:
             print "Connection is opened to host "+ hostname +" and database " + database + " with username " + username
         else:
