@@ -1,23 +1,22 @@
 import matplotlib, os, errno
-# IF WE ARE ON SERVER WITH NO DISPLAY, then:
+# IF WE ARE ON SERVER WITH NO DISPLAY, then we use Agg:
 #print matplotlib.get_backend()
 if not('DISPLAY' in os.environ):
     matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
-
 import numpy as np
 
-'''
-Example calls:
-hi = model.fit(...)
-
-saveHistory(hi.history, 'tmp_saved_history.npy')
-visualize_history(loadHistory('tmp_saved_history.npy'))
-
-'''
-
 def visualize_history(hi, show=True, save=False, save_path='', show_also='', custom_title=None):
+    # Visualize history of Keras model run.
+    '''
+    Example calls:
+    hi = model.fit(...)
+
+    saveHistory(hi.history, 'tmp_saved_history.npy')
+    visualize_history(loadHistory('tmp_saved_history.npy'))
+
+    '''
 
     # list all data in history
     print(hi.keys())
@@ -63,9 +62,6 @@ def visualize_history(hi, show=True, save=False, save_path='', show_also='', cus
     return plt
 
 def visualize_histories(histories, names, plotvalues='loss', show=True, save=False, save_path='', custom_title=None, just_val=False):
-
-    import matplotlib.pyplot as plt
-
     '''
     Visualize multiple histories.
 
@@ -74,6 +70,8 @@ def visualize_histories(histories, names, plotvalues='loss', show=True, save=Fal
         h2 = loadHistory('history2.npy')
         visualize_histories([h1, h2], ['history1', 'history2'])
     '''
+    import matplotlib.pyplot as plt
+
     if custom_title is None:
         custom_title = 'model ' + plotvalues
     if just_val:
@@ -111,16 +109,6 @@ def visualize_histories(histories, names, plotvalues='loss', show=True, save=Fal
 def visualize_special_histories(histories, plotvalues='loss', show=True, save=False, save_path='', custom_title=None, just_val=False):
     '''
     We are visualizing results of a k-fold crossvalidation training. In <histories> we have the individual runs of the experiment.
-
-    :param histories:
-    :param names:
-    :param plotvalues:
-    :param show:
-    :param save:
-    :param save_path:
-    :param custom_title:
-    :param just_val:
-    :return:
     '''
 
     train_color = 'grey'
@@ -270,6 +258,7 @@ def visualize_whiskered_boxed(whiskered_boxes_data, names, show=True, save=False
     return plt
 
 def saveHistory(history_dict, filename):
+    # Save history or histories into npy file
     if not os.path.exists(os.path.dirname(filename)):
         try:
             os.makedirs(os.path.dirname(filename))
@@ -281,13 +270,6 @@ def saveHistory(history_dict, filename):
     np.save(open(filename, 'w'), to_be_saved)
 
 def loadHistory(filename):
+    # Load history object
     loaded = np.load(open(filename))
     return loaded[()]['S']
-
-#visualize_history(loadHistory('1100downloaded_vII/tmp_saved_history.npy'))
-
-#h1 = loadHistory('/home/ekmek/TEMP_SPACE/MGR-Project-Code/Downloader/ModelImplementations/1_SimpleCNN_3conv_2fc/results/history.npy')
-#h2 = loadHistory('/home/ekmek/TEMP_SPACE/MGR-Project-Code/Downloader/ModelImplementations/2_VGG16_no_finetuning/(runs)/now2/results/history.npy')
-#h3 = loadHistory('/home/ekmek/TEMP_SPACE/MGR-Project-Code/Downloader/ModelImplementations/2_VGG16_no_finetuning/results/history_finetune.npy')
-#visualize_histories([h1, h2, h3], ['simple', 'vgg', 'finetune'],save=True)
-

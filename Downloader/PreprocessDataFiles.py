@@ -1,17 +1,12 @@
 # PreprocessDataF.py
-
-from PreprocessData.GenListOfUrls import *
 from PreprocessData.PrepSegments import *
-from PreprocessData.DownloadUrlFilenameMap import *
 import json
 
-from Defaults import *
 from DataOperations import *
 
-import pickle
-
-def PreprocessDataF(EdgesFile, Path, FromEdgeID = FromEdgeID, ToEdgeID=ToEdgeID,
-                    PIXELS_X = PIXELS_X, PIXELS_Y = PIXELS_Y, minimal_length=20):
+def PreprocessDataFiles(EdgesFile, Path, FromEdgeID = FromEdgeID, ToEdgeID=ToEdgeID,
+                        PIXELS_X = PIXELS_X, PIXELS_Y = PIXELS_Y, minimal_length=20):
+    # Preprocess data from files - used when downloading data.
     OutputFile = Path+DATASTRUCTUREFILE
 
     # 1 data prep
@@ -30,4 +25,4 @@ def PreprocessDataF(EdgesFile, Path, FromEdgeID = FromEdgeID, ToEdgeID=ToEdgeID,
 
     return FailedDownloads
 
-#PreprocessDataF(EDGESFILES, NODESFILES, DATASTRUCTUREFILE)
+#PreprocessDataFiles(EDGESFILES, NODESFILES, DATASTRUCTUREFILE)

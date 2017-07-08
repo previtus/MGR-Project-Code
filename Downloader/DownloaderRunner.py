@@ -1,8 +1,8 @@
+# Downloader Runner
 # has function run with argument path, which will decide where its stored, also some basic settings, but nothing
 # complicated - just an easy runner function
 import Downloader.Defaults
-from Downloader.PreprocessDataF import *
-from Downloader.DataOperations import *
+from Downloader.PreprocessDataFiles import *
 from Downloader.PreprocessData.SegmentsManipulators import *
 from DatasetHandler.FileHelperFunc import *
 
@@ -27,9 +27,16 @@ def RunDownload(name, from_edge, to_edge, px_py, minimal_length):
     FromEdgeID = from_edge
     ToEdgeID = to_edge
 
-    PreprocessDataF(path_to_edges, path_to_datafolder, FromEdgeID, ToEdgeID, PIXELS_X=px_py, PIXELS_Y=px_py, minimal_length=minimal_length)
+    PreprocessDataFiles(path_to_edges, path_to_datafolder, FromEdgeID, ToEdgeID, PIXELS_X=px_py, PIXELS_Y=px_py, minimal_length=minimal_length)
 
 def RunCheck(name, px_py):
+    '''
+    Check downloaded Segment files while downloading missing data.
+    :param name: name of the Segments file
+    :param px_py: pixel sizes
+    :return:
+    '''
+
     path_to_datafolder = get_project_folder()+'Data/StreetViewData/'+name+'/'
     segments_file = path_to_datafolder+'/SegmentsData.dump'
     print "Downloaded, now checking"
@@ -45,6 +52,11 @@ def RunCheck(name, px_py):
         Segments = FixDataFile_FailedDownloads(segments_file, ERROR_MESSAGE_FAILED_MANY_TIMES, PIXELS_X=px_py, PIXELS_Y=px_py, PrependPath=path_to_datafolder)
 
 def RunMarkBad(name):
+    '''
+    Mark errorneous segments by Error flag.
+    :param name:
+    :return:
+    '''
     path_to_datafolder = get_project_folder()+'Data/StreetViewData/'+name+'/'
     segments_file = path_to_datafolder+'/SegmentsData.dump'
 

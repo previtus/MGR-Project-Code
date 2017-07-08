@@ -4,8 +4,6 @@ from PreprocessData.GenListOfUrls import *
 from PreprocessData.DownloadUrlFilenameMap import *
 from PreprocessData.SegmentObj import *
 
-''' todo: return false/true and take into account fails  '''
-
 def SaveDataFile(name, Segments):
     '''
     Save structure of Segments into file <name>
@@ -19,7 +17,6 @@ def LoadDataFile(name):
     Load Segments from the file <name>
     '''
     Segments = []
-
 
     try:
         with open(name,'rb') as f:
@@ -81,9 +78,6 @@ def HasSomeErrorneousData(Segments, ERROR_TYPE):
                 return True
     return False
 
-# todo version with directly Segments:
-# > FixDataFile_FailedDownloads(___, ERROR_TYPE):
-
 def FixDataFile_FailedDownloads(name, ERROR_TYPE, PIXELS_X, PIXELS_Y, PrependPath):
     '''
     Loads, fixes and saves the structure of Segments. Looks at those
@@ -132,28 +126,11 @@ def FixDataFile_FailedDownloads(name, ERROR_TYPE, PIXELS_X, PIXELS_Y, PrependPat
     '''print "AFTER:"
     for segment in Segments:
         segment.displaySegment()'''
-
     
     # save
     SaveDataFile(name, Segments)
 
     return Segments
-
-'''
-try with this > import cPickle as pickle
-In all these cases, pickle and cPickle can fail you horribly.
-
-If you are looking to save an object (arbitrarily created), where you have attributes (either added in the object
-definition, or afterward)... your best bet is to use dill, which can serialize almost anything in python.
- >> Try Dill ?? maybe
-
-def save_object(obj, filename):
-    with open(filename, 'wb') as output:
-        pickle.dump(obj, output, pickle.HIGHEST_PROTOCOL)
-
-# sample usage
-save_object(company1, 'company1.pkl')
-'''
 
 def save_segments_file_as_without_missing_files(in_segments_file, path_to_images, out_segments_file):
     # Special treatment of Segments file - mark all missing images as unusable
@@ -192,8 +169,8 @@ def save_segments_file_as_without_missing_files(in_segments_file, path_to_images
 
     SaveDataFile(out_segments_file, Segments)
 
-
 def save_segments_file_marking_missing_files_as_errors(in_segments_file, path_to_images, out_segments_file):
+    # Debug function used to spawn new Segments file without any missing images.
     Segments = LoadDataFile(in_segments_file)
 
     print "Segments may have nonexistent files linked:"
@@ -212,19 +189,3 @@ def save_segments_file_marking_missing_files_as_errors(in_segments_file, path_to
                     Segment.ErrorMessages[i_th_image] = ERROR_MESSAGE_QUOTA
 
     SaveDataFile(out_segments_file, Segments)
-
-'''
-in_segments_file = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_minlen30_640px/SegmentsData.dump'
-path_to_images = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_minlen30_640px/'
-out_segments_file = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_minlen30_640px/SegmentsData.dump'
-save_segments_file_marking_missing_files_as_errors(in_segments_file, path_to_images, out_segments_file)
-'''
-
-'''
-keep files:
-SegmentsData_invalid.dump
-SegmentsData_marked_R100_4Tables_invalid.dump
-SegmentsData_marked_R100_invalid.dump
-SegmentsData_marked_R200_4Tables_invalid.dump
-SegmentsData_marked_R50_4Tables_invalid.dump
-'''

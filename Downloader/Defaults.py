@@ -1,5 +1,5 @@
-# Defaults.pyNODESFILES_GEOJSON = r'../../graph_new_data/attractivity_previtus_data_1_nodes.geojson'
-
+# Defaults.py
+# Default settings for the downloader.
 
 ### PreprocessData part ###
 
@@ -25,12 +25,12 @@ DOWNLOAD_OVERRIDE_PRETEND_YOU_WERE_ABLE_TO_DOWNLOAD_ALL_BUT_DONT_DO_IT = False
 FILE_NOT_FOUND_CHECKSUM = "79d895a10e5947aa682b79cf0cfdcda1" #640x640
 #FILE_NOT_FOUND_CHECKSUM = "a1ffb93c541716d60f3536d3ed308339" #299x299
 
-# TODO: add a test for a known 404 image with current px*py and md5
-# /home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/1200x_markable_640x640/images/1189_0.jpg 79d895a10e5947aa682b79cf0cfdcda1 False
+# Example:
+# .../StreetViewData/1200x_markable_640x640/images/1189_0.jpg 79d895a10e5947aa682b79cf0cfdcda1 False
 # No photographic information on the spot.
 # ...... all the way to
-#/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/1200x_markable_640x640/images/1199_4.jpg 79d895a10e5947aa682b79cf0cfdcda1 False
-#No photographic information on the spot.
+# .../StreetViewData/1200x_markable_640x640/images/1199_4.jpg 79d895a10e5947aa682b79cf0cfdcda1 False
+# No photographic information on the spot.
 
 
 #QUOTA_EXCEEDED_CHECKSUM="62b6f414127ae3a630639c8572360dd7" #299x299 maybe
@@ -49,9 +49,6 @@ BAD_MD5_LIST = [
     "b2328ec7ff935944a85723daddf0e8b7"
 ]
 
-# TODO: Check for file not found in different manner
-# probably: https://developers.google.com/maps/documentation/javascript/streetview#StreetViewService
-
 EDGESFILES_GEOJSON = r'../../graph_new_data/attractivity_previtus_data_1_edges.geojson'
 DATASTRUCTUREFILE = 'SegmentsData.dump'
 
@@ -68,16 +65,4 @@ ERROR_GENERAL = 1337
 
 # OSM Formula version
 OSM_MARKING_VERSION = '0.0'
-
-# KERAS SETTING
-# tf example (40, 299, 299, 3)
-
-# experiments worked with th
-# new Keras version expects None (instead of 'default') to search for the default system set value
 KERAS_SETTING_DIMENSIONS = 'channels_last'
-
-### Learning part ###
-# Number of epochs?, etc...
-
-### Classification part ###
-# Method of measuring distance between labels_from_segments <-> labels_from_model
