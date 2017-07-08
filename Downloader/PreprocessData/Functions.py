@@ -7,6 +7,7 @@ from Downloader.Defaults import FromEdgeID
 from DatasetHandler.FileHelperFunc import get_project_folder
 
 def getApi():
+    # Get secret Google Street View api code.
     api = open(get_project_folder()+'apicode.txt', 'r').read()
     return api
 
@@ -36,6 +37,12 @@ def bearing_between_two_points(start, end, degrees_offset=0.0):
     return bearing_from_north
 
 def distance_between_two_points(start, end):
+    '''
+    Calculate distance between start and end
+    :param start:
+    :param end:
+    :return: the distance
+    '''
     lat1 = start[0]
     lat2 = end[0]
     lon1 = start[1]
@@ -52,6 +59,12 @@ def distance_between_two_points(start, end):
 
 
 def midpoint(start, end):
+    '''
+    Interpolate a midpoint between two points.
+    :param start:
+    :param end:
+    :return: lat and lot of new point
+    '''
     lat1 = start[0]
     lat2 = end[0]
     lon1 = start[1]
@@ -68,6 +81,13 @@ def midpoint(start, end):
 
 
 def interpolation(start, end, fraction):
+    '''
+    Interpolate a custom fraction between points.
+    :param start:
+    :param end:
+    :param fraction: from 0 to 1
+    :return:
+    '''
     lat1 = start[0]
     lat2 = end[0]
     lon1 = start[1]
@@ -81,7 +101,7 @@ def interpolation(start, end, fraction):
     sinlat2 = sin(lat2)
     coslat2 = cos(lat2)
     sinlon2 = sin(lon2)
-    coslon2 = cos(lon2);
+    coslon2 = cos(lon2)
 
     dlat = lat2 - lat1;
     dlon = lon2 - lon1;

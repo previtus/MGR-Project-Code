@@ -5,6 +5,16 @@ def StatisticsSegments(Segments, additionalStatistics=False):
     Provide statistics for loaded dataset
     :param Segments: input list of Segments
     '''
+
+    '''
+    # Examples of usage
+    Segments = LoadDataFile('../'+DATASTRUCTUREFILE)
+    StatisticsSegments(Segments)
+
+    UsableTrainSubset = SubsetSegments(Segments, has_image=True, has_score=True)
+    StatisticsSegments(UsableTrainSubset)
+    '''
+
     # variables we are looking at:
     num_of_segments = len(Segments)
     num_of_potential_images = 0
@@ -41,17 +51,8 @@ def StatisticsSegments(Segments, additionalStatistics=False):
     if additionalStatistics:
         AdditionalStatistics(Segments)
 
-
-'''
-# Examples of usage
-Segments = LoadDataFile('../'+DATASTRUCTUREFILE)
-StatisticsSegments(Segments)
-
-UsableTrainSubset = SubsetSegments(Segments, has_image=True, has_score=True)
-StatisticsSegments(UsableTrainSubset)
-'''
-
 def AdditionalStatistics(Segments):
+    # Give us additional statistics - Lengths of edges
     stats_over_d = []
 
     for Segment in Segments:
@@ -91,10 +92,11 @@ def AdditionalStatistics(Segments):
         saveAllPlotsToPDF()
     show()
 
+    '''
+    Example usage:
+    file = '/home/ekmek/Desktop/MGR-Project-Code/Data/StreetViewData/50-100x_MoarImgs/SegmentsData.dump'
+    #file = '/home/ekmek/Desktop/MGR-Project-Code/Data/StreetViewData/1200x_markable_299x299/SegmentsData.dump'
+    Segments = LoadDataFile(file)
+    StatisticsSegments(Segments, True)
+    '''
 
-'''
-file = '/home/ekmek/Desktop/MGR-Project-Code/Data/StreetViewData/50-100x_MoarImgs/SegmentsData.dump'
-#file = '/home/ekmek/Desktop/MGR-Project-Code/Data/StreetViewData/1200x_markable_299x299/SegmentsData.dump'
-Segments = LoadDataFile(file)
-StatisticsSegments(Segments, True)
-'''

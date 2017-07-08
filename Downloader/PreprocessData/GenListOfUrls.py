@@ -1,5 +1,4 @@
 # GenListOfUrls.py
-from SegmentObj import *
 import sys
 sys.path.append('..')
 
@@ -23,7 +22,7 @@ def GenListOfUrls(Segments, PIXELS_X, PIXELS_Y, PrependPath='', minimal_length=2
             num_of_segments_with_score += 1
 
             #[urls, filenames] = segment.getGoogleViewUrls(PIXELS_X,PIXELS_Y)
-            [urls, filenames] = segment.getGoogleViewUrls_novel_brainscratching_aproach_weee_ohyeah(PIXELS_X,PIXELS_Y,minimal_length)
+            [urls, filenames] = segment.getGoogleViewUrls_whileUsingFractionsOfMinEdgeLen(PIXELS_X, PIXELS_Y, minimal_length)
 
             #print len(urls), urls
             num_of_image_urls_to_attempt_to_down += len(urls)

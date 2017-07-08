@@ -99,13 +99,13 @@ def DownloadUrlFilenameMap(FilenameMap, Segments):
 
         Segments[segment_list_id].HasLoadedImages[i_nth_image] = isLoaded
         print filename, md5_code, isLoaded
-    
+
+    # Exception example:
+    '''
+    images/078.jpg
+    Exception:  [Errno socket error] [Errno 11001] getaddrinfo failed
+    Exception:  [Errno socket error] timed out
+    '''
+
     return [FailedSegmentImageDownloads]
 
-
-# Exception example:
-'''
-images/078.jpg
-Exception:  [Errno socket error] [Errno 11001] getaddrinfo failed
-Exception:  [Errno socket error] timed out
-'''
