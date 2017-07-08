@@ -15,6 +15,12 @@ MIX_settings_file = 'Settings/set3/type_of_model_mix_kfold_d3.py'
 OSM_model_file = folder_path + 'SelectedModels/1761336.arien-pro.ics.muni.cz_TypesOfModels_monoTest_OSM_kfold_d3/models/osmmodel_resnet50.h5_osmtop.h5'
 OSM_settings_file = 'Settings/set3/type_of_model_osm_kfold_d3.py'
 
+
+# OSM Flagship Model !
+OSM_model_file = folder_path + 'SelectedModels/1771032.arien-pro.ics.muni.cz_set5_w64_depth2_d1/models/osm_resnet50.h5_osmtop.h5'
+OSM_settings_file = 'Settings/set5/set5_w64_depth2_d1.py'
+
+
 if len(sys.argv) > 2:
     model_file = (sys.argv[1])  # var1
     settings_file = (sys.argv[2])  # var2
