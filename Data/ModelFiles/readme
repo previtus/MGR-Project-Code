@@ -1,2 +1,1 @@
 Here we will keep model specific files - like precomputed weights, which can be reused for tuple (Dataset, Model).
-Be mindful that different Dataset needs these weights to be recalculated.

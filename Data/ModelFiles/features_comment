@@ -1,5 +1,0 @@
-dataset = CreateDataset.load_8376_resized_299x299(desired_number=1200, seed=42)
-[x, y, x_val, y_val] = dataset.getDataLabels_split()
-
-
-this is how we got the data for the features
