@@ -2,7 +2,7 @@
 import sys
 sys.path.append('..')
 
-def GenListOfUrls(Segments, PIXELS_X, PIXELS_Y, PrependPath='', minimal_length=20):
+def GenListOfUrls(Segments, PIXELS_X, PIXELS_Y, PrependPath='', minimal_length=20, custom=False):
     '''
     Iterates over the segment list and returns a list of urls needed for download
     Outputs list of tripples in [ (<url>, <filename>, <edge id>), ... ]
@@ -17,12 +17,14 @@ def GenListOfUrls(Segments, PIXELS_X, PIXELS_Y, PrependPath='', minimal_length=2
         
         if verbose: segment.displaySegment()
 
-        if not segment.hasUnknownScore():
+        if custom or not segment.hasUnknownScore():
             # We only care about scored segments now...
             num_of_segments_with_score += 1
 
-            #[urls, filenames] = segment.getGoogleViewUrls(PIXELS_X,PIXELS_Y)
-            [urls, filenames] = segment.getGoogleViewUrls_whileUsingFractionsOfMinEdgeLen(PIXELS_X, PIXELS_Y, minimal_length)
+            if custom:
+                [urls, filenames] = segment.getGoogleViewUrls(PIXELS_X,PIXELS_Y)
+            else:
+                [urls, filenames] = segment.getGoogleViewUrls_whileUsingFractionsOfMinEdgeLen(PIXELS_X, PIXELS_Y, minimal_length)
 
             #print len(urls), urls
             num_of_image_urls_to_attempt_to_down += len(urls)

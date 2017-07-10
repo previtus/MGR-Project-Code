@@ -40,6 +40,7 @@ def markSegmentsWithRadius(input_path, output_path, radius = 100, close=False):
 
     Segments = Downloader.DataOperations.SaveDataFile(output_path, Segments)
 
+"""
 path = '/home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/5556x_minlen30_640px_expanded/'
 input_path = path+'SegmentsData_images_generated_2flipshift_expanded.dump'
 output_path = path+'SegmentsData_mark100_images_generated_2flipshift_expanded.dump'
@@ -54,4 +55,11 @@ markSegmentsWithRadius(input_path, output_path, radius = r, close=False)
 input_path = path+'SegmentsData_images_generated_2flipshift_expanded.dump'
 output_path = path+'SegmentsData_mark50_images_generated_2flipshift_expanded.dump'
 r = 50
+markSegmentsWithRadius(input_path, output_path, radius = r, close=False)
+"""
+
+path = '/home/ekmek/Project II/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/'
+input_path = path + 'SegmentsData.dump'
+output_path = path+'SegmentsData_mark100.dump'
+r = 100
 markSegmentsWithRadius(input_path, output_path, radius = r, close=False)

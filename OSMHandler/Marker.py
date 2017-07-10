@@ -4,6 +4,7 @@
 
 from OSMHandler.Checker import Check
 from Downloader.Defaults import OSM_MARKING_VERSION
+import numpy
 
 print "imported Marker.py, inside DB requiring section."
 
@@ -57,7 +58,7 @@ def MarkSegment(Segment, radius = 50):
                 from operator import add
                 cumulative_vector = map(add, cumulative_vector, nearby_vector)
 
-        print len(nearby_vector), nearby_vector
+        print len(nearby_vector), numpy.sum(nearby_vector), nearby_vector
 
         Segment.markWithVector(cumulative_vector, index, OSM_MARKING_VERSION)
         index += 1
