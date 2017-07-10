@@ -5,8 +5,10 @@
 from OSMHandler.Checker import Check
 from Downloader.Defaults import OSM_MARKING_VERSION
 import numpy
+import os.path
 
 print "imported Marker.py, inside DB requiring section."
+stopfile = '/home/ekmek/Desktop/Project II/stop_dir/stop.txt'
 
 # global variable - we can reuse Marker
 ConnHandler = None
@@ -25,16 +27,27 @@ def Mark(Segments, radius = 50):
         ConnHandler = ConnectionHandler()
 
     ConnHandler.report()
-    if Check(Segments):
-        print "Segments seem to be up to date, breaking."
-        return True
+    #if Check(Segments):
+    #    print "Segments seem to be up to date, breaking."
+    #    return True
 
     # Mark segments
     i = 0
     for Segment in Segments:
         i += 1
-        print i, "th from", len(Segments)
-        MarkSegment(Segment, radius = radius)
+        stop = checkForStopFile()
+        is_marked = Segment.checkOSMVersion()
+
+
+        print i, "th from", len(Segments), "[stop ",stop,", is marked ",is_marked,"]"
+        if not stop and not is_marked:
+            MarkSegment(Segment, radius = radius)
+
+def checkForStopFile():
+    stopfile_present = os.path.isfile(stopfile)
+    stop = stopfile_present
+    return stop
+
 
 def MarkSegment(Segment, radius = 50):
     '''

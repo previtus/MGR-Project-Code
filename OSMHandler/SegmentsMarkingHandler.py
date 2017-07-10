@@ -27,7 +27,8 @@ def markSegmentsWithRadius(input_path, output_path, radius = 100, close=False):
 
     Segments = Downloader.DataOperations.LoadDataFile(input_path)
 
-    allright = Checker.Check(Segments)
+    #allright = Checker.Check(Segments)
+    allright = False
     print "checks out as ", allright
     if not allright:
         Marker.Mark(Segments, radius = radius)
@@ -59,7 +60,7 @@ markSegmentsWithRadius(input_path, output_path, radius = r, close=False)
 """
 
 path = '/home/ekmek/Project II/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/'
-input_path = path + 'SegmentsData.dump'
-output_path = path+'SegmentsData_mark100.dump'
+input_path = path + 'SegmentsData_mark100_progress.dump'
+output_path = path+'SegmentsData_mark100_progress.dump'
 r = 100
 markSegmentsWithRadius(input_path, output_path, radius = r, close=False)
