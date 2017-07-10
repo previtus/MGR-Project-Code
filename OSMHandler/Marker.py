@@ -30,7 +30,10 @@ def Mark(Segments, radius = 50):
         return True
 
     # Mark segments
+    i = 0
     for Segment in Segments:
+        i += 1
+        print i, "th from", len(Segments)
         MarkSegment(Segment, radius = radius)
 
 def MarkSegment(Segment, radius = 50):
