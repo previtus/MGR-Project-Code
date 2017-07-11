@@ -11,8 +11,7 @@ def testConnection():
     print len(vec_a), vec_a
     print len(vec_b), vec_b
 
-
-def markSegmentsWithRadius(input_path, output_path, radius = 100, close=False, interval=None):
+def markSegmentsWithRadius(input_path, output_path, radius = 100, close=False, interval=None, backwards=False):
     '''
     Mark these Segments with OSM data of said radius.
     :param input_path: path to initial Segments file (without any osm data)
@@ -31,7 +30,7 @@ def markSegmentsWithRadius(input_path, output_path, radius = 100, close=False, i
     allright = False
     print "checks out as ", allright
     if not allright:
-        Marker.Mark(Segments, radius = radius, interval = interval)
+        Marker.Mark(Segments, radius = radius, interval = interval, backwards=backwards)
 
         if close:
             Marker.closeConnection()
@@ -67,8 +66,8 @@ r = 100
 markSegmentsWithRadius(input_path, output_path, radius = r, close=False, interval=[1000,1100])
 """
 
-path = '/home/ekmek/Project II/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/'
-input_path = path + 'SegmentsData_mark100_progress_1100-1200.dump'
-output_path = path+'SegmentsData_mark100_progress_1100-1200.dump'
+path = '/home/ekmek/Vitek/Mgr project/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/'
+input_path = path + 'SegmentsData_fromBack.dump'
+output_path = path+'SegmentsData_fromBack.dump'
 r = 100
-markSegmentsWithRadius(input_path, output_path, radius = r, close=False, interval=[1100,1200])
+markSegmentsWithRadius(input_path, output_path, radius = r, close=False, interval=None, backwards=True)

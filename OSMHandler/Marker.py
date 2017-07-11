@@ -13,7 +13,7 @@ stopfile = '/home/ekmek/Desktop/Project II/stop_dir/stop.txt'
 # global variable - we can reuse Marker
 ConnHandler = None
 
-def Mark(Segments, radius = 50, interval = None):
+def Mark(Segments, radius = 50, interval = None, backwards=False):
     '''
     Mark Segments with radius. Call MarkSegment on each Segment.
     :param Segments:
@@ -32,21 +32,29 @@ def Mark(Segments, radius = 50, interval = None):
     #    return True
 
     # Mark segments
-    i = 0
 
     if interval is None:
         interval = [0, len(Segments)]
 
+    if backwards:
+        indices = range(interval[1]-1, interval[0]-1, -1)
+    else:
+        indices = range(interval[0], interval[1])
+
+    i = 0
     print interval
-    for Segment in Segments[interval[0] : interval[1]]:
+    for index in indices:
+        Segment = Segments[index]
         i += 1
         stop = checkForStopFile()
         is_marked = Segment.checkOSMVersion()
 
 
-        print i, "th from", interval[1] - interval[0], "[stop ",stop,", is marked ",is_marked,"]", interval
+        print i, "th from", interval[1] - interval[0], "[stop ",stop,", is marked ",is_marked,"]", interval, "index=", index
         if not stop and not is_marked:
             MarkSegment(Segment, radius = radius)
+
+        Segments[index] = Segment
 
 def checkForStopFile():
     stopfile_present = os.path.isfile(stopfile)
@@ -90,3 +98,44 @@ def closeConnection():
     global ConnHandler
     ConnHandler.close_connection()
     ConnHandler.report()
+
+def MergeMarking_LoadAndSave(pats_seg1, path_seg2, path_out):
+    import Downloader.DataOperations
+
+    Segments1 = Downloader.DataOperations.LoadDataFile(pats_seg1)
+    Segments2 = Downloader.DataOperations.LoadDataFile(path_seg2)
+
+    MergedSegments = MergeMarking(Segments1, Segments2)
+
+    Downloader.DataOperations.SaveDataFile(path_out, MergedSegments)
+
+def MergeMarking(Segments1, Segments2):
+    print "Merging labeling from two segments files, lens:", len(Segments1), len(Segments2)
+    if len(Segments1) <> len(Segments2):
+        return None
+
+    for i in range(0, len(Segments1)):
+        S1 = Segments1[i]
+        S2 = Segments2[i]
+
+        s1_is_marked = S1.checkOSMVersion()
+        s2_is_marked = S2.checkOSMVersion()
+
+        if not s1_is_marked and s2_is_marked:
+            # mark s1 by the osms which are in s2!
+            osm_version = S2.Segment_OSM_MARKING_VERSION
+            for j in range(0,len(S2.DistinctNearbyVector)):
+                nearby_vector = S2.DistinctNearbyVector[j]
+                S1.markWithVector(nearby_vector, j, osm_version)
+
+        Segments1[i] = S1
+
+    return Segments1
+
+"""
+s1path = '/home/ekmek/Vitek/Mgr project/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/SegmentsData_mark100_progress (376 th from 4073).dump'
+s2path = '/home/ekmek/Vitek/Mgr project/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/SegmentsData_fromBack.dump'
+s_merged = '/home/ekmek/Vitek/Mgr project/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/SegmentsData_MERGED.dump'
+
+MergeMarking_LoadAndSave(s1path, s2path, s_merged)
+"""
