@@ -140,7 +140,7 @@ def load_tmp_dataset():
     return x, y, osm
 
 from Functions import *
-def evaluator(model_file, settings_file, name_output_file):
+def evaluator(model_file, settings_file, name_output_file, custom_target_geojson = None):
     '''
     Main Evaluator function.
     :param model_file: path to model .h5 file.
@@ -151,7 +151,10 @@ def evaluator(model_file, settings_file, name_output_file):
     model_base, model_top, model_settings = evaluator_load_model(model_file, settings_file)
 
     # Load data!
-    path_to_segments_file = default_segments_path()
+    if custom_target_geojson is None:
+        path_to_segments_file = default_segments_path()
+    else:
+        path_to_segments_file = custom_target_geojson[1]
 
     we_dont_care_about_missing_images = False
     if model_settings["model_type"] is 'osm_only':
@@ -176,6 +179,7 @@ def evaluator(model_file, settings_file, name_output_file):
 
         y_pred = evaluator_generators_predict(model_base, model_top, model_settings, img_generator[1], osm, img_generator[2])
 
+    print len(y_pred), y_pred[0:10]
 
     pred_list = [lists[0], y_pred, lists[2], lists[3]]
     print "AFTER MARKING"
@@ -184,7 +188,11 @@ def evaluator(model_file, settings_file, name_output_file):
     EvaluatedData = prepEvaluatedData(y_pred, segment_ids)
     Altered = AlterSegments(EvaluatedData, Segments, only_unknown_scores=True)
 
-    GeoJSON = loadDefaultGEOJSON()
+    if custom_target_geojson is None:
+        GeoJSON = loadDefaultGEOJSON()
+    else:
+        geojson_to_be_marked = custom_target_geojson[0]
+        GeoJSON = loadGeoJson(geojson_to_be_marked)
     evaluated_geojson = markGeoJSON(GeoJSON, Altered)
     path_geojson_out = name_output_file
     saveGeoJson(evaluated_geojson, path_geojson_out)

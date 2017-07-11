@@ -48,13 +48,16 @@ def markGeoJSON(GeoJSON, Segments):
     SegmentId = 0
     for feature in GeoJSON['features']:
         if (feature['geometry']['type'] == 'LineString'):
-            json_score = feature['properties']['attractivity']
-            internal_score = Segments[SegmentId].getScore()
-            segments_score = internalToExternal(internal_score)
+            if 'attractivity' in feature['properties']:
+                json_score = feature['properties']['attractivity']
+            else:
+                json_score = -1
 
-            #if json_score == -1:
-            #    feature['properties']['attractivity'] = 200
-            feature['properties']['attractivity'] = segments_score
+            if SegmentId < len(Segments):
+                internal_score = Segments[SegmentId].getScore()
+                segments_score = internalToExternal(internal_score)
+
+                feature['properties']['attractivity'] = segments_score
 
             SegmentId += 1
 
@@ -71,16 +74,21 @@ def traverseGeoJSON(GeoJSON, Segments):
     SegmentId = 0
     for feature in GeoJSON['features']:
         if (feature['geometry']['type'] == 'LineString'):
-            json_score = feature['properties']['attractivity']
-            internal_score = Segments[SegmentId].getScore()
-            segments_score = internalToExternal(internal_score)
+            if 'attractivity' in feature['properties']:
+                json_score = feature['properties']['attractivity']
+            else:
+                json_score = -1
 
-            if json_score <> segments_score:
-                print SegmentId, json_score, segments_score
+            if SegmentId < len(Segments):
+                internal_score = Segments[SegmentId].getScore()
+                segments_score = internalToExternal(internal_score)
 
-            Coordinates = feature['geometry']['coordinates']
-            Start = tuple([Coordinates[0][1], Coordinates[0][0]])
-            End = tuple([Coordinates[-1][1], Coordinates[-1][0]])
+                if json_score <> segments_score:
+                    print SegmentId, json_score, segments_score
+
+            #Coordinates = feature['geometry']['coordinates']
+            #Start = tuple([Coordinates[0][1], Coordinates[0][0]])
+            #End = tuple([Coordinates[-1][1], Coordinates[-1][0]])
 
             #segment = SegmentObj(Start, End, Score, SegmentId)
             #if verbose: segment.displaySegment()
@@ -180,7 +188,10 @@ def analyze_lists(lists):
     unique_segment_ids = []
     scoreless_segment_ids = []
 
-    for i in range(0, len(__list_of_images)):
+
+    n = min([len(__list_of_images), len(__labels), len(__segment_ids)])
+
+    for i in range(0, n):
         id = __segment_ids[i]
         if id not in unique_segment_ids:
             unique_segment_ids.append(id)

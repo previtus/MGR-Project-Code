@@ -34,8 +34,12 @@ if len(sys.argv) > 2:
     settings_file = (sys.argv[2])  # var2
 
 #img_mse, img_mae = evaluator(IMG_model_file, IMG_settings_file, 'marked_from_img_1769353.geojson')
-mix_mse, mix_mae = evaluator(MIX_model_file, MIX_settings_file, 'marked_from_mix_flag1788956.geojson')
-#osm_mse, osm_mae = evaluator(OSM_model_file, OSM_settings_file)
+#mix_mse, mix_mae = evaluator(MIX_model_file, MIX_settings_file, 'marked_from_mix_flag1788956.geojson', )
+geojson_to_be_marked = '/home/ekmek/Vitek/Mgr project/additional_maps/DOP_Cyklotrasy_l.json'
+#segments_for_the_geojson = '/home/ekmek/Vitek/Mgr project/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/SegmentsData_mini_mark100.dump'
+segments_for_the_geojson = '/home/ekmek/Vitek/Mgr project/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/SegmentsData_mark100_progress (376 th from 4073).dump'
+custom_target_geojson = [geojson_to_be_marked, segments_for_the_geojson]
+osm_mse, osm_mae = evaluator(OSM_model_file, OSM_settings_file, 'praha_part_osm_376.geojson', custom_target_geojson)
 
 '''
 print "-------------------------------------"
