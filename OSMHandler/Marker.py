@@ -44,7 +44,7 @@ def Mark(Segments, radius = 50, interval = None):
         is_marked = Segment.checkOSMVersion()
 
 
-        print interval[0]+i, "th from", interval[1] - interval[0], "[stop ",stop,", is marked ",is_marked,"]", interval
+        print i, "th from", interval[1] - interval[0], "[stop ",stop,", is marked ",is_marked,"]", interval
         if not stop and not is_marked:
             MarkSegment(Segment, radius = radius)
 
