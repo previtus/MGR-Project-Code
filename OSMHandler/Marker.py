@@ -13,7 +13,7 @@ stopfile = '/home/ekmek/Desktop/Project II/stop_dir/stop.txt'
 # global variable - we can reuse Marker
 ConnHandler = None
 
-def Mark(Segments, radius = 50):
+def Mark(Segments, radius = 50, interval = None):
     '''
     Mark Segments with radius. Call MarkSegment on each Segment.
     :param Segments:
@@ -33,13 +33,18 @@ def Mark(Segments, radius = 50):
 
     # Mark segments
     i = 0
-    for Segment in Segments:
+
+    if interval is None:
+        interval = [0, len(Segments)]
+
+    print interval
+    for Segment in Segments[interval[0] : interval[1]]:
         i += 1
         stop = checkForStopFile()
         is_marked = Segment.checkOSMVersion()
 
 
-        print i, "th from", len(Segments), "[stop ",stop,", is marked ",is_marked,"]"
+        print interval[0]+i, "th from", interval[1] - interval[0], "[stop ",stop,", is marked ",is_marked,"]", interval
         if not stop and not is_marked:
             MarkSegment(Segment, radius = radius)
 
