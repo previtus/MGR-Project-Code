@@ -132,10 +132,46 @@ def MergeMarking(Segments1, Segments2):
 
     return Segments1
 
+def loadAndAnalyzeMarking(path):
+    import Downloader.DataOperations
+
+    Segments = Downloader.DataOperations.LoadDataFile(path)
+
+    analyzeMarking(Segments)
+
+def analyzeMarking(Segments):
+    '''
+    prints index boundaries of which segments are marked and which are not
+    :param Segments:
+    :return:
+    '''
+    started_marked_region = False
+    a = -1
+
+    i = 0
+    while i<len(Segments):
+        is_marked = Segments[i].checkOSMVersion(verbose=False)
+        if is_marked and not started_marked_region:
+            started_marked_region = True
+            a = i
+        if not is_marked and started_marked_region:
+            started_marked_region = False
+            print "Region ",a,"-",i," was marked!"
+        i += 1
+
+    if started_marked_region:
+        print "Region ", a, "-", i, " was marked!"
+        started_marked_region = False
+
+
 """
-s1path = '/home/ekmek/Vitek/Mgr project/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/SegmentsData_mark100_progress (376 th from 4073).dump'
-s2path = '/home/ekmek/Vitek/Mgr project/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/SegmentsData_fromBack.dump'
-s_merged = '/home/ekmek/Vitek/Mgr project/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/SegmentsData_MERGED.dump'
+s1path = '/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/SegmentsData_MERGED.dump'
+s2path = '/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/SegmentsData_fromBack__backup_995.dump'
+s_merged='/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/SegmentsData_MERGED.dump'
 
 MergeMarking_LoadAndSave(s1path, s2path, s_merged)
 """
+
+
+#s_merged='/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/SegmentsData_MERGED.dump'
+#loadAndAnalyzeMarking(s_merged)

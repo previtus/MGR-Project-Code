@@ -162,8 +162,9 @@ class SegmentObj:
         index = self.LocationsIndex(i_th_image)
         return self.DistinctLocations[index]
 
-    def checkOSMVersion(self):
-        print "Current project-wide OSM Marking version is: " + OSM_MARKING_VERSION + " | These Segments are on: " + self.Segment_OSM_MARKING_VERSION
+    def checkOSMVersion(self, verbose=True):
+        if verbose:
+            print "Current project-wide OSM Marking version is: " + OSM_MARKING_VERSION + " | These Segments are on: " + self.Segment_OSM_MARKING_VERSION
         return (self.Segment_OSM_MARKING_VERSION == OSM_MARKING_VERSION)
 
     def getNearbyVector(self, i_th_image):
