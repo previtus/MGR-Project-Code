@@ -366,8 +366,10 @@ def format_time(seconds):
         return "%.2f hours" % (h,)
 
 class RunMonitor(Callback):
+    '''
     # CUSTOM KERAS CALLBACK
     # inspired by Kerutils at https://github.com/samyzaf/kerutils
+    '''
 
     def __init__(self, **opt):
         super(Callback, self).__init__()

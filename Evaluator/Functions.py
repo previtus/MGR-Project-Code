@@ -15,25 +15,25 @@ name_of_segments_file = "5556x_markable_640x640/SegmentsData_marked_R100_4Tables
 
 
 def loadGeoJson(path):
-    # Load GeoJSON file
+    ''' Load GeoJSON file '''
     with open(path) as f:
         GeoJSON = json.load(f)
     return GeoJSON
 
 def saveGeoJson(GeoJSON, path):
-    # Save GeoJSON file
+    ''' Save GeoJSON file '''
     print "Saving GeoJSON object to:", path
     with open(path, 'a') as f:
         json.dump(GeoJSON, f)
 
 def loadDefaultGEOJSON():
-    # Load default GeoJSON file, which is the initial attractivity_previtus_data_1_edges.geojson file
+    ''' Load default GeoJSON file, which is the initial attractivity_previtus_data_1_edges.geojson file '''
     from DatasetHandler.FileHelperFunc import get_geojson_path
     path = get_geojson_path()
     return loadGeoJson(path)
 
 def internalToExternal(score):
-    # Convert score notations back to how geojson file used it.
+    ''' Convert score notations back to how geojson file used it. '''
     if score <> -1:
         return int(round(score * 100))
     return score
@@ -95,7 +95,7 @@ def traverseGeoJSON(GeoJSON, Segments):
             SegmentId += 1
 
 def prepEvaluatedData(y_pred, segment_ids):
-    # prepare dictionary which will give us scores of certain segment id all clustered together into one list.
+    ''' prepare dictionary which will give us scores of certain segment id all clustered together into one list. '''
     EvaluatedData = {}
     for i in range(0,len(y_pred)):
         id = segment_ids[i]
@@ -208,7 +208,7 @@ def analyze_lists(lists):
     print "Scored ", (number_of_segments-number_of_segments_without_score), " Segments with", (number_of_images-number_of_images_without_score), "images."
 
 def osm_from_lists(lists):
-    # Get osm data
+    ''' Get osm data '''
     __list_of_images, __labels, __osm, __segment_ids = lists
     osm = np.asarray(__osm)
     return osm
@@ -243,20 +243,20 @@ def getOsmGenerator_from_lists(lists):
     return [order, osm_generator, size]
 
 def generator_img(order, image_paths, resize=None):
-    # generator yields loaded images one by one, needed to save memory
+    ''' generator yields loaded images one by one, needed to save memory '''
     while True:
         for index in order:
             image = KerasPreparation.LoadActualImages([image_paths[index]], resize=resize)
             yield (image)
 def generator_osm(order, osms):
-    # generator yields osm vectors one by one, not really needed
+    ''' generator yields osm vectors one by one, not really needed '''
     while True:
         for index in order:
             osm = osms[index]
             yield (osm)
 
 def default_segments_path():
-    # assembles path to the segments files
+    ''' assembles path to the segments files '''
     folder = path_to_streetview_folder
     path_to_segments_file = folder + name_of_segments_file
 

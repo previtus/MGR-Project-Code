@@ -39,25 +39,25 @@ def use_path_which_exists(list_of_possible_paths):
     return used_path
 
 def file_exists(fname):
-    # Does file exist, returns boolean.
+    ''' Does file exist, returns boolean.'''
     return os.path.isfile(fname)
 
 def get_folder_from_file(fname):
-    # Get folder name from path to a file.
+    ''' Get folder name from path to a file.'''
     return os.path.dirname(fname) + '/'
 
 def folder_exists(directory):
-    # Does folder with this name exist, returns boolean
+    ''' Does folder with this name exist, returns boolean'''
     return os.path.exists(directory)
 
 def make_folder_ifItDoesntExist(directory):
-    # Make a new directory, if it didn't previously exist.
+    ''' Make a new directory, if it didn't previously exist.'''
     if not os.path.exists(directory):
         os.makedirs(directory)
 
 import shutil, errno
 def copy_folder(src, dst):
-    # Copy and paste folders. Used for dataset augmentation.
+    ''' Copy and paste folders. Used for dataset augmentation.'''
     try:
         shutil.copytree(src, dst)
     except OSError as exc: # python >2.5
@@ -66,7 +66,7 @@ def copy_folder(src, dst):
         else: raise
 
 def copy_file(src, dst):
-    # Copy and paste file.
+    ''' Copy and paste file.'''
     try:
         shutil.copy(src, dst)
     except OSError as exc:
@@ -74,7 +74,7 @@ def copy_file(src, dst):
 
 import hashlib
 def md5(fname):
-    # Get md5 hash of a file.
+    ''' Get md5 hash of a file.'''
     hash_md5 = hashlib.md5()
     with open(fname, "rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):

@@ -161,7 +161,9 @@ class Dataset:
                 print "File cannot be accessed! ", url
 
     def init_from_lists(self, list_of_images, labels, osm, segment_ids, img_width, img_height):
-        # Initialization from lists of data
+        '''
+        Initialization from lists of data
+        '''
         self.img_width = img_width
         self.img_height = img_height
         self.__list_of_images = list_of_images
@@ -173,8 +175,10 @@ class Dataset:
         self.has_osm_loaded = (len(self.__osm)>0)
 
     def init_from_segments(self, path_to_segments_file, img_width, img_height):
+        '''
         # Initialization from loaded Segment in path_to_segments_file
         # Segments are not used apart from initialization
+        '''
         Segments = DataOperations.LoadDataFile(path_to_segments_file)
         segments_dir = os.path.dirname(path_to_segments_file) + '/'
         __list_of_images, __labels, __osm, __segment_ids, flag_is_extended = KerasPreparation.LoadDataFromSegments(Segments, has_score=True, path_to_images=segments_dir)
@@ -251,13 +255,17 @@ class Dataset:
 
     # Data access: ---------------------------------------------------------------------------------------------
     def getDataLabels(self, resize=None):
+        '''
         # ([x,y]) as image data and labels
+        '''
         x = KerasPreparation.LoadActualImages(self.__list_of_images, resize=resize, dim_ordering=Downloader.Defaults.KERAS_SETTING_DIMENSIONS)
         y = np.array(self.__labels)
         return [x, y]
 
     def getDataLabels_split(self, resize=None, validation_split=0.2):
+        '''
         # ([x, y, x_val, y_val]) as image data and labels after being split
+        '''
         x = KerasPreparation.LoadActualImages(self.__list_of_images, resize=resize, dim_ordering=Downloader.Defaults.KERAS_SETTING_DIMENSIONS) # th or tf
         y = np.array(self.__labels)
 
@@ -265,18 +273,24 @@ class Dataset:
         return [x, y, x_val, y_val]
 
     def getDataLabels_split_only_y(self, resize=None, validation_split=0.2):
+        '''
         # Get just label data, after validation split
+        '''
         y = np.array(self.__labels)
         y, y_val = KerasPreparation.split_one_array(y, validation_split)
         return [y, y_val]
 
     def getDataLabels_only_y(self):
+        '''
         # Get just label data
+        '''
         y = np.array(self.__labels)
         return y
 
     def getDataLabels_split_only_osm(self, validation_split=0.2):
+        '''
         # Get just osm data, after validation split
+        '''
         osm, osm_val = KerasPreparation.split_one_array(self.__osm, validation_split)
         osm = np.asarray(osm)
         osm_val = np.asarray(osm_val)
@@ -284,7 +298,9 @@ class Dataset:
         return [osm, osm_val]
 
     def getDataLabels_only_osm(self):
+        '''
         # Get just osm data
+        '''
         osm = np.array(self.__osm)
         return osm
 
@@ -314,8 +330,10 @@ class Dataset:
                 yield (image, score)
 
     def getImageGenerator(self, validation_split, resize=None):
+        '''
         # Return generators
         # take the lists on images and their labels - split these two arrays by the validation split
+        '''
         y = np.array(self.__labels)
         images_paths, scores, images_paths_val, scores_val = KerasPreparation.split_data(self.__list_of_images, y, validation_split)
 
@@ -334,7 +352,9 @@ class Dataset:
     # Dataset reporting: ---------------------------------------------------------------------------------------------
 
     def statistics(self):
+        '''
         # Report important information about the dataset.
+        '''
         print "Dataset of", len(self.__list_of_images), " scored images of", self.img_width, "x", self.img_height, "resolution."
         labels = np.array(self.__labels)
         min = np.amin(labels)
@@ -346,7 +366,9 @@ class Dataset:
         print "min |---[ 25perc { mean } 75perc ]---| max"
 
     def debug_print_first(self, n):
+        '''
         # Debug print first n values in this dataset.
+        '''
         for i in range(0,n):
             print self.__segment_ids[i], self.__labels[i], self.__list_of_images[i]
 
@@ -412,7 +434,9 @@ class Dataset:
         return new_names
 
     def sampleUniform(self, desired_number):
+        '''
         # randomized subsample of a dataset
+        '''
         indices = random.sample(xrange(self.num_of_images), desired_number)
         return indices
 
@@ -440,12 +464,16 @@ class Dataset:
         return newDataset
 
     def getDataLabels_only_osm_raw(self):
+        '''
         # return list of osm without coversion to numpy format
+        '''
         return self.__osm
 
     def expandOsmDataWithMultipleRadii(self, model_settings):
+        '''
         # idea is to load all the radii data we have available and add it to each of the segments
         # we assume the basic experiment definition
+        '''
         r50 = 'SegmentsData_marked_R50_4TablesN.dump'
         r100 = 'SegmentsData_marked_R50_4TablesN.dump'
         r200 = 'SegmentsData_marked_R200_4TablesN.dump'

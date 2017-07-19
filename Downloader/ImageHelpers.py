@@ -6,7 +6,7 @@ from Downloader.Defaults import KERAS_SETTING_DIMENSIONS
 # Helper functions for loading of images
 
 def list_images(folder):
-    # prepare list of image names
+    ''' prepare list of image names '''
     from os import listdir
     from os.path import isfile, join
     image_list = [folder + f for f in listdir(folder) if isfile(join(folder, f))]

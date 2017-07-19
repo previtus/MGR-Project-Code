@@ -3,7 +3,7 @@ import numpy
 from Omnipresent import len_
 
 def chunks(l, n):
-    # Chunk data from list l into n fjords.
+    ''' Chunk data from list l into n fjords.'''
     a = numpy.array_split(numpy.array(l), n)
     b = []
     for i in a:
@@ -11,7 +11,7 @@ def chunks(l, n):
     return b
 
 def kfold(indices_in_fjords, selected):
-    # indices come like [] [] [] ... [], we want to select the one in <selected> as validation and rest as tests
+    ''' indices come like [] [] [] ... [], we want to select the one in <selected> as validation and rest as tests'''
     i = 0
     train_indices = []
     validation_indices = indices_in_fjords[selected]
@@ -26,8 +26,10 @@ def indices_to_data(any_indices, any_data):
     return selected_data
 
 def select_data(indices, data):
+    '''
     # select from data, while considering that data can be either list of items to directly select from
     # or it can be a list of size two, where we select from both items and later join
+    '''
     selected = []
     i = len(data)
     if i == 2:
@@ -44,12 +46,14 @@ def select_data(indices, data):
     return selected
 
 def best_min(arr):
-    # return the smallest value
+    ''' return the smallest value'''
     return min(arr)
 
 def k_fold_crossvalidation(model, dataset, model_settings):
+    '''
     # K fold crossvalidation scheme
     # includes proper loading of models, testing and processing of the results.
+    '''
     from ModelHandler.ModelTester import load_features
     from ModelHandler.ModelTester import train_top_model
 
