@@ -280,7 +280,7 @@ def figure_out_y(special_histories, just, BestInstead=False):
     print y_min, y_max
     return y_min, y_max
 
-def one_boxplot(axarritem, data, title, legend_on=False, just='both', showtitle=True, showxdesc=False, BestInstead=False):
+def one_boxplot(axarritem, data, title, legend_on=False, just='both', showtitle=True, showxdesc=False, BestInstead=False, Notch=False):
     valdata = data["last_validation_errors"]
     traindata = data["last_training_errors"]
 
@@ -305,7 +305,13 @@ def one_boxplot(axarritem, data, title, legend_on=False, just='both', showtitle=
     print "mean: ", np.mean(data), "+/-", np.std(data)
     stat = [np.mean(data), np.std(data)]
 
-    boxplot = axarritem.boxplot(data, labels=labels, widths = 0.6, showmeans=True, meanline=True)
+    boxplot = axarritem.boxplot(data, labels=labels, widths = 0.6, showmeans=True, meanline=True, notch=Notch, bootstrap=1000)
+
+    #legend_on = False
+    #boxplot = axarritem.violinplot(data, widths = 0.6, showmeans=True)
+    #     axarritem.set_yticklabels([])
+
+
     if showtitle:
         axarritem.set_title(title)
     if showxdesc:
@@ -323,15 +329,15 @@ def one_boxplot(axarritem, data, title, legend_on=False, just='both', showtitle=
         #axes.set_xlim([0.7, 2.7])
     return boxplot, stat
 
-def boxplots_in_row(plt, special_histories, data_names, just='both'):
-    y_min, y_max = figure_out_y(special_histories, just=just)
+def boxplots_in_row(plt, special_histories, data_names, just='both', BestInstead=False, Notch=False):
+    y_min, y_max = figure_out_y(special_histories, just=just, BestInstead=BestInstead)
 
     figure, axarr = plt.subplots(1, len(special_histories), sharex=True, sharey=True) #, figsize=(6, 8)
 
     for i in range(0,len(special_histories)-1):
-        one_boxplot(axarr[i], special_histories[i], data_names[i], just=just)
+        one_boxplot(axarr[i], special_histories[i], data_names[i], just=just, BestInstead=BestInstead, Notch=Notch)
     i = len(special_histories)-1
-    one_boxplot(axarr[i], special_histories[i], data_names[i], legend_on=True, just=just)
+    one_boxplot(axarr[i], special_histories[i], data_names[i], legend_on=True, just=just, BestInstead=BestInstead, Notch=Notch)
 
     figure.subplots_adjust(wspace=0, right=0.81, left=0.1)
 
@@ -475,7 +481,7 @@ def plot_4x4_derailed_plots(plt, special_histories_dic):
     '''
     return plt, figure
 
-def plot_4x4_derailed_boxes(plt, special_histories_dic, BestInstead=False, forced_ymin = 0.0, forced_ymax = 0.0):
+def plot_4x4_derailed_boxes(plt, special_histories_dic, BestInstead=False, forced_ymin = 0.0, forced_ymax = 0.0, Notch=False):
     y_min, y_max = figure_out_fromDic_y(special_histories_dic, just='val')
     if forced_ymin <> 0.0:
         y_min = forced_ymin
@@ -500,7 +506,7 @@ def plot_4x4_derailed_boxes(plt, special_histories_dic, BestInstead=False, force
             item = special_histories_dic[ind]
             name = 'depth '+ str(d) + ', width ' + str(w)
             print name
-            boxplot,stat = one_boxplot(axarr[wi, di], item, name, just='val', showtitle=False, showxdesc=False, BestInstead=BestInstead)
+            boxplot,stat = one_boxplot(axarr[wi, di], item, name, just='val', showtitle=False, showxdesc=False, BestInstead=BestInstead, Notch=Notch)
             stat.append(w)
             stat.append(d)
             stats.append(stat)

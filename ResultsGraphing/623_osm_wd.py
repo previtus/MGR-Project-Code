@@ -54,9 +54,10 @@ for key in data_paths.keys():
 
 print special_histories.keys()
 
+Notch=False
 
 import matplotlib.pyplot as plt
-plt, figure, stats = plot_4x4_derailed_boxes(plt, special_histories, BestInstead=True, forced_ymin = 0.04, forced_ymax = 0.11)
+plt, figure, stats = plot_4x4_derailed_boxes(plt, special_histories, BestInstead=True, forced_ymin = 0.04, forced_ymax = 0.11,Notch=Notch)
 
 custom_title = 'Best validation error'
 figure.suptitle(custom_title) # needs adjustment of the top value
