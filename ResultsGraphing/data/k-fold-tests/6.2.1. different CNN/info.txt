@@ -2,8 +2,9 @@ model: 		mix model
 dataset: 	5556x_markable_640x640
 
 
-resnet50	resnet50_1760999
-vgg16		
-vgg19		
-inception_v3	
-xception	
+feature sized for 299x299
+resnet50	1, 1, 2048
+vgg16		9, 9, 512
+vgg19		9, 9, 512
+inception_v3	8, 8, 2048
+xception	10, 10, 2048
