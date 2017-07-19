@@ -13,7 +13,7 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["unique_id"] = 'inception_v3_cnn'
     Settings["models"][n]["top_repeat_FC_block"] = 1
     Settings["models"][n]["cooking_method"] = 'generators' # 'direct' or 'generators'
-    Settings["models"][n]["epochs"] = 500
+    Settings["models"][n]["epochs"] = 60
     Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
     Settings["models"][n]["model_type"] = 'img_osm_mix'
     Settings["models"][n]["special_case"] = 'base_cnn_custom_top'
@@ -28,7 +28,7 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["unique_id"] = 'vgg19_cnn'
     Settings["models"][n]["top_repeat_FC_block"] = 1
     Settings["models"][n]["cooking_method"] = 'generators' # 'direct' or 'generators'
-    Settings["models"][n]["epochs"] = 500
+    Settings["models"][n]["epochs"] = 60
     Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
     Settings["models"][n]["model_type"] = 'img_osm_mix'
     Settings["models"][n]["special_case"] = 'base_cnn_custom_top'
@@ -43,7 +43,7 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["unique_id"] = 'vgg16_cnn'
     Settings["models"][n]["top_repeat_FC_block"] = 1
     Settings["models"][n]["cooking_method"] = 'generators' # 'direct' or 'generators'
-    Settings["models"][n]["epochs"] = 500
+    Settings["models"][n]["epochs"] = 60
     Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
     Settings["models"][n]["model_type"] = 'img_osm_mix'
     Settings["models"][n]["special_case"] = 'base_cnn_custom_top'
@@ -58,7 +58,7 @@ def Setup(Settings,DefaultModel):
     Settings["models"][n]["unique_id"] = 'xception_cnn'
     Settings["models"][n]["top_repeat_FC_block"] = 1
     Settings["models"][n]["cooking_method"] = 'generators' # 'direct' or 'generators'
-    Settings["models"][n]["epochs"] = 500
+    Settings["models"][n]["epochs"] = 60
     Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
     Settings["models"][n]["model_type"] = 'img_osm_mix'
     Settings["models"][n]["special_case"] = 'base_cnn_custom_top'
