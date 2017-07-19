@@ -81,6 +81,7 @@ def build_img_osm_mix_model_custom_base_cnn_top(input_shape_img, input_shape_osm
 
     img_features = GlobalAveragePooling2D()(img_features_input)
 
+    '''
     img_features = Conv2D(64, 3, padding='same', name='conv_topm_1')(img_features)
     img_features = Dropout(0.5)(img_features)
     img_features = MaxPooling2D(pool_size=(4, 4))(img_features)
@@ -89,6 +90,7 @@ def build_img_osm_mix_model_custom_base_cnn_top(input_shape_img, input_shape_osm
     img_features = Dropout(0.5)(img_features)
     img_features = MaxPooling2D(pool_size=(2, 2))(img_features)
     img_features = Dropout(0.5)(img_features)
+    '''
 
     img_features = Flatten()(img_features)
 
