@@ -1,7 +1,7 @@
 # Provides the rest of the ModelHandler code with models. Works with the lower level of code in /Create Model
 from keras.layers import Dropout, Flatten, Dense, Conv2D, MaxPooling2D
 from keras.models import Model
-from keras.layers import Input, concatenate
+from keras.layers import Input, concatenate, GlobalAveragePooling2D
 import ModelHandler.CreateModel.KerasApplicationsModels as Models
 
 from Omnipresent import len_
@@ -78,11 +78,14 @@ def build_img_osm_mix_model_custom_base_cnn_top(input_shape_img, input_shape_osm
     osm_features = Dropout(0.5)(osm_features)
 
     img_features_input = Input(shape=input_shape_img)
-    img_features = Conv2D(64, 3, padding='same', name='conv_topm_1')(img_features_input)
+
+    img_features = GlobalAveragePooling2D()(img_features_input)
+
+    img_features = Conv2D(64, 3, padding='same', name='conv_topm_1')(img_features)
     img_features = Dropout(0.5)(img_features)
     img_features = MaxPooling2D(pool_size=(4, 4))(img_features)
     img_features = Dropout(0.5)(img_features)
-    img_features = Conv2D(64, 3, padding='same', name='conv_topm_2')(img_features_input)
+    img_features = Conv2D(64, 3, padding='same', name='conv_topm_2')(img_features)
     img_features = Dropout(0.5)(img_features)
     img_features = MaxPooling2D(pool_size=(2, 2))(img_features)
     img_features = Dropout(0.5)(img_features)
