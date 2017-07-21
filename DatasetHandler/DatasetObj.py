@@ -373,14 +373,18 @@ class Dataset:
             print self.__segment_ids[i], self.__labels[i], self.__list_of_images[i]
 
 
-    def plotHistogram(self, save_to_pdf=False):
+    def plotHistogram(self, save_to_pdf=False, labels_override=None):
         '''
         Plot score of this dataset as histogram.
         :param save_to_pdf: flag to save into output.pdf
         :return:
         '''
         import DatasetVizualizators
-        labels = np.array(self.__labels)
+
+        if labels_override is not None:
+            labels = np.array(self.__labels)
+        else:
+            labels = labels_override
         DatasetVizualizators.plotHistogram(labels, 'Score distribution histogram')
         DatasetVizualizators.plotWhisker(labels, 'Score box plot')
         DatasetVizualizators.plotX_sortValues(labels, 'Distribution of score (sorted)', notReverse=True)

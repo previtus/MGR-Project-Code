@@ -1,11 +1,12 @@
 from Downloader.DownloaderRunner import RunDownload, RunCheck, RunMarkBad
 import sys
 
-name = "Prague_DOP_Cyklotrasy_l"
+name = "DatasetName"
 from_id = 0
 to_id = 5556 #5556
 pixels = 640
 minimal_length = 10
+custom_geojson = ''
 
 # python run_downloader_on_server.py NAME FROMID TOID PIXELS MIN_LEN
 if len(sys.argv) > 4:
@@ -21,13 +22,5 @@ print "[Setting] run_downloader_on_server.py", name, from_id, to_id, pixels
 
 print 'CAREFULLY CHECK THE FILE_NOT_FOUND_CHECKSUM!!! Is it the one for '+str(pixels)+' ??'
 
-
-to_id = 4082
-minimal_length = 5000
-custom_geojson = '/home/ekmek/Desktop/Project II/graph_new_data/DOP_Cyklotrasy_l.json'
-
 RunDownload(name, from_id, to_id, pixels, minimal_length, custom_geojson)
-#RunCheck(name, pixels)
-
-#RunMarkBad(name)
 #RunCheck(name, pixels)

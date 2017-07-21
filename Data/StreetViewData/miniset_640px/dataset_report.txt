@@ -26,5 +26,3 @@ We check for the existence of the target folfer and target dump file. If we can 
 Otherwise we copy the source folders images, and extend the dataset generating new images. We will also save a new dump file and then continue with it as the main dump file.
 We carry on like in regular case, only we are using a newly created dataset with it's new dataset dump file.
 Naturally with a new dataset we need to cook features, but we leave that upon the already existing structures.
-
-Settings2

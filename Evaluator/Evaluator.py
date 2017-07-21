@@ -140,7 +140,7 @@ def load_tmp_dataset():
     return x, y, osm
 
 from Functions import *
-def evaluator(model_file, settings_file, name_output_file, custom_target_geojson = None):
+def evaluator(model_file, settings_file, name_output_file, custom_target_geojson = None, show_segments_histo_stats = False, actually_save = True):
     '''
     Main Evaluator function.
     :param model_file: path to model .h5 file.
@@ -188,6 +188,25 @@ def evaluator(model_file, settings_file, name_output_file, custom_target_geojson
     EvaluatedData = prepEvaluatedData(y_pred, segment_ids)
     Altered = AlterSegments(EvaluatedData, Segments, only_unknown_scores=True)
 
+    if show_segments_histo_stats:
+        from DatasetHandler import DatasetObj
+
+        scores = []
+        for AltSeg in Altered:
+            scores.append( AltSeg.Score )
+
+        print len_(scores)
+
+        import DatasetHandler.DatasetVizualizators
+        save_to_pdf = False
+
+        labels = scores
+        DatasetHandler.DatasetVizualizators.plotHistogram(labels, 'Score distribution histogram', num_bins=20)
+        DatasetHandler.DatasetVizualizators.plotX_sortValues(labels, 'Distribution of score (sorted)', notReverse=True)
+        if save_to_pdf:
+            DatasetHandler.DatasetVizualizators.saveAllPlotsToPDF()
+        DatasetHandler.DatasetVizualizators.show()
+
     if custom_target_geojson is None:
         GeoJSON = loadDefaultGEOJSON()
     else:
@@ -195,7 +214,9 @@ def evaluator(model_file, settings_file, name_output_file, custom_target_geojson
         GeoJSON = loadGeoJson(geojson_to_be_marked)
     evaluated_geojson = markGeoJSON(GeoJSON, Altered)
     path_geojson_out = name_output_file
-    saveGeoJson(evaluated_geojson, path_geojson_out)
+
+    if actually_save:
+        saveGeoJson(evaluated_geojson, path_geojson_out)
 
     # Ex post testing
     DefaultSegments = DataOperations.LoadDataFile(path_to_segments_file)
@@ -204,8 +225,9 @@ def evaluator(model_file, settings_file, name_output_file, custom_target_geojson
 
     #print y_ref, y_pred
 
-    np.savetxt('y_ref.out', y_ref, delimiter=',')
-    np.savetxt('y_pred.out', y_pred, delimiter=',')
+    if actually_save:
+        np.savetxt('y_ref.out', y_ref, delimiter=',')
+        np.savetxt('y_pred.out', y_pred, delimiter=',')
 
     return 0, 0
     # Additional metrics
