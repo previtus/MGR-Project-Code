@@ -1,0 +1,5 @@
+This folder holds the Setting definition files to run repeated experiments with common settings.
+
+In the "set*" folders we have clean experiments, which were used to generate results which are plotted in the thesis text as graphs. These results usually use the k-fold cross-validation keeping one model-dataset pair in each file (to prevent them from running for too long and being terminated).
+
+In the "independent_experiments" we have a set of less ordered experiments, which we have used throughout the development process to test small independent ideas (to check if such and such editation of data is likely to bring improvement of hinder our learning method). These often have more model-dataset pairs in their description, but usually only in a single run version (as opposed to k-fold cross-val). We can outright see a hint of what the various pairs in the experiment are doing.
