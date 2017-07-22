@@ -1,0 +1,598 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>DatasetHandler package &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Downloader package" href="Downloader.html" />
+    <link rel="prev" title="Welcome to the documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="datasethandler-package">
+<h1>DatasetHandler package<a class="headerlink" href="#datasethandler-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-DatasetHandler.CreateDataset">
+<span id="datasethandler-createdataset-module"></span><h2>DatasetHandler.CreateDataset module<a class="headerlink" href="#module-DatasetHandler.CreateDataset" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="DatasetHandler.CreateDataset.determineUniqueId">
+<code class="descclassname">DatasetHandler.CreateDataset.</code><code class="descname">determineUniqueId</code><span class="sig-paren">(</span><em>dataset_nickname</em>, <em>desired_number</em>, <em>seed</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/CreateDataset.html#determineUniqueId"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.CreateDataset.determineUniqueId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Each dataset needs its own unique name build from the parameters which influence its shape.
+Later we name the feature files with this name and thus it needs to be linked with each dataset.
+:param dataset_nickname: id
+:param desired_number: number of images, can be None if all
+:param seed: seed for random data shuffling
+:return: string of unique id</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.CreateDataset.get_path_for_dataset">
+<code class="descclassname">DatasetHandler.CreateDataset.</code><code class="descname">get_path_for_dataset</code><span class="sig-paren">(</span><em>folder</em>, <em>filename_override</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/CreateDataset.html#get_path_for_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.CreateDataset.get_path_for_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get path to dataset from couple of default values, or use suggested name
+:param folder: name of the folder, will be joined to the project path
+:param filename_override: suggested name of dataset dump file
+:return: path</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.CreateDataset.load_custom">
+<code class="descclassname">DatasetHandler.CreateDataset.</code><code class="descname">load_custom</code><span class="sig-paren">(</span><em>folder</em>, <em>pixels</em>, <em>desired_number=None</em>, <em>seed=None</em>, <em>filename_override=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/CreateDataset.html#load_custom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.CreateDataset.load_custom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load dataset from one of prepared folders. Main method to load datasets.
+:param folder: folder name inside StreetViewData
+:param pixels: pixel size
+:param desired_number: number of images, can be None if all
+:param seed: seed for random data shuffling
+:param filename_override: if the name is not SegmentsData_marked_R100.dump or SegmentsData.dump
+:return: dataset object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.CreateDataset.prepareDataset">
+<code class="descclassname">DatasetHandler.CreateDataset.</code><code class="descname">prepareDataset</code><span class="sig-paren">(</span><em>path</em>, <em>dims</em>, <em>desired_number</em>, <em>seed</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/CreateDataset.html#prepareDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.CreateDataset.prepareDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create dataset object and prepare it from the suggested Segments file.
+:param path: path
+:param dims: pixel sizes list (width and height)
+:param desired_number: number of images, can be None if all
+:param seed: seed for random data shuffling
+:return: dataset object</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-DatasetHandler.DataAugmentation">
+<span id="datasethandler-dataaugmentation-module"></span><h2>DatasetHandler.DataAugmentation module<a class="headerlink" href="#module-DatasetHandler.DataAugmentation" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="DatasetHandler.DataAugmentation.handle_noncanon_dataset">
+<code class="descclassname">DatasetHandler.DataAugmentation.</code><code class="descname">handle_noncanon_dataset</code><span class="sig-paren">(</span><em>Settings</em>, <em>model_settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DataAugmentation.html#handle_noncanon_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DataAugmentation.handle_noncanon_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Special case scenario.
+We are creating a new custom dataset, instead of using one of the big officially used, “canon” datasets
+:param Settings: Setting for the whole experiment
+:param model_settings: Setting for our one dataset
+:return:</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-DatasetHandler.DatasetObj">
+<span id="datasethandler-datasetobj-module"></span><h2>DatasetHandler.DatasetObj module<a class="headerlink" href="#module-DatasetHandler.DatasetObj" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="DatasetHandler.DatasetObj.Dataset">
+<em class="property">class </em><code class="descclassname">DatasetHandler.DatasetObj.</code><code class="descname">Dataset</code><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Common base class for a Dataset</p>
+<p>What does dataset have?</p>
+<blockquote>
+<div><ul class="simple">
+<li>source data folder with images and their scores - via Segments, but we don’t use Segments anymore anywhere out</li>
+</ul>
+</div></blockquote>
+<p>What can it do?</p>
+<blockquote>
+<div><ul class="simple">
+<li>give it’s data nicely out ([x],[y]) as image data and labels</li>
+<li>give us subsets, which are uniform in sense of Scoring</li>
+<li>provide us with statistics - without worrying about unsuccessful downloads or anything</li>
+<li>give us <em>views</em> like exporting images into folder for inspection - for example coded with score</li>
+</ul>
+</div></blockquote>
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.DumpFilesIntoDirectory_withScores">
+<code class="descname">DumpFilesIntoDirectory_withScores</code><span class="sig-paren">(</span><em>target_directory=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.DumpFilesIntoDirectory_withScores"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.DumpFilesIntoDirectory_withScores" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple way of visualizing which images are considered “attractive” (with high score) and which are not
+:param target_directory: target directory, for example target_directory = ‘../debugViewOfDataset/’
+:return: returns list of new names of files, with the order unchanged</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.MapScoreToImages">
+<code class="descname">MapScoreToImages</code><span class="sig-paren">(</span><em>into_bins=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.MapScoreToImages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.MapScoreToImages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a dict which give to a index from 0-100 a list of images of such score (score goes in range 0-1, so <a href="#id1"><span class="problematic" id="id2">*</span></a>100 in this case)
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.cast_osm_to_bool">
+<code class="descname">cast_osm_to_bool</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.cast_osm_to_bool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.cast_osm_to_bool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms the osm vector data to boolean values, aka i=0 -&gt; 0, i&gt;0 -&gt; 1
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.cast_osm_to_one_hot_categories">
+<code class="descname">cast_osm_to_one_hot_categories</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.cast_osm_to_one_hot_categories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.cast_osm_to_one_hot_categories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms the osm vector data to one hot categories - low,mid,high represented as 001,010,100 binary.
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.debug_print_first">
+<code class="descname">debug_print_first</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.debug_print_first"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.debug_print_first" title="Permalink to this definition">¶</a></dt>
+<dd><p># Debug print first n values in this dataset.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.expandOsmDataWithMultipleRadii">
+<code class="descname">expandOsmDataWithMultipleRadii</code><span class="sig-paren">(</span><em>model_settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.expandOsmDataWithMultipleRadii"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.expandOsmDataWithMultipleRadii" title="Permalink to this definition">¶</a></dt>
+<dd><p># idea is to load all the radii data we have available and add it to each of the segments
+# we assume the basic experiment definition</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="DatasetHandler.DatasetObj.Dataset.flag_is_extended">
+<code class="descname">flag_is_extended</code><em class="property"> = False</em><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.flag_is_extended" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.generator_images_scores">
+<code class="descname">generator_images_scores</code><span class="sig-paren">(</span><em>order</em>, <em>image_paths</em>, <em>scores</em>, <em>resize=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.generator_images_scores"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.generator_images_scores" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get generator of images
+:param order: prearanged order (1,2,3…) or (2,55,1,980, …)
+:param image_paths: paths to images, these are kept in memory while the big 640x640x3 image data is not
+:param scores: score to be associated with returned image
+:param resize: parameter to resize loaded images on the fly
+:return: generator, which yields (image, score)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.getDataLabels">
+<code class="descname">getDataLabels</code><span class="sig-paren">(</span><em>resize=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.getDataLabels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.getDataLabels" title="Permalink to this definition">¶</a></dt>
+<dd><p># ([x,y]) as image data and labels</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.getDataLabels_only_osm">
+<code class="descname">getDataLabels_only_osm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.getDataLabels_only_osm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.getDataLabels_only_osm" title="Permalink to this definition">¶</a></dt>
+<dd><p># Get just osm data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.getDataLabels_only_osm_raw">
+<code class="descname">getDataLabels_only_osm_raw</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.getDataLabels_only_osm_raw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.getDataLabels_only_osm_raw" title="Permalink to this definition">¶</a></dt>
+<dd><p># return list of osm without coversion to numpy format</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.getDataLabels_only_y">
+<code class="descname">getDataLabels_only_y</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.getDataLabels_only_y"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.getDataLabels_only_y" title="Permalink to this definition">¶</a></dt>
+<dd><p># Get just label data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.getDataLabels_split">
+<code class="descname">getDataLabels_split</code><span class="sig-paren">(</span><em>resize=None</em>, <em>validation_split=0.2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.getDataLabels_split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.getDataLabels_split" title="Permalink to this definition">¶</a></dt>
+<dd><p># ([x, y, x_val, y_val]) as image data and labels after being split</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.getDataLabels_split_only_osm">
+<code class="descname">getDataLabels_split_only_osm</code><span class="sig-paren">(</span><em>validation_split=0.2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.getDataLabels_split_only_osm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.getDataLabels_split_only_osm" title="Permalink to this definition">¶</a></dt>
+<dd><p># Get just osm data, after validation split</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.getDataLabels_split_only_y">
+<code class="descname">getDataLabels_split_only_y</code><span class="sig-paren">(</span><em>resize=None</em>, <em>validation_split=0.2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.getDataLabels_split_only_y"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.getDataLabels_split_only_y" title="Permalink to this definition">¶</a></dt>
+<dd><p># Get just label data, after validation split</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.getImageGenerator">
+<code class="descname">getImageGenerator</code><span class="sig-paren">(</span><em>validation_split</em>, <em>resize=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.getImageGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.getImageGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p># Return generators
+# take the lists on images and their labels - split these two arrays by the validation split</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.getShapeOfOsm">
+<code class="descname">getShapeOfOsm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.getShapeOfOsm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.getShapeOfOsm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get shape of the osm data - aka dimension of the vectors, traditionally (594,) needed for building Keras models.
+:return:</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="DatasetHandler.DatasetObj.Dataset.has_osm_loaded">
+<code class="descname">has_osm_loaded</code><em class="property"> = False</em><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.has_osm_loaded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="DatasetHandler.DatasetObj.Dataset.img_height">
+<code class="descname">img_height</code><em class="property"> = -1</em><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.img_height" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="DatasetHandler.DatasetObj.Dataset.img_width">
+<code class="descname">img_width</code><em class="property"> = -1</em><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.img_width" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.init_from_lists">
+<code class="descname">init_from_lists</code><span class="sig-paren">(</span><em>list_of_images</em>, <em>labels</em>, <em>osm</em>, <em>segment_ids</em>, <em>img_width</em>, <em>img_height</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.init_from_lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.init_from_lists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialization from lists of data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.init_from_segments">
+<code class="descname">init_from_segments</code><span class="sig-paren">(</span><em>path_to_segments_file</em>, <em>img_width</em>, <em>img_height</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.init_from_segments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.init_from_segments" title="Permalink to this definition">¶</a></dt>
+<dd><p># Initialization from loaded Segment in path_to_segments_file
+# Segments are not used apart from initialization</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.log_the_osm">
+<code class="descname">log_the_osm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.log_the_osm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.log_the_osm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply log to values in OSM vector.
+:return:</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="DatasetHandler.DatasetObj.Dataset.num_of_images">
+<code class="descname">num_of_images</code><em class="property"> = 0</em><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.num_of_images" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.plotHistogram">
+<code class="descname">plotHistogram</code><span class="sig-paren">(</span><em>save_to_pdf=False</em>, <em>labels_override=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.plotHistogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.plotHistogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot score of this dataset as histogram.
+:param save_to_pdf: flag to save into output.pdf
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.randomize_all_list_order_deterministically_same_segment">
+<code class="descname">randomize_all_list_order_deterministically_same_segment</code><span class="sig-paren">(</span><em>local_seed</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.randomize_all_list_order_deterministically_same_segment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.randomize_all_list_order_deterministically_same_segment" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>According to a chosen seed number will shuffle contents of lists (of urls, of scores, of osm) so they are kept</dt>
+<dd>intact.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.remove_dual_osms">
+<code class="descname">remove_dual_osms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.remove_dual_osms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.remove_dual_osms" title="Permalink to this definition">¶</a></dt>
+<dd><p>We know that every third entry is actually unique (in sense of osm,score pair) - when we are talking about osm_only model
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.sampleUniform">
+<code class="descname">sampleUniform</code><span class="sig-paren">(</span><em>desired_number</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.sampleUniform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.sampleUniform" title="Permalink to this definition">¶</a></dt>
+<dd><p># randomized subsample of a dataset</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.spawnUniformSubset">
+<code class="descname">spawnUniformSubset</code><span class="sig-paren">(</span><em>desired_number</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.spawnUniformSubset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.spawnUniformSubset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spawn a subset from dataset uniform distribution over the original data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>desired_number</strong> – size of the desired dataset</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting new dataset</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.statistics">
+<code class="descname">statistics</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.statistics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.statistics" title="Permalink to this definition">¶</a></dt>
+<dd><p># Report important information about the dataset.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DatasetHandler.DatasetObj.Dataset.test_existence_of_all_images">
+<code class="descname">test_existence_of_all_images</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetObj.html#Dataset.test_existence_of_all_images"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.test_existence_of_all_images" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test physical presence of the images - useful for debuging.
+:return:</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="DatasetHandler.DatasetObj.Dataset.unique_id">
+<code class="descname">unique_id</code><em class="property"> = ''</em><a class="headerlink" href="#DatasetHandler.DatasetObj.Dataset.unique_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-DatasetHandler.DatasetVizualizators">
+<span id="datasethandler-datasetvizualizators-module"></span><h2>DatasetHandler.DatasetVizualizators module<a class="headerlink" href="#module-DatasetHandler.DatasetVizualizators" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="DatasetHandler.DatasetVizualizators.GenerateAverageImagesFromDictionary">
+<code class="descclassname">DatasetHandler.DatasetVizualizators.</code><code class="descname">GenerateAverageImagesFromDictionary</code><span class="sig-paren">(</span><em>dict</em>, <em>save_to_dir=None</em>, <em>output_folder=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetVizualizators.html#GenerateAverageImagesFromDictionary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetVizualizators.GenerateAverageImagesFromDictionary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a dictionary of d[score_label_value] pointing to an array of images
+:param dict:
+:return: Up to 100 averaged images</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.DatasetVizualizators.plotHistogram">
+<code class="descclassname">DatasetHandler.DatasetVizualizators.</code><code class="descname">plotHistogram</code><span class="sig-paren">(</span><em>x</em>, <em>title=''</em>, <em>num_bins=100</em>, <em>x_min=0.0</em>, <em>x_max=1.0</em>, <em>custom_x_label='Score value'</em>, <em>custom_y_label='Count of occurances'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetVizualizators.html#plotHistogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetVizualizators.plotHistogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot histogram from the x data.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.DatasetVizualizators.plotMultipleWhiskerPlots">
+<code class="descclassname">DatasetHandler.DatasetVizualizators.</code><code class="descname">plotMultipleWhiskerPlots</code><span class="sig-paren">(</span><em>datas</em>, <em>whiskers</em>, <em>labels</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetVizualizators.html#plotMultipleWhiskerPlots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetVizualizators.plotMultipleWhiskerPlots" title="Permalink to this definition">¶</a></dt>
+<dd><p>Example run:</p>
+<p>means_men = (20, 35, 30, 35, 27)
+std_men = (2, 3, 4, 1, 2)
+means_women = (25, 32, 34, 20, 25)
+std_women = (3, 5, 2, 3, 3)</p>
+<p>datas = [means_men, means_women, means_men]
+whiskers = [std_men, std_women, std_women]
+labels = [‘1’, ‘2’, ‘3’]</p>
+<p>plotMultipleWhiskerPlots(datas,whiskers,labels)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.DatasetVizualizators.plotWhisker">
+<code class="descclassname">DatasetHandler.DatasetVizualizators.</code><code class="descname">plotWhisker</code><span class="sig-paren">(</span><em>data</em>, <em>title=''</em>, <em>y_min=0.0</em>, <em>y_max=1.0</em>, <em>legend_on=True</em>, <em>notch=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetVizualizators.html#plotWhisker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetVizualizators.plotWhisker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot box plot / whisker graph from data.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.DatasetVizualizators.plotX_sortValues">
+<code class="descclassname">DatasetHandler.DatasetVizualizators.</code><code class="descname">plotX_sortValues</code><span class="sig-paren">(</span><em>dont_touch_this_x</em>, <em>title=''</em>, <em>x_min=0.0</em>, <em>x_max=1.0</em>, <em>notReverse=False</em>, <em>custom_x_label='# of images'</em>, <em>custom_y_label='Score value'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetVizualizators.html#plotX_sortValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetVizualizators.plotX_sortValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualization of dataset by the method of sorting array by value and plotting.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.DatasetVizualizators.saveAllPlotsToPDF">
+<code class="descclassname">DatasetHandler.DatasetVizualizators.</code><code class="descname">saveAllPlotsToPDF</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetVizualizators.html#saveAllPlotsToPDF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetVizualizators.saveAllPlotsToPDF" title="Permalink to this definition">¶</a></dt>
+<dd><p># Save all created plots into a pdf file.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.DatasetVizualizators.show">
+<code class="descclassname">DatasetHandler.DatasetVizualizators.</code><code class="descname">show</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetVizualizators.html#show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetVizualizators.show" title="Permalink to this definition">¶</a></dt>
+<dd><p>show plots on screen</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.DatasetVizualizators.subPlot2">
+<code class="descclassname">DatasetHandler.DatasetVizualizators.</code><code class="descname">subPlot2</code><span class="sig-paren">(</span><em>fce1</em>, <em>fce2</em>, <em>param1=None</em>, <em>param2=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetVizualizators.html#subPlot2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetVizualizators.subPlot2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Join two plots.</p>
+<p>Example run:
+def tmp_fce1(): …
+def tmp_fce2(): …
+subPlot2(tmp_fce1, tmp_fce2)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.DatasetVizualizators.xkcd">
+<code class="descclassname">DatasetHandler.DatasetVizualizators.</code><code class="descname">xkcd</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetVizualizators.html#xkcd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetVizualizators.xkcd" title="Permalink to this definition">¶</a></dt>
+<dd><p>special style</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.DatasetVizualizators.zoomOut">
+<code class="descclassname">DatasetHandler.DatasetVizualizators.</code><code class="descname">zoomOut</code><span class="sig-paren">(</span><em>axes</em>, <em>xlim=None</em>, <em>ylim=None</em>, <em>factor=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetVizualizators.html#zoomOut"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetVizualizators.zoomOut" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set size to fit in limitations.
+:param axes: handler to matlibplot
+:param xlim: list of [from x, to x] values
+:param ylim: list of [from y, to y] values
+:param factor: zoom factor
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.DatasetVizualizators.zoomOutX">
+<code class="descclassname">DatasetHandler.DatasetVizualizators.</code><code class="descname">zoomOutX</code><span class="sig-paren">(</span><em>axes</em>, <em>xlim=None</em>, <em>factor=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetVizualizators.html#zoomOutX"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetVizualizators.zoomOutX" title="Permalink to this definition">¶</a></dt>
+<dd><p>handle the X axis</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.DatasetVizualizators.zoomOutY">
+<code class="descclassname">DatasetHandler.DatasetVizualizators.</code><code class="descname">zoomOutY</code><span class="sig-paren">(</span><em>axes</em>, <em>ylim=None</em>, <em>factor=0.05</em>, <em>only_up=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/DatasetVizualizators.html#zoomOutY"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.DatasetVizualizators.zoomOutY" title="Permalink to this definition">¶</a></dt>
+<dd><p>handle the Y axis</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-DatasetHandler.FileHelperFunc">
+<span id="datasethandler-filehelperfunc-module"></span><h2>DatasetHandler.FileHelperFunc module<a class="headerlink" href="#module-DatasetHandler.FileHelperFunc" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="DatasetHandler.FileHelperFunc.copy_file">
+<code class="descclassname">DatasetHandler.FileHelperFunc.</code><code class="descname">copy_file</code><span class="sig-paren">(</span><em>src</em>, <em>dst</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/FileHelperFunc.html#copy_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.FileHelperFunc.copy_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy and paste file.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.FileHelperFunc.copy_folder">
+<code class="descclassname">DatasetHandler.FileHelperFunc.</code><code class="descname">copy_folder</code><span class="sig-paren">(</span><em>src</em>, <em>dst</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/FileHelperFunc.html#copy_folder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.FileHelperFunc.copy_folder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy and paste folders. Used for dataset augmentation.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.FileHelperFunc.file_exists">
+<code class="descclassname">DatasetHandler.FileHelperFunc.</code><code class="descname">file_exists</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/FileHelperFunc.html#file_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.FileHelperFunc.file_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does file exist, returns boolean.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.FileHelperFunc.folder_exists">
+<code class="descclassname">DatasetHandler.FileHelperFunc.</code><code class="descname">folder_exists</code><span class="sig-paren">(</span><em>directory</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/FileHelperFunc.html#folder_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.FileHelperFunc.folder_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does folder with this name exist, returns boolean</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.FileHelperFunc.get_folder_from_file">
+<code class="descclassname">DatasetHandler.FileHelperFunc.</code><code class="descname">get_folder_from_file</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/FileHelperFunc.html#get_folder_from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.FileHelperFunc.get_folder_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get folder name from path to a file.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.FileHelperFunc.get_geojson_path">
+<code class="descclassname">DatasetHandler.FileHelperFunc.</code><code class="descname">get_geojson_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/FileHelperFunc.html#get_geojson_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.FileHelperFunc.get_geojson_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives us the path directly to attractivity_previtus_data_1_edges.geojson from a list of allowed paths
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.FileHelperFunc.get_project_folder">
+<code class="descclassname">DatasetHandler.FileHelperFunc.</code><code class="descname">get_project_folder</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/FileHelperFunc.html#get_project_folder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.FileHelperFunc.get_project_folder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives us the path to MGR-Project-Code from a list of allowed folders.
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.FileHelperFunc.make_folder_ifItDoesntExist">
+<code class="descclassname">DatasetHandler.FileHelperFunc.</code><code class="descname">make_folder_ifItDoesntExist</code><span class="sig-paren">(</span><em>directory</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/FileHelperFunc.html#make_folder_ifItDoesntExist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.FileHelperFunc.make_folder_ifItDoesntExist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a new directory, if it didn’t previously exist.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.FileHelperFunc.md5">
+<code class="descclassname">DatasetHandler.FileHelperFunc.</code><code class="descname">md5</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/FileHelperFunc.html#md5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.FileHelperFunc.md5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get md5 hash of a file.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DatasetHandler.FileHelperFunc.use_path_which_exists">
+<code class="descclassname">DatasetHandler.FileHelperFunc.</code><code class="descname">use_path_which_exists</code><span class="sig-paren">(</span><em>list_of_possible_paths</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatasetHandler/FileHelperFunc.html#use_path_which_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DatasetHandler.FileHelperFunc.use_path_which_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>From a list of possible paths choose the one which exists.
+:param list_of_possible_paths: possible paths
+:return: working path</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-DatasetHandler">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-DatasetHandler" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">DatasetHandler package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-DatasetHandler.CreateDataset">DatasetHandler.CreateDataset module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-DatasetHandler.DataAugmentation">DatasetHandler.DataAugmentation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-DatasetHandler.DatasetObj">DatasetHandler.DatasetObj module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-DatasetHandler.DatasetVizualizators">DatasetHandler.DatasetVizualizators module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-DatasetHandler.FileHelperFunc">DatasetHandler.FileHelperFunc module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-DatasetHandler">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to the documentation!</a></li>
+      <li>Next: <a href="Downloader.html" title="next chapter">Downloader package</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/DatasetHandler.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

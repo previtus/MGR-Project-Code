@@ -1,0 +1,259 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ExperimentRunner.SettingsDefaults &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ExperimentRunner.SettingsDefaults</h1><div class="highlight"><pre>
+<span></span>
+<div class="viewcode-block" id="load_default_settings"><a class="viewcode-back" href="../../ExperimentRunner.html#ExperimentRunner.SettingsDefaults.load_default_settings">[docs]</a><span class="k">def</span> <span class="nf">load_default_settings</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Default setting definition.</span>
+<span class="sd">    :return: Default setting for whole experiment and for first model in dictionaries.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">DefaultSettings</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># dataset settings</span>
+    <span class="n">DefaultSettings</span><span class="p">[</span><span class="s2">&quot;experiment_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;basic&quot;</span>
+    <span class="n">DefaultSettings</span><span class="p">[</span><span class="s2">&quot;interrupt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">DefaultSettings</span><span class="p">[</span><span class="s2">&quot;report_on_models&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">DefaultSettings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">DefaultModel</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># dataset setting</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;dataset_pointer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="c1"># if = -1, then create new dataset, otherwise use dataset of model of this index</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;dataset_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1200x_markable_299x299&quot;</span> <span class="c1"># &quot;1200x_markable_299x299&quot;, &quot;5556x_mark_res_299x299&quot;, &quot;5556x_markable_640x640&quot;</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;dump_file_override&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="c1"># &#39;&#39; is default, could also be &#39;SegmentsData_marked_R100_4Tables.dump&#39; ... etc</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;pixels&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">299</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;number_of_images&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;seed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">13</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;validation_split&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.25</span>
+
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;unique_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;resnet50_top3FC_top150ep_10imgs_299px&#39;</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;cnn_model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;resnet50&#39;</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;cooking_method&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;generators&#39;</span> <span class="c1"># &#39;direct&#39; or &#39;generators&#39;</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;cut_cnn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;simple_cnn_with_top&#39;</span> <span class="c1"># &#39;simple_cnn_with_top&#39;, &#39;img_osm_mix&#39;, &#39;osm_only&#39;</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;top_repeat_FC_block&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;save_visualization&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># Train and Test specifics</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;epochs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">150</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;rmsprop&#39;</span> <span class="c1"># &#39;rmsprop&#39; or &#39;adam&#39; etc.</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;loss_func&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;mean_squared_error&#39;</span> <span class="c1"># &#39;mean_squared_error&#39; or &#39;mean_absolute_error&#39; etc.</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;metrics&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mean_absolute_error&#39;</span><span class="p">]</span> <span class="c1"># list of &#39;mean_squared_error&#39; or &#39;mean_absolute_error&#39; etc.</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;train_top&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># Always True??</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;test_existence_of_images&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;evaluation_after_training&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;k_fold_crossvalidation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;crossvalidation_k&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span>
+
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;finetune&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="kn">from</span> <span class="nn">keras</span> <span class="k">import</span> <span class="n">optimizers</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;finetune_optimizer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">optimizers</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">lr</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;finetune_num_of_cnn_layers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;finetune_epochs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
+
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;finetune_DEBUG_METHOD_OF_MODEL_GEN&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># True - uses cooked feature files, False - trains the whole model on spot</span>
+
+    <span class="c1"># Hurray for shuffling</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;shuffle_dataset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;shuffle_dataset_method&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;default-same-segment&#39;</span>
+
+    <span class="c1"># OSM data editation</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;edit_osm_vec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="c1"># &#39;booleans&#39;, &#39;low-mid-high&#39;</span>
+
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;osm_manual_width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">256</span>
+
+    <span class="c1"># Special case HACKS</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;special_case&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="c1"># by default no hack # hack_dont_use_features, is not yet prepared</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;osm_only_unique_osms&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># Noncanon dataset creation</span>
+    <span class="n">DefaultModel</span><span class="p">[</span><span class="s2">&quot;noncanon_dataset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="c1"># can be &#39;expand_existing_dataset&#39;</span>
+
+
+    <span class="n">DefaultSettings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DefaultModel</span><span class="p">)</span>
+    <span class="n">DefaultSettings</span><span class="p">[</span><span class="s2">&quot;graph_histories&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">,</span><span class="s1">&#39;together&#39;</span><span class="p">,[]]</span> <span class="c1">#[&#39;all&#39;,[],[0,2]]</span>
+
+    <span class="c1"># empty values, which will be filled:</span>
+    <span class="n">DefaultSettings</span><span class="p">[</span><span class="s2">&quot;filename_features_train&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">DefaultSettings</span><span class="p">[</span><span class="s2">&quot;filename_features_test&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">DefaultSettings</span><span class="p">[</span><span class="s2">&quot;finetune_features_train&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">DefaultSettings</span><span class="p">[</span><span class="s2">&quot;finetune_features_test&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">DefaultSettings</span><span class="p">,</span> <span class="n">DefaultModel</span></div>
+
+<div class="viewcode-block" id="print_settings"><a class="viewcode-back" href="../../ExperimentRunner.html#ExperimentRunner.SettingsDefaults.print_settings">[docs]</a><span class="k">def</span> <span class="nf">print_settings</span><span class="p">(</span><span class="n">Settings</span><span class="p">,</span> <span class="n">ignore_default_values</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Debug of Settings, prints values which are not like the ones in Default setting file.</span>
+<span class="sd">    :param Settings: Custom setting to be checked</span>
+<span class="sd">    :param ignore_default_values: Flag to ignore default values (for better clarity)</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="nb">print</span> <span class="s2">&quot;## Loaded Settings:&quot;</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span>
+    <span class="n">DefaultSettings</span><span class="p">,</span> <span class="n">DefaultModel</span> <span class="o">=</span> <span class="n">load_default_settings</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">Settings</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s1">&#39;models&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_default_values</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">Settings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">==</span> <span class="n">DefaultSettings</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                <span class="nb">print</span> <span class="n">t</span><span class="p">,</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="n">Settings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]:</span>
+        <span class="nb">print</span> <span class="n">t</span><span class="p">,</span><span class="s2">&quot;[model]&quot;</span><span class="p">,</span> <span class="n">model</span><span class="p">[</span><span class="s2">&quot;unique_id&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">subkey</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_default_values</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">model</span><span class="p">[</span><span class="n">subkey</span><span class="p">]</span> <span class="o">==</span> <span class="n">DefaultModel</span><span class="p">[</span><span class="n">subkey</span><span class="p">]:</span>
+                <span class="nb">print</span> <span class="n">t</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="n">subkey</span><span class="p">,</span> <span class="n">model</span><span class="p">[</span><span class="n">subkey</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="load_settings_from_file"><a class="viewcode-back" href="../../ExperimentRunner.html#ExperimentRunner.SettingsDefaults.load_settings_from_file">[docs]</a><span class="k">def</span> <span class="nf">load_settings_from_file</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">job_id</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Load Settings from a custom settings description file.</span>
+<span class="sd">    :param file: Load from file</span>
+<span class="sd">    :param job_id: Unique id</span>
+<span class="sd">    :param verbose: Flag to debug info about loaded Settings</span>
+<span class="sd">    :return: Settings dictionary</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="nb">print</span> <span class="s2">&quot;## Job: &quot;</span><span class="p">,</span> <span class="n">job_id</span><span class="p">,</span><span class="s2">&quot; Loading Settings from &quot;</span><span class="p">,</span><span class="n">file</span>
+
+    <span class="n">Settings</span><span class="p">,</span> <span class="n">DefaultModel</span> <span class="o">=</span> <span class="n">load_default_settings</span><span class="p">()</span>
+    <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;job_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">job_id</span>
+
+    <span class="kn">import</span> <span class="nn">os.path</span>
+    <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+            <span class="kn">import</span> <span class="nn">imp</span>
+            <span class="n">foo</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">load_source</span><span class="p">(</span><span class="s1">&#39;Setup&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+            <span class="n">Settings</span> <span class="o">=</span> <span class="n">foo</span><span class="o">.</span><span class="n">Setup</span><span class="p">(</span><span class="n">Settings</span><span class="p">,</span><span class="n">DefaultModel</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Couldn&#39;t find Settings file &#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="s2">&quot;&#39; using the Default Settings instead&quot;</span>
+            <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;interrupt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">print_settings</span><span class="p">(</span><span class="n">Settings</span><span class="p">,</span> <span class="n">ignore_default_values</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Settings</span>
+
+    <span class="c1">## Typical usage example</span>
+    <span class="c1">#load_settings_from_file(&#39;setting_example.py&#39;, verbose=True)</span>
+    <span class="c1"># EXAMPLE OF SETTINGS FILE &lt;setting_example.py&gt;:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    </span>
+<span class="sd">    def Setup(Settings,DefaultModel):</span>
+<span class="sd">        Settings[&quot;dataset_name&quot;] = &#39;foo&#39;</span>
+<span class="sd">    </span>
+<span class="sd">        Settings[&quot;seed&quot;] = 20</span>
+<span class="sd">    </span>
+<span class="sd">        n = len(Settings[&quot;models&quot;])</span>
+<span class="sd">        Settings[&quot;models&quot;].append(DefaultModel.copy())</span>
+<span class="sd">    </span>
+<span class="sd">        Settings[&quot;models&quot;][n][&quot;unique_id&quot;] = &#39;test&#39;</span>
+<span class="sd">        Settings[&quot;models&quot;][n][&quot;finetune_cnn&quot;] = True</span>
+<span class="sd">    </span>
+<span class="sd">        Settings[&quot;graph_histories&quot;] = [&#39;all&#39;,[0]]</span>
+<span class="sd">    </span>
+<span class="sd">        return Settings</span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,30 @@
+ExperimentRunner package
+========================
+
+Submodules
+----------
+
+ExperimentRunner\.ModelExperiments module
+-----------------------------------------
+
+.. automodule:: ExperimentRunner.ModelExperiments
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ExperimentRunner\.SettingsDefaults module
+-----------------------------------------
+
+.. automodule:: ExperimentRunner.SettingsDefaults
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: ExperimentRunner
+    :members:
+    :undoc-members:
+    :show-inheritance:

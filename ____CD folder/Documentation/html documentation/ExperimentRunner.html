@@ -1,0 +1,167 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ExperimentRunner package &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ModelHandler package" href="ModelHandler.html" />
+    <link rel="prev" title="Evaluator package" href="Evaluator.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="experimentrunner-package">
+<h1>ExperimentRunner package<a class="headerlink" href="#experimentrunner-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ExperimentRunner.ModelExperiments">
+<span id="experimentrunner-modelexperiments-module"></span><h2>ExperimentRunner.ModelExperiments module<a class="headerlink" href="#module-ExperimentRunner.ModelExperiments" title="Permalink to this headline">¶</a></h2>
+<p>This is the main Experiment runner with Models</p>
+<dl class="function">
+<dt id="ExperimentRunner.ModelExperiments.experiment_runner">
+<code class="descclassname">ExperimentRunner.ModelExperiments.</code><code class="descname">experiment_runner</code><span class="sig-paren">(</span><em>settings_file=None</em>, <em>job_id=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ExperimentRunner/ModelExperiments.html#experiment_runner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ExperimentRunner.ModelExperiments.experiment_runner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main experiment runner function, controls the run of the whole testing scheme.
+:param settings_file: specification of path to Settings file
+:param job_id: unque id, given by the scheduling program
+:return:</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ExperimentRunner.SettingsDefaults">
+<span id="experimentrunner-settingsdefaults-module"></span><h2>ExperimentRunner.SettingsDefaults module<a class="headerlink" href="#module-ExperimentRunner.SettingsDefaults" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ExperimentRunner.SettingsDefaults.load_default_settings">
+<code class="descclassname">ExperimentRunner.SettingsDefaults.</code><code class="descname">load_default_settings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ExperimentRunner/SettingsDefaults.html#load_default_settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ExperimentRunner.SettingsDefaults.load_default_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default setting definition.
+:return: Default setting for whole experiment and for first model in dictionaries.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ExperimentRunner.SettingsDefaults.load_settings_from_file">
+<code class="descclassname">ExperimentRunner.SettingsDefaults.</code><code class="descname">load_settings_from_file</code><span class="sig-paren">(</span><em>file=None</em>, <em>job_id=''</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ExperimentRunner/SettingsDefaults.html#load_settings_from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ExperimentRunner.SettingsDefaults.load_settings_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load Settings from a custom settings description file.
+:param file: Load from file
+:param job_id: Unique id
+:param verbose: Flag to debug info about loaded Settings
+:return: Settings dictionary</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ExperimentRunner.SettingsDefaults.print_settings">
+<code class="descclassname">ExperimentRunner.SettingsDefaults.</code><code class="descname">print_settings</code><span class="sig-paren">(</span><em>Settings</em>, <em>ignore_default_values=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ExperimentRunner/SettingsDefaults.html#print_settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ExperimentRunner.SettingsDefaults.print_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Debug of Settings, prints values which are not like the ones in Default setting file.
+:param Settings: Custom setting to be checked
+:param ignore_default_values: Flag to ignore default values (for better clarity)
+:return:</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ExperimentRunner">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ExperimentRunner" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ExperimentRunner package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-ExperimentRunner.ModelExperiments">ExperimentRunner.ModelExperiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-ExperimentRunner.SettingsDefaults">ExperimentRunner.SettingsDefaults module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-ExperimentRunner">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Evaluator.html" title="previous chapter">Evaluator package</a></li>
+      <li>Next: <a href="ModelHandler.html" title="next chapter">ModelHandler package</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/ExperimentRunner.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

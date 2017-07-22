@@ -1,0 +1,389 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Downloader.PreprocessData.SegmentObj &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Downloader.PreprocessData.SegmentObj</h1><div class="highlight"><pre>
+<span></span><span class="c1"># GraphEdgeSegment.py</span>
+<span class="kn">from</span> <span class="nn">Functions</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;..&#39;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">Downloader.Defaults</span> <span class="k">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="SegmentObj"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj">[docs]</a><span class="k">class</span> <span class="nc">SegmentObj</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Common base class for segment</span>
+<span class="sd">    Variables: FromId, ToId, SegmentId</span>
+<span class="sd">    Functions: getBearingString(), getGoogleViewUrl()</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Start</span><span class="p">,</span> <span class="n">End</span><span class="p">,</span> <span class="n">Score</span><span class="p">,</span> <span class="n">SegmentId</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Initialize Segment with the data from an edge.</span>
+<span class="sd">        :param Start: start coordinates</span>
+<span class="sd">        :param End: end coordinates</span>
+<span class="sd">        :param Score: score, which is then transformed</span>
+<span class="sd">        :param SegmentId: segment unique id</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SegmentId</span> <span class="o">=</span> <span class="n">SegmentId</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setScore</span><span class="p">(</span><span class="n">Score</span><span class="p">)</span>
+
+        <span class="c1"># Array of boolean flags if the images have been downloaded (1 or more)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">HasLoadedImages</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Error code encountered while downloading</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ErrorMessages</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># = -1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_images</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Start</span> <span class="o">=</span> <span class="n">Start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">End</span> <span class="o">=</span> <span class="n">End</span>
+
+        <span class="c1"># each of the i images has it&#39;s own location</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LocationsIndex</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DistinctLocations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># ... and after as well its own Nearby vector</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DistinctNearbyVector</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># One segment can generate multiple images, where we &quot;stand&quot; and &quot;look&quot; at different positions, each of these</span>
+        <span class="c1"># will have different central location associated.</span>
+
+        <span class="c1"># PS: when we have 3 images based in Start and 3 based in End, we can reuse the values of neighborhood</span>
+        <span class="c1"># (as long as we use cirle around the point as neighborhood)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Segment_OSM_MARKING_VERSION</span> <span class="o">=</span> <span class="s1">&#39;-1&#39;</span>
+
+<div class="viewcode-block" id="SegmentObj.ScoreAdjustment"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj.ScoreAdjustment">[docs]</a>    <span class="k">def</span> <span class="nf">ScoreAdjustment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">):</span>
+        <span class="c1"># val goes &lt;0,100&gt; we want &lt;0,1&gt; (when using sigmoid)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">/</span><span class="mf">100.0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SegmentObj.setScore"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj.setScore">[docs]</a>    <span class="k">def</span> <span class="nf">setScore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="o">&lt;&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ScoreAdjustment</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Score</span> <span class="o">=</span> <span class="n">s</span></div>
+
+<div class="viewcode-block" id="SegmentObj.displaySegment"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj.displaySegment">[docs]</a>    <span class="k">def</span> <span class="nf">displaySegment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Report information about segment</span>
+        <span class="nb">print</span> <span class="s2">&quot;SegmentId: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SegmentId</span><span class="p">,</span> <span class="s2">&quot;, Images: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">HasLoadedImages</span><span class="p">,</span> <span class="s2">&quot;, Errors: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ErrorMessages</span><span class="p">,</span> <span class="s2">&quot;, Score: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getScore</span><span class="p">()</span>
+        <span class="nb">print</span> <span class="s2">&quot;Start: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Start</span>
+        <span class="nb">print</span> <span class="s2">&quot;End: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">End</span></div>
+
+<div class="viewcode-block" id="SegmentObj.displaySegmentShort"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj.displaySegmentShort">[docs]</a>    <span class="k">def</span> <span class="nf">displaySegmentShort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Report brief information about segment</span>
+        <span class="nb">print</span> <span class="s2">&quot;SegmentId: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SegmentId</span><span class="p">,</span> <span class="s2">&quot;, Images: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">HasLoadedImages</span><span class="p">,</span> <span class="s2">&quot;, Score: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getScore</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SegmentObj.getBearingString"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj.getBearingString">[docs]</a>    <span class="k">def</span> <span class="nf">getBearingString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Location</span><span class="p">,</span> <span class="n">Direction</span><span class="p">,</span> <span class="n">degrees_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+        <span class="c1"># Get the bearing when looking from Location in Direction.</span>
+        <span class="k">return</span> <span class="n">bearing_between_two_points</span><span class="p">(</span><span class="n">Location</span><span class="p">,</span> <span class="n">Direction</span><span class="p">,</span> <span class="n">degrees_offset</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SegmentObj.resetImageMemory"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj.resetImageMemory">[docs]</a>    <span class="k">def</span> <span class="nf">resetImageMemory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_of_images</span><span class="p">):</span>
+        <span class="c1"># Reset saved information in this Segment.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">HasLoadedImages</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ErrorMessages</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_images</span> <span class="o">=</span> <span class="n">number_of_images</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">number_of_images</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">HasLoadedImages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ErrorMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ERROR_MESSAGE_NO_ERROR</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SegmentObj.getGoogleViewUrls"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj.getGoogleViewUrls">[docs]</a>    <span class="k">def</span> <span class="nf">getGoogleViewUrls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">PIXELS_X</span><span class="p">,</span> <span class="n">PIXELS_Y</span><span class="p">):</span>
+        <span class="c1"># Simple method</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Generate urls for the Segment. Here we also reset the</span>
+<span class="sd">        :param resx: Resolution of images, X</span>
+<span class="sd">        :param resy: Resolution of images, Y</span>
+<span class="sd">        :return: returns list of urls and filenames to download</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">urls</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">filenames</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Looking from START to END</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DistinctLocations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Start</span><span class="p">)</span> <span class="c1"># we are standing in Start</span>
+
+        <span class="c1"># 1 IMG</span>
+        <span class="n">urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getGoogleViewUrl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">End</span><span class="p">,</span> <span class="n">PIXELS_X</span><span class="p">,</span> <span class="n">PIXELS_Y</span><span class="p">))</span>
+        <span class="n">filenames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getImageFilename</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LocationsIndex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getGoogleViewUrl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">End</span><span class="p">,</span> <span class="n">PIXELS_X</span><span class="p">,</span> <span class="n">PIXELS_Y</span><span class="p">,</span> <span class="n">degrees_offset</span><span class="o">=</span><span class="mf">120.0</span><span class="p">))</span>
+        <span class="n">filenames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getImageFilename</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LocationsIndex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getGoogleViewUrl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">End</span><span class="p">,</span> <span class="n">PIXELS_X</span><span class="p">,</span> <span class="n">PIXELS_Y</span><span class="p">,</span> <span class="n">degrees_offset</span><span class="o">=</span><span class="mf">240.0</span><span class="p">))</span>
+        <span class="n">filenames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getImageFilename</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LocationsIndex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Looking from END to START</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DistinctLocations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">End</span><span class="p">)</span> <span class="c1"># we are standing in Start</span>
+
+        <span class="c1"># 1 IMG</span>
+        <span class="n">urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">getGoogleViewUrl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">End</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Start</span><span class="p">,</span> <span class="n">PIXELS_X</span><span class="p">,</span><span class="n">PIXELS_Y</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">filenames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">getImageFilename</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">))</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LocationsIndex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">getGoogleViewUrl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">End</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Start</span><span class="p">,</span> <span class="n">PIXELS_X</span><span class="p">,</span><span class="n">PIXELS_Y</span><span class="p">,</span> <span class="n">degrees_offset</span><span class="o">=</span><span class="mf">120.0</span><span class="p">))</span>
+        <span class="n">filenames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getImageFilename</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LocationsIndex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">getGoogleViewUrl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">End</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Start</span><span class="p">,</span> <span class="n">PIXELS_X</span><span class="p">,</span><span class="n">PIXELS_Y</span><span class="p">,</span> <span class="n">degrees_offset</span><span class="o">=</span><span class="mf">240.0</span><span class="p">))</span>
+        <span class="n">filenames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getImageFilename</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LocationsIndex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># And more to come &lt;3</span>
+
+        <span class="n">number_of_images</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">urls</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resetImageMemory</span><span class="p">(</span><span class="n">number_of_images</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">distLoc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">DistinctLocations</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DistinctNearbyVector</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">urls</span><span class="p">,</span> <span class="n">filenames</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="SegmentObj.getGoogleViewUrl"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj.getGoogleViewUrl">[docs]</a>    <span class="k">def</span> <span class="nf">getGoogleViewUrl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Location</span><span class="p">,</span> <span class="n">Direction</span><span class="p">,</span> <span class="n">resx</span><span class="p">,</span> <span class="n">resy</span><span class="p">,</span> <span class="n">degrees_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+        <span class="s1">&#39;Google View url from the start of this segment&#39;</span>
+        <span class="c1"># http://maps.googleapis.com/maps/api/</span>
+        <span class="c1"># streetview?size=600x400&amp;location=&lt;lat&gt;,&lt;long&gt;&amp;heading=&lt;angle from north&gt;&amp;key=&lt;api&gt;</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">Location</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">lon</span> <span class="o">=</span> <span class="n">Location</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">bearing</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getBearingString</span><span class="p">(</span><span class="n">Location</span><span class="p">,</span> <span class="n">Direction</span><span class="p">,</span> <span class="n">degrees_offset</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">url_start</span> <span class="o">=</span> <span class="s2">&quot;http://maps.googleapis.com/maps/api/streetview?size=&quot;</span>
+        <span class="n">api</span> <span class="o">=</span> <span class="n">getApi</span><span class="p">()</span>
+
+        <span class="n">full_url</span> <span class="o">=</span> <span class="p">[</span><span class="n">url_start</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">resx</span><span class="p">),</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">resy</span><span class="p">),</span> <span class="s2">&quot;&amp;location=&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">lat</span><span class="p">),</span> <span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="s2">&quot;&amp;heading=&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">bearing</span><span class="p">),</span> <span class="s2">&quot;&amp;key=&quot;</span><span class="p">,</span> <span class="n">api</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_url</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SegmentObj.getImageFilename"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj.getImageFilename">[docs]</a>    <span class="k">def</span> <span class="nf">getImageFilename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i_th_image</span><span class="p">):</span>
+        <span class="s1">&#39;Unified filename generation&#39;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;images/&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SegmentId</span><span class="p">,</span> <span class="n">NUMBER_OF_ZEROS_PADDING</span><span class="p">),</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i_th_image</span><span class="p">),</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">filename</span></div>
+
+<div class="viewcode-block" id="SegmentObj.getScore"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj.getScore">[docs]</a>    <span class="k">def</span> <span class="nf">getScore</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Score</span></div>
+
+<div class="viewcode-block" id="SegmentObj.hasLoadedImageI"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj.hasLoadedImageI">[docs]</a>    <span class="k">def</span> <span class="nf">hasLoadedImageI</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="c1"># while working with one image only, the validity flag is if we got it</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">HasLoadedImages</span><span class="p">[</span><span class="n">i</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="SegmentObj.hasUnknownScore"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj.hasUnknownScore">[docs]</a>    <span class="k">def</span> <span class="nf">hasUnknownScore</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getScore</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># negative score means unknown (-1 in source was /100)</span></div>
+
+<div class="viewcode-block" id="SegmentObj.getLocation"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj.getLocation">[docs]</a>    <span class="k">def</span> <span class="nf">getLocation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i_th_image</span><span class="p">):</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">LocationsIndex</span><span class="p">(</span><span class="n">i_th_image</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">DistinctLocations</span><span class="p">[</span><span class="n">index</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="SegmentObj.checkOSMVersion"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj.checkOSMVersion">[docs]</a>    <span class="k">def</span> <span class="nf">checkOSMVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Current project-wide OSM Marking version is: &quot;</span> <span class="o">+</span> <span class="n">OSM_MARKING_VERSION</span> <span class="o">+</span> <span class="s2">&quot; | These Segments are on: &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Segment_OSM_MARKING_VERSION</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Segment_OSM_MARKING_VERSION</span> <span class="o">==</span> <span class="n">OSM_MARKING_VERSION</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SegmentObj.getNearbyVector"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj.getNearbyVector">[docs]</a>    <span class="k">def</span> <span class="nf">getNearbyVector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i_th_image</span><span class="p">):</span>
+        <span class="c1"># Get osm vector.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkOSMVersion</span><span class="p">():</span>
+            <span class="nb">print</span> <span class="s2">&quot;Warning, the Segment&#39;s OSM_MARKING_VERSION is not up to date, the NearbyVector structure might have changed!&quot;</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">LocationsIndex</span><span class="p">(</span><span class="n">i_th_image</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">DistinctNearbyVector</span><span class="p">[</span><span class="n">index</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="SegmentObj.markWithVector"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj.markWithVector">[docs]</a>    <span class="k">def</span> <span class="nf">markWithVector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nearby_vector</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">MARKING_VERSION</span><span class="p">):</span>
+        <span class="c1"># Mark with osm vector.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DistinctNearbyVector</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">nearby_vector</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Segment_OSM_MARKING_VERSION</span> <span class="o">=</span> <span class="n">MARKING_VERSION</span></div>
+
+    <span class="c1"># ---------------------------------------------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="SegmentObj.betweenPoints"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj.betweenPoints">[docs]</a>    <span class="k">def</span> <span class="nf">betweenPoints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pointStart</span><span class="p">,</span> <span class="n">pointEnd</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Generate urls and filenames in between these two points. They will be added to the rest of data in this Segment.</span>
+<span class="sd">        :param pointStart:</span>
+<span class="sd">        :param pointEnd:</span>
+<span class="sd">        :return: urls and filenames</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">urls</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">filenames</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Looking from START to END</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DistinctLocations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointStart</span><span class="p">)</span> <span class="c1"># we are standing in Start</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DistinctLocations</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">loaded_before</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LocationsIndex</span><span class="p">)</span>
+
+        <span class="c1"># 3 IMGs</span>
+        <span class="n">urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getGoogleViewUrl</span><span class="p">(</span><span class="n">pointStart</span><span class="p">,</span> <span class="n">pointEnd</span><span class="p">,</span> <span class="n">PIXELS_X</span><span class="p">,</span> <span class="n">PIXELS_Y</span><span class="p">))</span>
+        <span class="n">filenames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getImageFilename</span><span class="p">(</span><span class="n">loaded_before</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LocationsIndex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="n">urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getGoogleViewUrl</span><span class="p">(</span><span class="n">pointStart</span><span class="p">,</span> <span class="n">pointEnd</span><span class="p">,</span> <span class="n">PIXELS_X</span><span class="p">,</span> <span class="n">PIXELS_Y</span><span class="p">,</span> <span class="n">degrees_offset</span><span class="o">=</span><span class="mf">120.0</span><span class="p">))</span>
+        <span class="n">filenames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getImageFilename</span><span class="p">(</span><span class="n">loaded_before</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LocationsIndex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="n">urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getGoogleViewUrl</span><span class="p">(</span><span class="n">pointStart</span><span class="p">,</span> <span class="n">pointEnd</span><span class="p">,</span> <span class="n">PIXELS_X</span><span class="p">,</span> <span class="n">PIXELS_Y</span><span class="p">,</span> <span class="n">degrees_offset</span><span class="o">=</span><span class="mf">240.0</span><span class="p">))</span>
+        <span class="n">filenames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getImageFilename</span><span class="p">(</span><span class="n">loaded_before</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LocationsIndex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+        <span class="c1"># Looking from END to START</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DistinctLocations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointEnd</span><span class="p">)</span> <span class="c1"># we are standing in Start</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DistinctLocations</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="c1"># 3 IMGs</span>
+        <span class="n">urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">getGoogleViewUrl</span><span class="p">(</span><span class="n">pointEnd</span><span class="p">,</span> <span class="n">pointStart</span><span class="p">,</span> <span class="n">PIXELS_X</span><span class="p">,</span><span class="n">PIXELS_Y</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">filenames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">getImageFilename</span><span class="p">(</span><span class="n">loaded_before</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">))</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LocationsIndex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="n">urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">getGoogleViewUrl</span><span class="p">(</span><span class="n">pointEnd</span><span class="p">,</span> <span class="n">pointStart</span><span class="p">,</span> <span class="n">PIXELS_X</span><span class="p">,</span><span class="n">PIXELS_Y</span><span class="p">,</span> <span class="n">degrees_offset</span><span class="o">=</span><span class="mf">120.0</span><span class="p">))</span>
+        <span class="n">filenames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getImageFilename</span><span class="p">(</span><span class="n">loaded_before</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LocationsIndex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="n">urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">getGoogleViewUrl</span><span class="p">(</span><span class="n">pointEnd</span><span class="p">,</span> <span class="n">pointStart</span><span class="p">,</span> <span class="n">PIXELS_X</span><span class="p">,</span><span class="n">PIXELS_Y</span><span class="p">,</span> <span class="n">degrees_offset</span><span class="o">=</span><span class="mf">240.0</span><span class="p">))</span>
+        <span class="n">filenames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getImageFilename</span><span class="p">(</span><span class="n">loaded_before</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LocationsIndex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">urls</span><span class="p">,</span> <span class="n">filenames</span></div>
+
+<div class="viewcode-block" id="SegmentObj.getGoogleViewUrls_whileUsingFractionsOfMinEdgeLen"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentObj.SegmentObj.getGoogleViewUrls_whileUsingFractionsOfMinEdgeLen">[docs]</a>    <span class="k">def</span> <span class="nf">getGoogleViewUrls_whileUsingFractionsOfMinEdgeLen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">PIXELS_X</span><span class="p">,</span> <span class="n">PIXELS_Y</span><span class="p">,</span> <span class="n">minimal_length</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        More sophisticated method, splitting long edges into minimal_length</span>
+<span class="sd">        :param PIXELS_X:</span>
+<span class="sd">        :param PIXELS_Y:</span>
+<span class="sd">        :param minimal_length: minimal allowed edge len</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">urls</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">filenames</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">min_allowed_distance</span> <span class="o">=</span> <span class="n">minimal_length</span>
+
+        <span class="n">d</span> <span class="o">=</span> <span class="mi">1000</span><span class="o">*</span><span class="n">distance_between_two_points</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">End</span><span class="p">)</span>
+        <span class="n">number_of_splits</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">((</span><span class="n">floor</span><span class="p">(</span><span class="n">d</span> <span class="o">/</span> <span class="n">min_allowed_distance</span><span class="p">)),</span><span class="mf">1.0</span><span class="p">))</span>
+
+        <span class="c1">#print &quot;---&quot;, d, min_allowed_distance, number_of_splits</span>
+
+        <span class="n">before_frac</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">loc</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">frac</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">number_of_splits</span><span class="p">):</span>
+            <span class="n">current_frac</span> <span class="o">=</span> <span class="p">(</span><span class="n">frac</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">number_of_splits</span><span class="p">)</span>
+
+            <span class="c1"># before_frac, current_frac will be 0.0-0.2, 0.2-0.4, etc all the way till 0.8-1.0</span>
+            <span class="n">PointA</span> <span class="o">=</span> <span class="n">interpolation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">End</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="n">before_frac</span><span class="p">)</span>
+            <span class="n">PointB</span> <span class="o">=</span> <span class="n">interpolation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">End</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="n">current_frac</span><span class="p">)</span>
+            <span class="c1">#d = 1000*distance_between_two_points(PointA, PointB)</span>
+            <span class="c1">#print before_frac, current_frac, d</span>
+
+            <span class="n">urls1</span><span class="p">,</span> <span class="n">filenames1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">betweenPoints</span><span class="p">(</span><span class="n">PointA</span><span class="p">,</span> <span class="n">PointB</span><span class="p">)</span>
+            <span class="n">urls</span> <span class="o">+=</span> <span class="n">urls1</span>
+            <span class="n">filenames</span> <span class="o">+=</span> <span class="n">filenames1</span>
+
+            <span class="n">loc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DistinctLocations</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+            <span class="n">before_frac</span> <span class="o">=</span> <span class="n">current_frac</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DistinctLocations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span>
+
+        <span class="n">number_of_images</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">urls</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resetImageMemory</span><span class="p">(</span><span class="n">number_of_images</span><span class="p">)</span>
+
+
+        <span class="k">for</span> <span class="n">distLoc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">DistinctLocations</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DistinctNearbyVector</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        # DEBUG distances</span>
+<span class="sd">        str_distances = &#39;&#39;</span>
+<span class="sd">        last = self.DistinctLocations[0]</span>
+<span class="sd">        for distLoc in self.DistinctLocations[1:]:</span>
+<span class="sd">            d = 1000*distance_between_two_points(last, distLoc)</span>
+<span class="sd">            last = distLoc</span>
+<span class="sd">            str_distances += str(d)+&#39;, &#39;</span>
+<span class="sd">        print str_distances, self.DistinctLocations, self.LocationsIndex</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">urls</span><span class="p">,</span> <span class="n">filenames</span><span class="p">]</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

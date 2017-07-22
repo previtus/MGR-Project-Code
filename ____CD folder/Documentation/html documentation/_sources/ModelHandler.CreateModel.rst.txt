@@ -1,0 +1,27 @@
+ModelHandler\.CreateModel package
+=================================
+
+Subpackages
+-----------
+
+.. toctree::
+
+Submodules
+----------
+
+ModelHandler\.CreateModel\.KerasApplicationsModels module
+---------------------------------------------------------
+
+.. automodule:: ModelHandler.CreateModel.KerasApplicationsModels
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: ModelHandler.CreateModel
+    :members:
+    :undoc-members:
+    :show-inheritance:

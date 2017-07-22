@@ -1,0 +1,208 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Downloader.PreprocessData.SegmentsManipulators &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Downloader.PreprocessData.SegmentsManipulators</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">Downloader.DataOperations</span> <span class="k">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="StatisticsSegments"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentsManipulators.StatisticsSegments">[docs]</a><span class="k">def</span> <span class="nf">StatisticsSegments</span><span class="p">(</span><span class="n">Segments</span><span class="p">,</span> <span class="n">additionalStatistics</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Provide statistics for loaded dataset</span>
+<span class="sd">    :param Segments: input list of Segments</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    # Examples of usage</span>
+<span class="sd">    Segments = LoadDataFile(&#39;../&#39;+DATASTRUCTUREFILE)</span>
+<span class="sd">    StatisticsSegments(Segments)</span>
+
+<span class="sd">    UsableTrainSubset = SubsetSegments(Segments, has_image=True, has_score=True)</span>
+<span class="sd">    StatisticsSegments(UsableTrainSubset)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c1"># variables we are looking at:</span>
+    <span class="n">num_of_segments</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Segments</span><span class="p">)</span>
+    <span class="n">num_of_potential_images</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">num_not_found_images</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">num_attractivity_not_known</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># score == -1</span>
+    <span class="n">num_valid</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># aka has images AND has scores</span>
+
+    <span class="n">num_attractivity_known</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">num_found_images</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">Segment</span> <span class="ow">in</span> <span class="n">Segments</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i_th_image</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">Segment</span><span class="o">.</span><span class="n">number_of_images</span><span class="p">):</span>
+            <span class="c1"># Count for each image</span>
+            <span class="k">if</span> <span class="n">Segment</span><span class="o">.</span><span class="n">hasUnknownScore</span><span class="p">():</span>
+                <span class="n">num_attractivity_not_known</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">num_attractivity_known</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">Segment</span><span class="o">.</span><span class="n">hasLoadedImageI</span><span class="p">(</span><span class="n">i_th_image</span><span class="p">):</span>
+                <span class="n">num_not_found_images</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">num_found_images</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">Segment</span><span class="o">.</span><span class="n">hasUnknownScore</span><span class="p">())</span> <span class="ow">and</span> <span class="p">(</span><span class="n">Segment</span><span class="o">.</span><span class="n">hasLoadedImageI</span><span class="p">(</span><span class="n">i_th_image</span><span class="p">)):</span>
+                <span class="n">num_valid</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">num_of_potential_images</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="nb">print</span> <span class="s2">&quot;Segments Statistics:&quot;</span>
+    <span class="nb">print</span> <span class="s2">&quot;From &quot;</span><span class="p">,</span> <span class="n">num_of_segments</span><span class="p">,</span> <span class="s2">&quot; loaded Segments (with&quot;</span><span class="p">,</span> <span class="n">num_of_potential_images</span><span class="p">,</span> <span class="s2">&quot;potential images), only &quot;</span><span class="p">,</span> <span class="n">num_found_images</span><span class="p">,</span> <span class="s2">&quot; have images (&quot;</span><span class="p">,</span> <span class="n">num_not_found_images</span><span class="p">,</span><span class="s2">&quot;don&#39;t) and only &quot;</span><span class="p">,</span> <span class="n">num_attractivity_known</span><span class="p">,</span> <span class="s2">&quot; have score (&quot;</span><span class="p">,</span><span class="n">num_attractivity_not_known</span><span class="p">,</span><span class="s2">&quot;don&#39;t).&quot;</span>
+    <span class="nb">print</span> <span class="s2">&quot;The data set which we can use for training (aka has images AND has scores) is &quot;</span><span class="p">,</span> <span class="n">num_valid</span>
+
+    <span class="k">if</span> <span class="n">additionalStatistics</span><span class="p">:</span>
+        <span class="n">AdditionalStatistics</span><span class="p">(</span><span class="n">Segments</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AdditionalStatistics"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.SegmentsManipulators.AdditionalStatistics">[docs]</a><span class="k">def</span> <span class="nf">AdditionalStatistics</span><span class="p">(</span><span class="n">Segments</span><span class="p">):</span>
+    <span class="c1"># Give us additional statistics - Lengths of edges</span>
+    <span class="n">stats_over_d</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">Segment</span> <span class="ow">in</span> <span class="n">Segments</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">Segment</span><span class="o">.</span><span class="n">hasUnknownScore</span><span class="p">():</span>
+
+            <span class="n">d</span> <span class="o">=</span> <span class="mi">1000</span><span class="o">*</span><span class="n">distance_between_two_points</span><span class="p">(</span><span class="n">Segment</span><span class="o">.</span><span class="n">Start</span><span class="p">,</span> <span class="n">Segment</span><span class="o">.</span><span class="n">End</span><span class="p">)</span>
+            <span class="c1">#print d, Segment.Start, Segment.End</span>
+            <span class="n">stats_over_d</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            m = midpoint(Segment.Start, Segment.End)</span>
+<span class="sd">            d1 = 1000 * distance_between_two_points(Segment.Start, m)</span>
+<span class="sd">            d2 = 1000 * distance_between_two_points(m, Segment.End)</span>
+<span class="sd">            print abs(d - (d1+d2)), d1, d2</span>
+<span class="sd">            &#39;&#39;&#39;</span>
+
+    <span class="kn">from</span> <span class="nn">DatasetHandler.DatasetVizualizators</span> <span class="k">import</span> <span class="o">*</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+    <span class="nb">print</span> <span class="n">stats_over_d</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">stats_over_d</span><span class="p">)</span>
+    <span class="nb">min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="nb">max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">q1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+    <span class="n">q3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">75</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="nb">min</span><span class="p">,</span> <span class="s2">&quot;|---[&quot;</span><span class="p">,</span> <span class="n">q1</span><span class="p">,</span> <span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="s2">&quot;}&quot;</span><span class="p">,</span> <span class="n">q3</span><span class="p">,</span> <span class="s2">&quot;]---|&quot;</span><span class="p">,</span> <span class="nb">max</span>
+
+    <span class="n">save_to_pdf</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">plotWhisker</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;Lengths of edges (in meters)&#39;</span><span class="p">,</span> <span class="n">y_min</span><span class="o">=</span><span class="nb">min</span><span class="p">,</span> <span class="n">y_max</span><span class="o">=</span><span class="nb">max</span><span class="p">)</span>
+    <span class="n">plotHistogram</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;Length distribution histogram (in meters)&#39;</span><span class="p">,</span> <span class="n">x_min</span><span class="o">=</span><span class="nb">min</span><span class="p">,</span> <span class="n">x_max</span><span class="o">=</span><span class="nb">max</span><span class="p">,</span> <span class="n">num_bins</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+                <span class="n">custom_x_label</span><span class="o">=</span><span class="s1">&#39;Distance in meters&#39;</span><span class="p">,</span> <span class="n">custom_y_label</span><span class="o">=</span><span class="s1">&#39;Count of occurances&#39;</span><span class="p">)</span>
+    <span class="n">plotX_sortValues</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;Lengths of edges (sorted, in meters)&#39;</span><span class="p">,</span> <span class="n">x_min</span><span class="o">=</span><span class="nb">min</span><span class="p">,</span> <span class="n">x_max</span><span class="o">=</span><span class="nb">max</span><span class="p">,</span> <span class="n">notReverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">custom_x_label</span> <span class="o">=</span> <span class="s1">&#39;# of edge&#39;</span><span class="p">,</span> <span class="n">custom_y_label</span> <span class="o">=</span> <span class="s1">&#39;edge length in meters&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">save_to_pdf</span><span class="p">:</span>
+        <span class="n">saveAllPlotsToPDF</span><span class="p">()</span>
+    <span class="n">show</span><span class="p">()</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Example usage:</span>
+<span class="sd">    file = &#39;/home/ekmek/Desktop/MGR-Project-Code/Data/StreetViewData/50-100x_MoarImgs/SegmentsData.dump&#39;</span>
+<span class="sd">    #file = &#39;/home/ekmek/Desktop/MGR-Project-Code/Data/StreetViewData/1200x_markable_299x299/SegmentsData.dump&#39;</span>
+<span class="sd">    Segments = LoadDataFile(file)</span>
+<span class="sd">    StatisticsSegments(Segments, True)</span>
+<span class="sd">    &#39;&#39;&#39;</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

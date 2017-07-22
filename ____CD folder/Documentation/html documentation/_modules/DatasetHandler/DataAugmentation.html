@@ -1,0 +1,325 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>DatasetHandler.DataAugmentation &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for DatasetHandler.DataAugmentation</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">Omnipresent</span> <span class="k">import</span> <span class="n">len_</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">DatasetHandler.FileHelperFunc</span> <span class="k">import</span> <span class="n">copy_folder</span><span class="p">,</span> <span class="n">copy_file</span><span class="p">,</span> <span class="n">file_exists</span><span class="p">,</span> <span class="n">folder_exists</span><span class="p">,</span> <span class="n">md5</span>
+
+<div class="viewcode-block" id="handle_noncanon_dataset"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DataAugmentation.handle_noncanon_dataset">[docs]</a><span class="k">def</span> <span class="nf">handle_noncanon_dataset</span><span class="p">(</span><span class="n">Settings</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Special case scenario.</span>
+<span class="sd">    We are creating a new custom dataset, instead of using one of the big officially used, &quot;canon&quot; datasets</span>
+<span class="sd">    :param Settings: Setting for the whole experiment</span>
+<span class="sd">    :param model_settings: Setting for our one dataset</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;noncanon_dataset&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;expand_existing_dataset&#39;</span><span class="p">:</span>
+        <span class="c1"># Idea: take an existing dataset and expand it via</span>
+
+        <span class="c1"># Directly load the old segments file</span>
+
+        <span class="c1"># for each segment</span>
+        <span class="c1">#   for each image</span>
+        <span class="c1">#       apply the custom ImageDataGenerator to generate new images (depending of settings)</span>
+        <span class="c1">#       save the new images into target folder as well as into this Segment</span>
+        <span class="c1"># save edited Segments array into new SegmentsFile.dump</span>
+
+        <span class="n">debug_visual_output</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">debug_txt_output</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="kn">from</span> <span class="nn">DatasetHandler.CreateDataset</span> <span class="k">import</span> <span class="n">get_path_for_dataset</span>
+        <span class="kn">from</span> <span class="nn">Downloader.DataOperations</span> <span class="k">import</span> <span class="n">LoadDataFile</span>
+        <span class="kn">from</span> <span class="nn">Downloader.KerasPreparation</span> <span class="k">import</span> <span class="n">LoadActualImages</span>
+        <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+        <span class="k">if</span> <span class="n">debug_visual_output</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span>
+            <span class="kn">from</span> <span class="nn">keras.preprocessing.image</span> <span class="k">import</span> <span class="n">array_to_img</span>
+            <span class="kn">import</span> <span class="nn">math</span>
+
+        <span class="n">target_folder</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dataset_name&quot;</span><span class="p">]</span>
+        <span class="n">source_folder</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;source_dataset&quot;</span><span class="p">]</span>
+
+        <span class="n">filename_override</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dump_file_override&quot;</span><span class="p">]</span>
+        <span class="n">source_segments_path</span> <span class="o">=</span> <span class="n">get_path_for_dataset</span><span class="p">(</span><span class="n">source_folder</span><span class="p">,</span> <span class="n">filename_override</span><span class="p">)</span>
+        <span class="n">source_segments_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">source_segments_path</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_exists</span><span class="p">(</span><span class="n">source_segments_dir</span> <span class="o">+</span> <span class="n">filename_override</span><span class="p">):</span>
+            <span class="nb">print</span> <span class="s2">&quot;WARNING !!!!&quot;</span>
+            <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span><span class="s2">&quot;Careful, couldn&#39;t find the file&quot;</span><span class="p">,</span> <span class="n">source_segments_dir</span> <span class="o">+</span> <span class="n">filename_override</span>
+            <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span><span class="s2">&quot;... we will instead be using   &quot;</span><span class="p">,</span> <span class="n">source_segments_path</span>
+
+
+        <span class="n">target_segments_path</span> <span class="o">=</span> <span class="n">get_path_for_dataset</span><span class="p">(</span><span class="n">target_folder</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">target_segments_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">target_segments_path</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
+        <span class="n">target_segments_path</span> <span class="o">=</span> <span class="n">target_segments_dir</span><span class="o">+</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dump_file_expanded&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Check if we don&#39;t alredy have it?</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">file_exists</span><span class="p">(</span><span class="n">target_segments_path</span><span class="p">)</span> <span class="ow">and</span> <span class="n">folder_exists</span><span class="p">(</span><span class="n">target_segments_dir</span><span class="o">+</span><span class="s1">&#39;images&#39;</span><span class="p">)):</span>
+            <span class="n">list1</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">target_segments_dir</span><span class="o">+</span><span class="s1">&#39;images&#39;</span><span class="p">)</span>
+            <span class="n">list2</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">source_segments_dir</span><span class="o">+</span><span class="s1">&#39;images&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list1</span><span class="p">)</span><span class="o">&gt;=</span><span class="nb">len</span><span class="p">(</span><span class="n">list2</span><span class="p">):</span>
+                <span class="c1"># Seems like we have copied it correctly too</span>
+
+                <span class="nb">print</span> <span class="s2">&quot;We already have this dataset extended! (&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">list1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">list2</span><span class="p">),</span> <span class="s2">&quot;)&quot;</span>
+
+                <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file_exists</span><span class="p">(</span><span class="n">target_segments_path</span><span class="p">),</span> <span class="n">target_segments_path</span>
+            <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">folder_exists</span><span class="p">(</span><span class="n">target_segments_dir</span><span class="o">+</span><span class="s1">&#39;images&#39;</span><span class="p">),</span> <span class="n">target_segments_dir</span><span class="o">+</span><span class="s1">&#39;images&#39;</span>
+
+
+        <span class="n">generated_images_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">target_segments_path</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/images/&#39;</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;source_segments_path&quot;</span><span class="p">,</span> <span class="n">source_segments_path</span>  <span class="c1"># /home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/miniset_640px/SegmentsData.dump</span>
+        <span class="nb">print</span> <span class="s2">&quot;source_segments_dir&quot;</span><span class="p">,</span> <span class="n">source_segments_dir</span>    <span class="c1"># /home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/miniset_640px/</span>
+        <span class="nb">print</span> <span class="s2">&quot;target_segments_path&quot;</span><span class="p">,</span> <span class="n">target_segments_path</span>  <span class="c1"># /home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/miniset_640px_expanded/SegmentsData_images_generated_test_folder_expanded.dump</span>
+        <span class="nb">print</span> <span class="s2">&quot;target_segments_dir&quot;</span><span class="p">,</span> <span class="n">target_segments_dir</span>    <span class="c1"># /home/ekmek/Vitek/MGR-Project-Code/Data/StreetViewData/miniset_640px_expanded/</span>
+
+        <span class="c1"># copy source_dataset -&gt; target_dataset in dataset_name</span>
+        <span class="c1"># from source_segments_dir/images to  target_segments_dir/images</span>
+        <span class="n">source__path</span> <span class="o">=</span> <span class="n">source_segments_dir</span><span class="o">+</span><span class="s1">&#39;images&#39;</span>
+        <span class="n">target__path</span> <span class="o">=</span> <span class="n">target_segments_dir</span><span class="o">+</span><span class="s1">&#39;images&#39;</span>
+
+        <span class="n">copy_folder</span><span class="p">(</span><span class="n">source__path</span><span class="p">,</span> <span class="n">target__path</span><span class="p">)</span>
+
+        <span class="c1"># test the success of this copy process!</span>
+        <span class="c1"># for each file in source_segments_dir/images check for a copy in target_segments_dir/images</span>
+
+        <span class="n">was_ok</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">was_ok</span><span class="p">:</span>
+            <span class="n">was_ok</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">list_of_source_files</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">source__path</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">list_of_source_files</span><span class="p">:</span>
+                <span class="n">file_source</span> <span class="o">=</span> <span class="n">source__path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">item</span>
+                <span class="n">file_target</span> <span class="o">=</span> <span class="n">target__path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">item</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">file_exists</span><span class="p">(</span><span class="n">file_target</span><span class="p">):</span>
+                    <span class="n">was_ok</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># file exists, but maybe just to be parainoid secure, md5 compare?</span>
+                    <span class="n">md5_1</span> <span class="o">=</span> <span class="n">md5</span><span class="p">(</span><span class="n">file_source</span><span class="p">)</span>
+                    <span class="n">md5_2</span> <span class="o">=</span> <span class="n">md5</span><span class="p">(</span><span class="n">file_target</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">md5_1</span> <span class="o">&lt;&gt;</span> <span class="n">md5_2</span><span class="p">:</span>
+                        <span class="n">was_ok</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">was_ok</span><span class="p">:</span>
+                    <span class="n">copy_file</span><span class="p">(</span><span class="n">file_source</span><span class="p">,</span> <span class="n">file_target</span><span class="p">)</span>
+
+                    <span class="nb">print</span> <span class="s1">&#39;-- was missing, now fixed:&#39;</span> <span class="o">+</span> <span class="n">file_source</span>
+
+        <span class="n">size_of_batch</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;noncanon_dataset_genfrom1&quot;</span><span class="p">]</span>
+
+        <span class="n">image_generator</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;noncanon_dataset_imagegenerator&quot;</span><span class="p">]</span>
+        <span class="nb">print</span> <span class="s2">&quot;image_generator&quot;</span><span class="p">,</span> <span class="n">image_generator</span>
+
+        <span class="n">Segments</span> <span class="o">=</span> <span class="n">LoadDataFile</span><span class="p">(</span><span class="n">source_segments_path</span><span class="p">)</span>
+
+        <span class="n">number_of_images_parsed</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">Segment</span> <span class="ow">in</span> <span class="n">Segments</span><span class="p">:</span>
+            <span class="n">number_of_images</span> <span class="o">=</span> <span class="n">Segment</span><span class="o">.</span><span class="n">number_of_images</span>
+            <span class="k">for</span> <span class="n">i_th_image</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">number_of_images</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">Segment</span><span class="o">.</span><span class="n">hasLoadedImageI</span><span class="p">(</span><span class="n">i_th_image</span><span class="p">):</span>
+                    <span class="n">filename</span> <span class="o">=</span> <span class="n">source_segments_dir</span><span class="o">+</span><span class="n">Segment</span><span class="o">.</span><span class="n">getImageFilename</span><span class="p">(</span><span class="n">i_th_image</span><span class="p">)</span>
+                    <span class="n">number_of_images_parsed</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="nb">print</span> <span class="n">filename</span>
+
+                    <span class="c1"># we have one image filepath - generate data</span>
+                    <span class="n">x</span> <span class="o">=</span> <span class="n">LoadActualImages</span><span class="p">([</span><span class="n">filename</span><span class="p">])</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">Segment</span><span class="o">.</span><span class="n">SegmentId</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">debug_txt_output</span><span class="p">:</span>
+                        <span class="nb">print</span> <span class="s2">&quot;ORIGINAL id&quot;</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;ith&quot;</span><span class="p">,</span> <span class="n">i_th_image</span><span class="p">,</span> <span class="s2">&quot;img:&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+                    <span class="n">X_batch</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">y_batch</span> <span class="o">=</span> <span class="p">[]</span>
+
+                    <span class="kn">from</span> <span class="nn">DatasetHandler.custom_image</span> <span class="k">import</span> <span class="n">ImageDataGenerator</span> <span class="k">as</span> <span class="n">custom_ImageDataGenerator</span>
+                    <span class="n">number_of_images_generated</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">x_gen</span><span class="p">,</span> <span class="n">y_gen</span> <span class="ow">in</span> <span class="n">image_generator</span><span class="o">.</span><span class="n">flow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">save_to_dir</span><span class="o">=</span><span class="n">generated_images_folder</span><span class="p">,</span> <span class="n">save_prefix</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s1">&#39;jpg&#39;</span><span class="p">):</span>
+                        <span class="n">number_of_images_generated</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">image</span> <span class="o">=</span> <span class="n">x_gen</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                        <span class="n">filename_generated</span> <span class="o">=</span> <span class="n">y_gen</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="nb">id</span> <span class="o">=</span> <span class="n">y_gen</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+                        <span class="k">if</span> <span class="n">debug_txt_output</span><span class="p">:</span>
+                            <span class="nb">print</span> <span class="nb">id</span><span class="p">,</span> <span class="n">filename_generated</span>
+
+                            <span class="c1"># save image on path filename_generated to the Segments hierarchy!</span>
+                            <span class="nb">print</span> <span class="s2">&quot;Segment.number_of_images&quot;</span><span class="p">,</span> <span class="n">Segment</span><span class="o">.</span><span class="n">number_of_images</span>
+                            <span class="nb">print</span> <span class="s2">&quot;Segment.LocationsIndex&quot;</span><span class="p">,</span> <span class="n">Segment</span><span class="o">.</span><span class="n">LocationsIndex</span>
+                            <span class="nb">print</span> <span class="s2">&quot;Segment.DistinctLocations&quot;</span><span class="p">,</span> <span class="n">Segment</span><span class="o">.</span><span class="n">DistinctLocations</span>
+                            <span class="nb">print</span> <span class="s2">&quot;Segment.DistinctNearbyVector&quot;</span><span class="p">,</span> <span class="n">Segment</span><span class="o">.</span><span class="n">DistinctNearbyVector</span>
+                            <span class="nb">print</span> <span class="s2">&quot;Segment.HasLoadedImages&quot;</span><span class="p">,</span> <span class="n">Segment</span><span class="o">.</span><span class="n">HasLoadedImages</span>
+                            <span class="nb">print</span> <span class="s2">&quot;Segment.ErrorMessages&quot;</span><span class="p">,</span> <span class="n">Segment</span><span class="o">.</span><span class="n">ErrorMessages</span>
+
+                        <span class="c1"># Value 200 is the marker</span>
+                        <span class="n">location_index</span> <span class="o">=</span> <span class="n">Segment</span><span class="o">.</span><span class="n">LocationsIndex</span><span class="p">[</span><span class="n">i_th_image</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1000</span>
+                        <span class="c1"># accordingly we get Segment.DistinctLocations[location_index] and Segment.DistinctNearbyVector[location_index]</span>
+                        <span class="n">has_img</span> <span class="o">=</span> <span class="n">Segment</span><span class="o">.</span><span class="n">HasLoadedImages</span><span class="p">[</span><span class="n">i_th_image</span><span class="p">]</span>
+                        <span class="n">has_err</span> <span class="o">=</span> <span class="n">Segment</span><span class="o">.</span><span class="n">ErrorMessages</span><span class="p">[</span><span class="n">i_th_image</span><span class="p">]</span>
+
+                        <span class="c1"># Add to this Segment</span>
+                        <span class="n">Segment</span><span class="o">.</span><span class="n">number_of_images</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">Segment</span><span class="o">.</span><span class="n">LocationsIndex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">location_index</span><span class="p">)</span>
+                        <span class="n">Segment</span><span class="o">.</span><span class="n">HasLoadedImages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">has_img</span><span class="p">)</span>
+                        <span class="n">Segment</span><span class="o">.</span><span class="n">ErrorMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">has_err</span><span class="p">)</span>
+
+
+                        <span class="c1"># Change filename and path</span>
+                        <span class="n">new_filename_generated</span> <span class="o">=</span> <span class="n">target_segments_dir</span> <span class="o">+</span> <span class="s1">&#39;images&#39;</span> <span class="o">+</span> <span class="n">Segment</span><span class="o">.</span><span class="n">getImageFilename</span><span class="p">(</span><span class="n">Segment</span><span class="o">.</span><span class="n">number_of_images</span><span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">6</span><span class="p">:]</span>
+                        <span class="k">if</span> <span class="n">debug_txt_output</span><span class="p">:</span>
+                            <span class="nb">print</span> <span class="s2">&quot;rename&quot;</span><span class="p">,</span> <span class="n">filename_generated</span><span class="p">,</span> <span class="s2">&quot;to&quot;</span><span class="p">,</span> <span class="n">new_filename_generated</span>
+
+                        <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">filename_generated</span><span class="p">,</span> <span class="n">new_filename_generated</span><span class="p">)</span>
+
+                        <span class="nb">print</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">new_filename_generated</span>
+
+                        <span class="n">X_batch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+                        <span class="n">y_batch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+
+                        <span class="c1">#print &quot;id&quot;, y_gen, &quot;img:&quot;, len_(x_gen), array_md5(image)</span>
+
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)</span> <span class="o">==</span> <span class="n">size_of_batch</span><span class="p">:</span>
+
+                            <span class="k">if</span> <span class="n">debug_txt_output</span><span class="p">:</span>
+                                <span class="nb">print</span> <span class="s2">&quot;GENERATED &quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_batch</span><span class="p">),</span> <span class="s2">&quot; images &gt; &quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">X_batch</span><span class="p">),</span> <span class="n">y_batch</span>
+
+                            <span class="k">if</span> <span class="n">debug_visual_output</span><span class="p">:</span>
+                                <span class="c1"># create a grid of 3x3 images</span>
+                                <span class="n">size_for_plot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">size_of_batch</span><span class="o">-</span><span class="mf">0.1</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                                <span class="n">size_for_plot_y</span> <span class="o">=</span> <span class="n">size_for_plot</span>
+                                <span class="k">while</span> <span class="n">size_of_batch</span> <span class="o">&lt;=</span> <span class="n">size_for_plot</span><span class="o">*</span><span class="p">(</span><span class="n">size_for_plot_y</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                                    <span class="n">size_for_plot_y</span> <span class="o">-=</span> <span class="mi">1</span>
+
+                                <span class="nb">print</span> <span class="n">size_for_plot</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">size_for_plot_y</span><span class="p">,</span> <span class="s2">&quot; grid&quot;</span>
+
+                                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)):</span>
+                                    <span class="n">pyplot</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">size_for_plot_y</span><span class="p">,</span><span class="n">size_for_plot</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+                                    <span class="n">img</span> <span class="o">=</span> <span class="n">X_batch</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                                    <span class="n">backimg</span> <span class="o">=</span> <span class="n">array_to_img</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+                                    <span class="n">pyplot</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">backimg</span><span class="p">)</span>
+                                <span class="c1"># show the plot</span>
+                                <span class="n">pyplot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+                                <span class="k">break</span>
+
+                            <span class="k">break</span> <span class="c1"># end generation for this one image</span>
+                    <span class="k">if</span> <span class="n">debug_txt_output</span><span class="p">:</span>
+                        <span class="nb">print</span> <span class="s2">&quot;Save new images from id&quot;</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot; in&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot;number_of_images_parsed&quot;</span><span class="p">,</span> <span class="n">number_of_images_parsed</span>
+
+        <span class="kn">from</span> <span class="nn">Downloader.DataOperations</span> <span class="k">import</span> <span class="n">SaveDataFile</span>
+        <span class="nb">print</span> <span class="s2">&quot;Saving new Segments file into &quot;</span><span class="p">,</span> <span class="n">target_segments_path</span>
+        <span class="n">SaveDataFile</span><span class="p">(</span><span class="n">target_segments_path</span><span class="p">,</span> <span class="n">Segments</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;This type of noncanon dataset generation has not yet been implemented!&quot;</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

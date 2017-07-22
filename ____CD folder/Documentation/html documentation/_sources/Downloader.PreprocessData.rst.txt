@@ -1,0 +1,70 @@
+Downloader\.PreprocessData package
+==================================
+
+Submodules
+----------
+
+Downloader\.PreprocessData\.DecoratorRetry module
+-------------------------------------------------
+
+.. automodule:: Downloader.PreprocessData.DecoratorRetry
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Downloader\.PreprocessData\.DownloadUrlFilenameMap module
+---------------------------------------------------------
+
+.. automodule:: Downloader.PreprocessData.DownloadUrlFilenameMap
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Downloader\.PreprocessData\.Functions module
+--------------------------------------------
+
+.. automodule:: Downloader.PreprocessData.Functions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Downloader\.PreprocessData\.GenListOfUrls module
+------------------------------------------------
+
+.. automodule:: Downloader.PreprocessData.GenListOfUrls
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Downloader\.PreprocessData\.PrepSegments module
+-----------------------------------------------
+
+.. automodule:: Downloader.PreprocessData.PrepSegments
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Downloader\.PreprocessData\.SegmentObj module
+---------------------------------------------
+
+.. automodule:: Downloader.PreprocessData.SegmentObj
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Downloader\.PreprocessData\.SegmentsManipulators module
+-------------------------------------------------------
+
+.. automodule:: Downloader.PreprocessData.SegmentsManipulators
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: Downloader.PreprocessData
+    :members:
+    :undoc-members:
+    :show-inheritance:

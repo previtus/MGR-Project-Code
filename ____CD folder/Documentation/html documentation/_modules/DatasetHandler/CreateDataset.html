@@ -1,0 +1,189 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>DatasetHandler.CreateDataset &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for DatasetHandler.CreateDataset</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">DatasetObj</span> <span class="k">import</span> <span class="n">Dataset</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">from</span> <span class="nn">FileHelperFunc</span> <span class="k">import</span> <span class="n">get_project_folder</span>
+
+<span class="n">ABS_PATH_TO_PRJ</span> <span class="o">=</span> <span class="n">get_project_folder</span><span class="p">()</span>
+
+<div class="viewcode-block" id="determineUniqueId"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.CreateDataset.determineUniqueId">[docs]</a><span class="k">def</span> <span class="nf">determineUniqueId</span><span class="p">(</span><span class="n">dataset_nickname</span><span class="p">,</span> <span class="n">desired_number</span><span class="p">,</span><span class="n">seed</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Each dataset needs its own unique name build from the parameters which influence its shape.</span>
+<span class="sd">    Later we name the feature files with this name and thus it needs to be linked with each dataset.</span>
+<span class="sd">    :param dataset_nickname: id</span>
+<span class="sd">    :param desired_number: number of images, can be None if all</span>
+<span class="sd">    :param seed: seed for random data shuffling</span>
+<span class="sd">    :return: string of unique id</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">unique_id</span> <span class="o">=</span> <span class="n">dataset_nickname</span>
+    <span class="k">if</span> <span class="n">desired_number</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">unique_id</span> <span class="o">=</span> <span class="n">unique_id</span><span class="o">+</span><span class="s1">&#39;-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">desired_number</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">unique_id</span> <span class="o">=</span> <span class="n">unique_id</span> <span class="o">+</span> <span class="s1">&#39;-full&#39;</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">unique_id</span> <span class="o">=</span> <span class="n">unique_id</span><span class="o">+</span><span class="s1">&#39;-seed&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">unique_id</span></div>
+
+<div class="viewcode-block" id="prepareDataset"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.CreateDataset.prepareDataset">[docs]</a><span class="k">def</span> <span class="nf">prepareDataset</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dims</span><span class="p">,</span> <span class="n">desired_number</span><span class="p">,</span> <span class="n">seed</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Create dataset object and prepare it from the suggested Segments file.</span>
+<span class="sd">    :param path: path</span>
+<span class="sd">    :param dims: pixel sizes list (width and height)</span>
+<span class="sd">    :param desired_number: number of images, can be None if all</span>
+<span class="sd">    :param seed: seed for random data shuffling</span>
+<span class="sd">    :return: dataset object</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">()</span>
+    <span class="n">dataset</span><span class="o">.</span><span class="n">init_from_segments</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">img_width</span><span class="o">=</span><span class="n">dims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">img_height</span><span class="o">=</span><span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">desired_number</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">dataset</span>
+
+    <span class="n">subset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">spawnUniformSubset</span><span class="p">(</span><span class="n">desired_number</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">subset</span></div>
+
+<div class="viewcode-block" id="get_path_for_dataset"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.CreateDataset.get_path_for_dataset">[docs]</a><span class="k">def</span> <span class="nf">get_path_for_dataset</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">filename_override</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Get path to dataset from couple of default values, or use suggested name</span>
+<span class="sd">    :param folder: name of the folder, will be joined to the project path</span>
+<span class="sd">    :param filename_override: suggested name of dataset dump file</span>
+<span class="sd">    :return: path</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">path_r100</span> <span class="o">=</span> <span class="n">ABS_PATH_TO_PRJ</span><span class="o">+</span><span class="s1">&#39;Data/StreetViewData/&#39;</span><span class="o">+</span><span class="n">folder</span><span class="o">+</span><span class="s1">&#39;/SegmentsData_marked_R100.dump&#39;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">ABS_PATH_TO_PRJ</span><span class="o">+</span><span class="s1">&#39;Data/StreetViewData/&#39;</span><span class="o">+</span><span class="n">folder</span><span class="o">+</span><span class="s1">&#39;/SegmentsData.dump&#39;</span>
+
+    <span class="n">path_override</span> <span class="o">=</span> <span class="n">ABS_PATH_TO_PRJ</span><span class="o">+</span><span class="s1">&#39;Data/StreetViewData/&#39;</span><span class="o">+</span><span class="n">folder</span><span class="o">+</span><span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">filename_override</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path_r100</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path_r100</span>
+
+    <span class="k">if</span> <span class="n">filename_override</span> <span class="o">&lt;&gt;</span> <span class="s1">&#39;&#39;</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path_override</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path_override</span>
+    <span class="k">return</span> <span class="n">path</span></div>
+
+<div class="viewcode-block" id="load_custom"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.CreateDataset.load_custom">[docs]</a><span class="k">def</span> <span class="nf">load_custom</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">pixels</span><span class="p">,</span> <span class="n">desired_number</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filename_override</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Load dataset from one of prepared folders. Main method to load datasets.</span>
+<span class="sd">    :param folder: folder name inside StreetViewData</span>
+<span class="sd">    :param pixels: pixel size</span>
+<span class="sd">    :param desired_number: number of images, can be None if all</span>
+<span class="sd">    :param seed: seed for random data shuffling</span>
+<span class="sd">    :param filename_override: if the name is not SegmentsData_marked_R100.dump or SegmentsData.dump</span>
+<span class="sd">    :return: dataset object</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># folder should be name of the dir, like 50x_markable_350x350</span>
+    <span class="n">unique_id</span> <span class="o">=</span> <span class="n">determineUniqueId</span><span class="p">(</span><span class="n">folder</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">pixels</span><span class="p">),</span><span class="n">desired_number</span><span class="p">,</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">path</span> <span class="o">=</span> <span class="n">get_path_for_dataset</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">filename_override</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s2">&quot;#  Loading dataset at&quot;</span><span class="p">,</span> <span class="n">path</span>
+
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">prepareDataset</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="p">[</span><span class="n">pixels</span><span class="p">,</span> <span class="n">pixels</span><span class="p">],</span> <span class="n">desired_number</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">dataset</span><span class="o">.</span><span class="n">unique_id</span> <span class="o">=</span> <span class="n">unique_id</span>
+
+    <span class="nb">print</span> <span class="s2">&quot;Loaded dataset with unique_id=&quot;</span><span class="p">,</span> <span class="n">unique_id</span><span class="p">,</span> <span class="s2">&quot;, statistics:&quot;</span>
+    <span class="n">dataset</span><span class="o">.</span><span class="n">statistics</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">dataset</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

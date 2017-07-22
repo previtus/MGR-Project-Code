@@ -1,0 +1,217 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Downloader.PreprocessData.DownloadUrlFilenameMap &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Downloader.PreprocessData.DownloadUrlFilenameMap</h1><div class="highlight"><pre>
+<span></span><span class="c1"># DownloadUrlFilenameMap.py</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;..&#39;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">Downloader.Defaults</span> <span class="k">import</span> <span class="o">*</span>
+
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">DecoratorRetry</span> <span class="k">import</span> <span class="n">retry</span>
+<span class="kn">from</span> <span class="nn">Functions</span> <span class="k">import</span> <span class="n">segmentIDtoListID</span>
+
+<span class="c1"># fail &gt; @retry(Exception, tries=2, delay=1, backoff=0)</span>
+<span class="c1"># ok &gt; @retry(Exception, tries=4, delay=3, backoff=2)</span>
+
+<div class="viewcode-block" id="urlretrieve_with_retry"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.DownloadUrlFilenameMap.urlretrieve_with_retry">[docs]</a><span class="nd">@retry</span><span class="p">(</span><span class="ne">Exception</span><span class="p">,</span> <span class="n">tries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">backoff</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">urlretrieve_with_retry</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Saves (image) file and returns (&lt;filename_string&gt;, &lt;object of httplib.HTTPMessage&gt;) &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="md5"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.DownloadUrlFilenameMap.md5">[docs]</a><span class="k">def</span> <span class="nf">md5</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+    <span class="n">hash_md5</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4096</span><span class="p">),</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+                <span class="n">hash_md5</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">hash_md5</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="DownloadUrlFilenameMap"><a class="viewcode-back" href="../../../Downloader.PreprocessData.html#Downloader.PreprocessData.DownloadUrlFilenameMap.DownloadUrlFilenameMap">[docs]</a><span class="k">def</span> <span class="nf">DownloadUrlFilenameMap</span><span class="p">(</span><span class="n">FilenameMap</span><span class="p">,</span> <span class="n">Segments</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Download multiple files according to the FilenameMap.</span>
+<span class="sd">    List of tripples in [ (&lt;url&gt;, &lt;filename&gt;, &lt;edge id&gt;), ... ]</span>
+
+<span class="sd">    Marks entires in Segments with flags about the images.</span>
+<span class="sd">    Returns list of failed downloads</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c1"># Check for the target directory</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">FilenameMap</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+
+    <span class="c1"># timeout in seconds</span>
+    <span class="n">socket</span><span class="o">.</span><span class="n">setdefaulttimeout</span><span class="p">(</span><span class="n">DOWNLOAD_TIMEOUT</span><span class="p">)</span>
+    <span class="n">FailedSegmentImageDownloads</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">fileTuple</span> <span class="ow">in</span> <span class="n">FilenameMap</span><span class="p">:</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">fileTuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">fileTuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">segment_id</span> <span class="o">=</span> <span class="n">fileTuple</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">i_nth_image</span> <span class="o">=</span> <span class="n">fileTuple</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">segment_list_id</span> <span class="o">=</span> <span class="n">segmentIDtoListID</span><span class="p">(</span><span class="n">segment_id</span><span class="p">)</span>
+
+        <span class="n">Segments</span><span class="p">[</span><span class="n">segment_list_id</span><span class="p">]</span><span class="o">.</span><span class="n">ErrorMessages</span><span class="p">[</span><span class="n">i_nth_image</span><span class="p">]</span> <span class="o">=</span> <span class="n">ERROR_MESSAGE_NO_ERROR</span>
+        <span class="n">isLoaded</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">md5_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># ONLY TO CIRCUMVENT DOWNLOADING, DEBUG ONLY</span>
+            <span class="k">if</span> <span class="n">DOWNLOAD_OVERRIDE_PRETEND_YOU_WERE_ABLE_TO_DOWNLOAD_ALL_BUT_DONT_DO_IT</span><span class="p">:</span>
+                <span class="n">md5_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">image_header</span> <span class="o">=</span> <span class="n">urlretrieve_with_retry</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+                <span class="n">md5_code</span> <span class="o">=</span> <span class="n">md5</span><span class="p">(</span><span class="n">image_header</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            
+            <span class="k">if</span> <span class="p">(</span><span class="n">md5_code</span> <span class="o">==</span> <span class="n">FILE_NOT_FOUND_CHECKSUM</span><span class="p">):</span>
+                <span class="c1"># HANDLE PHOTO NOT FOUND / INVALID SEGMENT</span>
+                <span class="n">isLoaded</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="nb">print</span> <span class="s2">&quot;No photographic information on the spot.&quot;</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">image_header</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">FailedSegmentImageDownloads</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">segment_id</span><span class="p">,</span> <span class="n">i_nth_image</span><span class="p">])</span>
+                <span class="c1"># remove invalid segments?</span>
+                <span class="c1"># better have dictionary dict[ID] =&gt; obj</span>
+                <span class="c1">## not del Segments[segment_id]</span>
+                <span class="n">Segments</span><span class="p">[</span><span class="n">segment_list_id</span><span class="p">]</span><span class="o">.</span><span class="n">ErrorMessages</span><span class="p">[</span><span class="n">i_nth_image</span><span class="p">]</span> <span class="o">=</span> <span class="n">ERROR_MESSAGE_NOT_FOUND</span> <span class="c1">#404</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">md5_code</span> <span class="o">==</span> <span class="n">QUOTA_EXCEEDED_CHECKSUM</span> <span class="ow">or</span> <span class="n">md5_code</span> <span class="o">==</span> <span class="n">QUOTA_EXCEEDED_CHECKSUM_billing_msg</span><span class="p">):</span>
+                <span class="c1"># SUSPECTED QUOTA REACHED</span>
+                <span class="n">isLoaded</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="nb">print</span> <span class="s2">&quot;Daily download quota (25,000) exceeded.&quot;</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">image_header</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">FailedSegmentImageDownloads</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">segment_id</span><span class="p">,</span> <span class="n">i_nth_image</span><span class="p">])</span>
+                <span class="n">Segments</span><span class="p">[</span><span class="n">segment_list_id</span><span class="p">]</span><span class="o">.</span><span class="n">ErrorMessages</span><span class="p">[</span><span class="n">i_nth_image</span><span class="p">]</span> <span class="o">=</span> <span class="n">ERROR_MESSAGE_QUOTA</span> <span class="c1">#333</span>
+
+
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># HANDLE FAIL OF DOWNLOADING PHOTO / INVALID SEGMENT</span>
+            <span class="nb">print</span> <span class="s2">&quot;exception: &quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="n">isLoaded</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">FailedSegmentImageDownloads</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">segment_id</span><span class="p">,</span> <span class="n">i_nth_image</span><span class="p">])</span>
+            <span class="c1"># remove invalid segments?</span>
+            <span class="n">Segments</span><span class="p">[</span><span class="n">segment_list_id</span><span class="p">]</span><span class="o">.</span><span class="n">ErrorMessages</span><span class="p">[</span><span class="n">i_nth_image</span><span class="p">]</span> <span class="o">=</span> <span class="n">ERROR_MESSAGE_FAILED_MANY_TIMES</span> <span class="c1">#101</span>
+
+
+            <span class="nb">print</span> <span class="s2">&quot;Failed to finally save the file.&quot;</span>
+
+        <span class="n">Segments</span><span class="p">[</span><span class="n">segment_list_id</span><span class="p">]</span><span class="o">.</span><span class="n">HasLoadedImages</span><span class="p">[</span><span class="n">i_nth_image</span><span class="p">]</span> <span class="o">=</span> <span class="n">isLoaded</span>
+        <span class="nb">print</span> <span class="n">filename</span><span class="p">,</span> <span class="n">md5_code</span><span class="p">,</span> <span class="n">isLoaded</span>
+
+    <span class="c1"># Exception example:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    images/078.jpg</span>
+<span class="sd">    Exception:  [Errno socket error] [Errno 11001] getaddrinfo failed</span>
+<span class="sd">    Exception:  [Errno socket error] timed out</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">FailedSegmentImageDownloads</span><span class="p">]</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

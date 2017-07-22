@@ -1,0 +1,345 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Evaluator.Evaluator &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Evaluator.Evaluator</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">ExperimentRunner.SettingsDefaults</span> <span class="k">as</span> <span class="nn">SettingsDefaults</span>
+
+<span class="kn">import</span> <span class="nn">ModelHandler.ModelOI</span> <span class="k">as</span> <span class="nn">ModelOI</span>
+<span class="kn">import</span> <span class="nn">ModelHandler.ModelGenerator</span> <span class="k">as</span> <span class="nn">ModelGenerator</span>
+<span class="kn">import</span> <span class="nn">DatasetHandler</span> <span class="k">as</span> <span class="nn">DatasetHandler</span>
+<span class="kn">from</span> <span class="nn">Omnipresent</span> <span class="k">import</span> <span class="n">len_</span>
+
+<div class="viewcode-block" id="evaluator_load_model"><a class="viewcode-back" href="../../Evaluator.html#Evaluator.Evaluator.evaluator_load_model">[docs]</a><span class="k">def</span> <span class="nf">evaluator_load_model</span><span class="p">(</span><span class="n">model_file</span><span class="p">,</span> <span class="n">settings_file</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Load skeleton of model and dataset</span>
+<span class="sd">    :param model_file: model h5 file</span>
+<span class="sd">    :param settings_file: corresponding settings file</span>
+<span class="sd">    :param verbose:</span>
+<span class="sd">    :return: model_base, model_top, model_settings</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">Settings</span> <span class="o">=</span> <span class="n">SettingsDefaults</span><span class="o">.</span><span class="n">load_settings_from_file</span><span class="p">(</span><span class="n">settings_file</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="n">Settings</span>
+
+    <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;test_existence_of_images&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;evaluation_after_training&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;model_shape_filename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;tmp.png&quot;</span>
+    <span class="n">model_settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">models</span> <span class="o">=</span> <span class="n">ModelGenerator</span><span class="o">.</span><span class="n">get_cnn_models</span><span class="p">(</span><span class="n">Settings</span><span class="p">)</span>
+    <span class="n">models</span> <span class="o">=</span> <span class="n">ModelGenerator</span><span class="o">.</span><span class="n">get_top_models</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Settings</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;interrupt&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="mi">365</span>
+    <span class="k">if</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;report_on_models&quot;</span><span class="p">]:</span>
+        <span class="n">ModelGenerator</span><span class="o">.</span><span class="n">report_models</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">Settings</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">ModelOI</span><span class="o">.</span><span class="n">save_visualizations</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">Settings</span><span class="p">)</span>
+
+    <span class="c1">### WEIGHTS to model from file</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">),</span> <span class="n">model_file</span>
+
+    <span class="n">loaded_model</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;osm_only&#39;</span><span class="p">:</span>
+        <span class="c1"># osm model doesn&#39;t have a base</span>
+        <span class="n">loaded_model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="n">model_file</span><span class="p">)</span>
+        <span class="n">model_base</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">model_top</span> <span class="o">=</span> <span class="n">loaded_model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">loaded_model</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="n">model_file</span><span class="p">)</span>
+        <span class="n">model_base</span> <span class="o">=</span> <span class="n">loaded_model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">model_top</span> <span class="o">=</span> <span class="n">loaded_model</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="c1">#print &quot;BASE MODEL&quot;</span>
+        <span class="c1">#model_base.summary()</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;TOP MODEL&quot;</span>
+        <span class="n">model_top</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">model_base</span><span class="p">,</span> <span class="n">model_top</span><span class="p">,</span> <span class="n">model_settings</span></div>
+
+<div class="viewcode-block" id="evaluator_predict_on_dataset"><a class="viewcode-back" href="../../Evaluator.html#Evaluator.Evaluator.evaluator_predict_on_dataset">[docs]</a><span class="k">def</span> <span class="nf">evaluator_predict_on_dataset</span><span class="p">(</span><span class="n">model_base</span><span class="p">,</span> <span class="n">model_top</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">osm</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Evaluate model by just loading data into memory. This is effective with OSM models, but with others it will likely</span>
+<span class="sd">    flood the memory and be terminated - use generators in that case.</span>
+
+<span class="sd">    :param model_base: base CNN model</span>
+<span class="sd">    :param model_top: attached custom top classifier model</span>
+<span class="sd">    :param model_settings: settings of the model (to recognize the type of the model)</span>
+<span class="sd">    :param x: image data</span>
+<span class="sd">    :param osm: list of corresponding osm vectors</span>
+<span class="sd">    :return: Returns labeled data (labeled from images and osm)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;simple_cnn_with_top&#39;</span><span class="p">:</span>
+        <span class="n">labels_base</span> <span class="o">=</span> <span class="n">model_base</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">labels_predicted</span> <span class="o">=</span> <span class="n">model_top</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">labels_base</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;img_osm_mix&#39;</span><span class="p">:</span>
+        <span class="n">labels_base</span> <span class="o">=</span> <span class="n">model_base</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">osm_input</span> <span class="o">=</span> <span class="n">osm</span>
+        <span class="n">labels_predicted</span> <span class="o">=</span> <span class="n">model_top</span><span class="o">.</span><span class="n">predict</span><span class="p">([</span><span class="n">osm_input</span><span class="p">,</span> <span class="n">labels_base</span><span class="p">],</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;osm_only&#39;</span><span class="p">:</span>
+        <span class="n">osm_input</span> <span class="o">=</span> <span class="n">osm</span>
+        <span class="n">labels_predicted</span> <span class="o">=</span> <span class="n">model_top</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">osm_input</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="nb">print</span> <span class="n">len_</span><span class="p">(</span><span class="n">labels_predicted</span><span class="p">)</span>
+    <span class="n">labels_return</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels_predicted</span><span class="p">:</span>
+        <span class="n">labels_return</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">labels_return</span></div>
+
+<div class="viewcode-block" id="evaluator_generators_predict"><a class="viewcode-back" href="../../Evaluator.html#Evaluator.Evaluator.evaluator_generators_predict">[docs]</a><span class="k">def</span> <span class="nf">evaluator_generators_predict</span><span class="p">(</span><span class="n">model_base</span><span class="p">,</span> <span class="n">model_top</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">,</span> <span class="n">img_generator</span><span class="p">,</span> <span class="n">osm</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Use generators to evaluate model.</span>
+<span class="sd">    :param model_base: base CNN model</span>
+<span class="sd">    :param model_top: attached custom top classifier model</span>
+<span class="sd">    :param model_settings: settings of the model (to recognize the type of the model)</span>
+<span class="sd">    :param img_generator: image generator</span>
+<span class="sd">    :param osm: list of corresponding osm vectors</span>
+<span class="sd">    :param size: amount of images.</span>
+<span class="sd">    :return: Returns labeled data (labeled from images and osm)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="nb">print</span> <span class="n">img_generator</span><span class="p">,</span> <span class="n">size</span>
+
+    <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;simple_cnn_with_top&#39;</span><span class="p">:</span>
+        <span class="n">labels_base</span> <span class="o">=</span> <span class="n">model_base</span><span class="o">.</span><span class="n">predict_generator</span><span class="p">(</span><span class="n">img_generator</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot;len_(labels_base)&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">labels_base</span><span class="p">)</span>
+        <span class="n">labels_predicted</span> <span class="o">=</span> <span class="n">model_top</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">labels_base</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;img_osm_mix&#39;</span><span class="p">:</span>
+        <span class="n">labels_base</span> <span class="o">=</span> <span class="n">model_base</span><span class="o">.</span><span class="n">predict_generator</span><span class="p">(</span><span class="n">img_generator</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot;len_(labels_base)&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">labels_base</span><span class="p">)</span>
+        <span class="n">osm_input</span> <span class="o">=</span> <span class="n">osm</span>
+        <span class="n">labels_predicted</span> <span class="o">=</span> <span class="n">model_top</span><span class="o">.</span><span class="n">predict</span><span class="p">([</span><span class="n">osm_input</span><span class="p">,</span> <span class="n">labels_base</span><span class="p">],</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="nb">print</span> <span class="n">len_</span><span class="p">(</span><span class="n">labels_predicted</span><span class="p">)</span>
+    <span class="n">labels_return</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels_predicted</span><span class="p">:</span>
+        <span class="n">labels_return</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">labels_return</span></div>
+
+<div class="viewcode-block" id="load_tmp_dataset"><a class="viewcode-back" href="../../Evaluator.html#Evaluator.Evaluator.load_tmp_dataset">[docs]</a><span class="k">def</span> <span class="nf">load_tmp_dataset</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Example of how a dataset can be loaded.</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">model_settings</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># HACK</span>
+    <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dataset_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;miniset_640px&quot;</span>
+    <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;pixels&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">640</span>
+    <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;number_of_images&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;seed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">13</span>
+
+    <span class="c1">#Settings[&quot;models&quot;][0][&quot;dump_file_override&quot;] = &#39;SegmentsData.dump&#39;</span>
+    <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dump_file_override&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;SegmentsData_mark100.dump&#39;</span>
+
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">DatasetHandler</span><span class="o">.</span><span class="n">CreateDataset</span><span class="o">.</span><span class="n">load_custom</span><span class="p">(</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dataset_name&quot;</span><span class="p">],</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;pixels&quot;</span><span class="p">],</span>
+                                                       <span class="n">desired_number</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;number_of_images&quot;</span><span class="p">],</span>
+                                                       <span class="n">seed</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;seed&quot;</span><span class="p">],</span>
+                                                       <span class="n">filename_override</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dump_file_override&quot;</span><span class="p">])</span>
+    <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getDataLabels</span><span class="p">()</span>
+    <span class="n">osm</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getDataLabels_only_osm</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="n">len_</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">len_</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">len_</span><span class="p">(</span><span class="n">osm</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">osm</span></div>
+
+<span class="kn">from</span> <span class="nn">Functions</span> <span class="k">import</span> <span class="o">*</span>
+<div class="viewcode-block" id="evaluator"><a class="viewcode-back" href="../../Evaluator.html#Evaluator.Evaluator.evaluator">[docs]</a><span class="k">def</span> <span class="nf">evaluator</span><span class="p">(</span><span class="n">model_file</span><span class="p">,</span> <span class="n">settings_file</span><span class="p">,</span> <span class="n">name_output_file</span><span class="p">,</span> <span class="n">custom_target_geojson</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">show_segments_histo_stats</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">actually_save</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Main Evaluator function.</span>
+<span class="sd">    :param model_file: path to model .h5 file.</span>
+<span class="sd">    :param settings_file: path to settings file which was used to train this model.</span>
+<span class="sd">    :param name_output_file: name of labeled geojson data</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">model_base</span><span class="p">,</span> <span class="n">model_top</span><span class="p">,</span> <span class="n">model_settings</span> <span class="o">=</span> <span class="n">evaluator_load_model</span><span class="p">(</span><span class="n">model_file</span><span class="p">,</span> <span class="n">settings_file</span><span class="p">)</span>
+
+    <span class="c1"># Load data!</span>
+    <span class="k">if</span> <span class="n">custom_target_geojson</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">path_to_segments_file</span> <span class="o">=</span> <span class="n">default_segments_path</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">path_to_segments_file</span> <span class="o">=</span> <span class="n">custom_target_geojson</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">we_dont_care_about_missing_images</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;osm_only&#39;</span><span class="p">:</span>
+        <span class="n">we_dont_care_about_missing_images</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">lists</span><span class="p">,</span> <span class="n">Segments</span> <span class="o">=</span> <span class="n">loadDataFromSegments</span><span class="p">(</span><span class="n">path_to_segments_file</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">we_dont_care_about_missing_images</span><span class="o">=</span><span class="n">we_dont_care_about_missing_images</span><span class="p">)</span>
+    <span class="c1">#lists = small_lists(lists)</span>
+
+    <span class="nb">print</span> <span class="s2">&quot;BEFORE MARKING&quot;</span>
+    <span class="n">analyze_lists</span><span class="p">(</span><span class="n">lists</span><span class="p">)</span>
+
+    <span class="n">y_ref</span> <span class="o">=</span> <span class="n">lists</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">osm</span> <span class="o">=</span> <span class="n">osm_from_lists</span><span class="p">(</span><span class="n">lists</span><span class="p">)</span>
+    <span class="n">segment_ids</span> <span class="o">=</span> <span class="n">lists</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;osm_only&#39;</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">evaluator_predict_on_dataset</span><span class="p">(</span><span class="n">model_base</span><span class="p">,</span> <span class="n">model_top</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">osm</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># these models rely on images, lets use generators for reasonable memory requirements</span>
+        <span class="n">img_generator</span> <span class="o">=</span> <span class="n">getImgGenerator_from_lists</span><span class="p">(</span><span class="n">lists</span><span class="p">)</span>
+
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">evaluator_generators_predict</span><span class="p">(</span><span class="n">model_base</span><span class="p">,</span> <span class="n">model_top</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">,</span> <span class="n">img_generator</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">osm</span><span class="p">,</span> <span class="n">img_generator</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="nb">print</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">),</span> <span class="n">y_pred</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+
+    <span class="n">pred_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">lists</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">lists</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">lists</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
+    <span class="nb">print</span> <span class="s2">&quot;AFTER MARKING&quot;</span>
+    <span class="n">analyze_lists</span><span class="p">(</span><span class="n">pred_list</span><span class="p">)</span>
+
+    <span class="n">EvaluatedData</span> <span class="o">=</span> <span class="n">prepEvaluatedData</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">segment_ids</span><span class="p">)</span>
+    <span class="n">Altered</span> <span class="o">=</span> <span class="n">AlterSegments</span><span class="p">(</span><span class="n">EvaluatedData</span><span class="p">,</span> <span class="n">Segments</span><span class="p">,</span> <span class="n">only_unknown_scores</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">show_segments_histo_stats</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">DatasetHandler</span> <span class="k">import</span> <span class="n">DatasetObj</span>
+
+        <span class="n">scores</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">AltSeg</span> <span class="ow">in</span> <span class="n">Altered</span><span class="p">:</span>
+            <span class="n">scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">AltSeg</span><span class="o">.</span><span class="n">Score</span> <span class="p">)</span>
+
+        <span class="nb">print</span> <span class="n">len_</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+
+        <span class="kn">import</span> <span class="nn">DatasetHandler.DatasetVizualizators</span>
+        <span class="n">save_to_pdf</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">scores</span>
+        <span class="n">DatasetHandler</span><span class="o">.</span><span class="n">DatasetVizualizators</span><span class="o">.</span><span class="n">plotHistogram</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="s1">&#39;Score distribution histogram&#39;</span><span class="p">,</span> <span class="n">num_bins</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+        <span class="n">DatasetHandler</span><span class="o">.</span><span class="n">DatasetVizualizators</span><span class="o">.</span><span class="n">plotX_sortValues</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="s1">&#39;Distribution of score (sorted)&#39;</span><span class="p">,</span> <span class="n">notReverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_to_pdf</span><span class="p">:</span>
+            <span class="n">DatasetHandler</span><span class="o">.</span><span class="n">DatasetVizualizators</span><span class="o">.</span><span class="n">saveAllPlotsToPDF</span><span class="p">()</span>
+        <span class="n">DatasetHandler</span><span class="o">.</span><span class="n">DatasetVizualizators</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">custom_target_geojson</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">GeoJSON</span> <span class="o">=</span> <span class="n">loadDefaultGEOJSON</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">geojson_to_be_marked</span> <span class="o">=</span> <span class="n">custom_target_geojson</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">GeoJSON</span> <span class="o">=</span> <span class="n">loadGeoJson</span><span class="p">(</span><span class="n">geojson_to_be_marked</span><span class="p">)</span>
+    <span class="n">evaluated_geojson</span> <span class="o">=</span> <span class="n">markGeoJSON</span><span class="p">(</span><span class="n">GeoJSON</span><span class="p">,</span> <span class="n">Altered</span><span class="p">)</span>
+    <span class="n">path_geojson_out</span> <span class="o">=</span> <span class="n">name_output_file</span>
+
+    <span class="k">if</span> <span class="n">actually_save</span><span class="p">:</span>
+        <span class="n">saveGeoJson</span><span class="p">(</span><span class="n">evaluated_geojson</span><span class="p">,</span> <span class="n">path_geojson_out</span><span class="p">)</span>
+
+    <span class="c1"># Ex post testing</span>
+    <span class="n">DefaultSegments</span> <span class="o">=</span> <span class="n">DataOperations</span><span class="o">.</span><span class="n">LoadDataFile</span><span class="p">(</span><span class="n">path_to_segments_file</span><span class="p">)</span>
+    <span class="n">traverseGeoJSON</span><span class="p">(</span><span class="n">evaluated_geojson</span><span class="p">,</span> <span class="n">DefaultSegments</span><span class="p">)</span>
+
+
+    <span class="c1">#print y_ref, y_pred</span>
+
+    <span class="k">if</span> <span class="n">actually_save</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s1">&#39;y_ref.out&#39;</span><span class="p">,</span> <span class="n">y_ref</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s1">&#39;y_pred.out&#39;</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="c1"># Additional metrics</span>
+    <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">mean_squared_error</span><span class="p">,</span> <span class="n">mean_absolute_error</span>
+    <span class="n">mae</span> <span class="o">=</span> <span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">y_ref</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">mse</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_ref</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">mse</span><span class="p">,</span> <span class="n">mae</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

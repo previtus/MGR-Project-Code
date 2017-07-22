@@ -1,0 +1,628 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>DatasetHandler.DatasetObj &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for DatasetHandler.DatasetObj</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">Downloader.DataOperations</span> <span class="k">as</span> <span class="nn">DataOperations</span>
+<span class="kn">import</span> <span class="nn">Downloader.KerasPreparation</span> <span class="k">as</span> <span class="nn">KerasPreparation</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">Downloader.Defaults</span>
+<span class="kn">from</span> <span class="nn">Omnipresent</span> <span class="k">import</span> <span class="n">file_exists_and_accesible</span>
+
+<div class="viewcode-block" id="Dataset"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset">[docs]</a><span class="k">class</span> <span class="nc">Dataset</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Common base class for a Dataset</span>
+
+<span class="sd">    What does dataset have?</span>
+
+<span class="sd">     - source data folder with images and their scores - via Segments, but we don&#39;t use Segments anymore anywhere out</span>
+
+<span class="sd">    What can it do?</span>
+
+<span class="sd">     - give it&#39;s data nicely out ([x],[y]) as image data and labels</span>
+<span class="sd">     - give us subsets, which are uniform in sense of Scoring</span>
+<span class="sd">     - provide us with statistics - without worrying about unsuccessful downloads or anything</span>
+<span class="sd">     - give us *views* like exporting images into folder for inspection - for example coded with score</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">__list_of_images</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">__labels</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">__osm</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">img_width</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">img_height</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">num_of_images</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">unique_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">has_osm_loaded</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">flag_is_extended</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Dataset.randomize_all_list_order_deterministically_same_segment"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.randomize_all_list_order_deterministically_same_segment">[docs]</a>    <span class="k">def</span> <span class="nf">randomize_all_list_order_deterministically_same_segment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_seed</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        According to a chosen seed number will shuffle contents of lists (of urls, of scores, of osm) so they are kept</span>
+<span class="sd">         intact.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span><span class="p">)</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+        <span class="c1">#indices = range(0,n)*6</span>
+        <span class="c1">#indices += range(0,n)</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__labels</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__osm</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__segment_ids</span>
+
+        <span class="c1">#print len(a), len(b), len(c), len(d), d[0:10]</span>
+
+        <span class="n">lists</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span>
+        <span class="n">shuffled_lists</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">already_used_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">random</span><span class="o">.</span><span class="n">Random</span><span class="p">(</span><span class="n">local_seed</span><span class="p">)</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">already_used_data</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">str_</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="n">lists</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">seg_id</span> <span class="o">=</span> <span class="n">l</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+            <span class="c1">#print index, seg_id, l</span>
+
+            <span class="c1">#for k in range(-6,6):</span>
+            <span class="c1">#    print index+k, lists[index+k][3]</span>
+
+            <span class="n">k</span> <span class="o">=</span> <span class="n">index</span><span class="o">-</span><span class="mi">1</span>
+            <span class="n">found_first_of_such_id</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">found_first_of_such_id</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">found_first_of_such_id</span><span class="p">:</span>
+                <span class="n">seg_id_prev</span> <span class="o">=</span> <span class="n">lists</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">seg_id</span> <span class="o">==</span> <span class="n">seg_id_prev</span><span class="p">:</span>
+                    <span class="n">k</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">found_first_of_such_id</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="n">first_index</span> <span class="o">=</span> <span class="n">k</span>
+            <span class="n">last_index</span> <span class="o">=</span> <span class="n">k</span>
+
+            <span class="n">found_last_of_such_id</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">found_last_of_such_id</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;=</span> <span class="n">n</span><span class="p">:</span>
+                    <span class="n">found_last_of_such_id</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">last_index</span> <span class="o">=</span> <span class="n">k</span><span class="o">-</span><span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">seg_id</span> <span class="o">==</span> <span class="n">lists</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">3</span><span class="p">]:</span>
+                    <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">found_last_of_such_id</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">last_index</span> <span class="o">=</span> <span class="n">k</span><span class="o">-</span><span class="mi">1</span>
+
+            <span class="n">str_</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">first_index</span><span class="p">,</span> <span class="n">last_index</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                <span class="c1">#print i, lists[i][3]</span>
+                <span class="n">str_</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;(&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">lists</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">3</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;), &#39;</span>
+                <span class="n">shuffled_lists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lists</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">already_used_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="c1">#print str_</span>
+            <span class="c1">#print &#39;pre&#39;, first_index-1, lists[first_index-1][3]</span>
+            <span class="c1">#print &#39;post&#39;, last_index+1, lists[last_index+1][3]</span>
+
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            for k in range(0,images_per_segment):</span>
+<span class="sd">                index = i*images_per_segment+k</span>
+<span class="sd">                str_ += str(i*images_per_segment+k)+&#39;, &#39;</span>
+<span class="sd">                shuffled_lists.append(lists[index])</span>
+<span class="sd">            #print str_</span>
+<span class="sd">            &#39;&#39;&#39;</span>
+
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">shuffled_lists</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span> <span class="o">=</span> <span class="n">a</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__osm</span> <span class="o">=</span> <span class="n">c</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__segment_ids</span> <span class="o">=</span> <span class="n">d</span></div>
+
+        <span class="c1">#print len(a), len(b), len(c), len(d), d[0:10]</span>
+
+<div class="viewcode-block" id="Dataset.remove_dual_osms"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.remove_dual_osms">[docs]</a>    <span class="k">def</span> <span class="nf">remove_dual_osms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        We know that every third entry is actually unique (in sense of osm,score pair) - when we are talking about osm_only model</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">images_per_segment</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span><span class="p">)</span>
+        <span class="n">bytripples</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="n">images_per_segment</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">bytripples</span><span class="p">:</span>
+            <span class="n">indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="n">images_per_segment</span><span class="p">)</span>
+
+        <span class="nb">print</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__labels</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__segment_ids</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__labels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__osm</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__segment_ids</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__segment_ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+
+        <span class="nb">print</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__labels</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__segment_ids</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Dataset.test_existence_of_all_images"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.test_existence_of_all_images">[docs]</a>    <span class="k">def</span> <span class="nf">test_existence_of_all_images</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Test physical presence of the images - useful for debuging.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span><span class="p">:</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">file_exists_and_accesible</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">b</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;File cannot be accessed! &quot;</span><span class="p">,</span> <span class="n">url</span></div>
+
+<div class="viewcode-block" id="Dataset.init_from_lists"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.init_from_lists">[docs]</a>    <span class="k">def</span> <span class="nf">init_from_lists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_of_images</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">osm</span><span class="p">,</span> <span class="n">segment_ids</span><span class="p">,</span> <span class="n">img_width</span><span class="p">,</span> <span class="n">img_height</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Initialization from lists of data</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">img_width</span> <span class="o">=</span> <span class="n">img_width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">img_height</span> <span class="o">=</span> <span class="n">img_height</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span> <span class="o">=</span> <span class="n">list_of_images</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__labels</span> <span class="o">=</span> <span class="n">labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__osm</span> <span class="o">=</span> <span class="n">osm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__segment_ids</span> <span class="o">=</span> <span class="n">segment_ids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_of_images</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">has_osm_loaded</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Dataset.init_from_segments"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.init_from_segments">[docs]</a>    <span class="k">def</span> <span class="nf">init_from_segments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_segments_file</span><span class="p">,</span> <span class="n">img_width</span><span class="p">,</span> <span class="n">img_height</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        # Initialization from loaded Segment in path_to_segments_file</span>
+<span class="sd">        # Segments are not used apart from initialization</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">Segments</span> <span class="o">=</span> <span class="n">DataOperations</span><span class="o">.</span><span class="n">LoadDataFile</span><span class="p">(</span><span class="n">path_to_segments_file</span><span class="p">)</span>
+        <span class="n">segments_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path_to_segments_file</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
+        <span class="n">__list_of_images</span><span class="p">,</span> <span class="n">__labels</span><span class="p">,</span> <span class="n">__osm</span><span class="p">,</span> <span class="n">__segment_ids</span><span class="p">,</span> <span class="n">flag_is_extended</span> <span class="o">=</span> <span class="n">KerasPreparation</span><span class="o">.</span><span class="n">LoadDataFromSegments</span><span class="p">(</span><span class="n">Segments</span><span class="p">,</span> <span class="n">has_score</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">path_to_images</span><span class="o">=</span><span class="n">segments_dir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flag_is_extended</span> <span class="o">=</span> <span class="n">flag_is_extended</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_from_lists</span><span class="p">(</span><span class="n">__list_of_images</span><span class="p">,</span> <span class="n">__labels</span><span class="p">,</span> <span class="n">__osm</span><span class="p">,</span> <span class="n">__segment_ids</span><span class="p">,</span> <span class="n">img_width</span><span class="p">,</span> <span class="n">img_height</span><span class="p">)</span></div>
+
+    <span class="c1"># Osm data editation</span>
+<div class="viewcode-block" id="Dataset.cast_osm_to_bool"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.cast_osm_to_bool">[docs]</a>    <span class="k">def</span> <span class="nf">cast_osm_to_bool</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Transforms the osm vector data to boolean values, aka i=0 -&gt; 0, i&gt;0 -&gt; 1</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">def</span> <span class="nf">boo</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">boo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Dataset.cast_osm_to_one_hot_categories"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.cast_osm_to_one_hot_categories">[docs]</a>    <span class="k">def</span> <span class="nf">cast_osm_to_one_hot_categories</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Transforms the osm vector data to one hot categories - low,mid,high represented as 001,010,100 binary.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">statistics_for_attributes</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">attribute_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+            <span class="n">attribute_values</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">vector_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">)):</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">[</span><span class="n">vector_id</span><span class="p">][</span><span class="n">attribute_id</span><span class="p">]</span>
+                <span class="n">attribute_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+            <span class="n">q1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">attribute_values</span><span class="p">,</span> <span class="mi">33</span><span class="p">)</span>
+            <span class="n">q3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">attribute_values</span><span class="p">,</span> <span class="mi">66</span><span class="p">)</span>
+
+            <span class="c1">#print attribute_id, q1, q3</span>
+            <span class="n">statistics_for_attributes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">q1</span><span class="p">,</span> <span class="n">q3</span><span class="p">])</span>
+
+        <span class="n">new_osm_vector</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">vector_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">)):</span>
+            <span class="n">new_osm_vector</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+            <span class="k">for</span> <span class="n">attribute_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">[</span><span class="n">vector_id</span><span class="p">])):</span>
+                <span class="n">stats</span> <span class="o">=</span> <span class="n">statistics_for_attributes</span><span class="p">[</span><span class="n">attribute_id</span><span class="p">]</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">[</span><span class="n">vector_id</span><span class="p">][</span><span class="n">attribute_id</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">val</span> <span class="o">&lt;=</span> <span class="n">stats</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="c1"># value smaller than lower percentile -&gt; &quot;low&quot;</span>
+                    <span class="n">new_osm_vector</span><span class="p">[</span><span class="n">vector_id</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="n">val</span> <span class="o">&lt;=</span> <span class="n">stats</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="c1"># value in between percentiles -&gt; &quot;mid&quot;</span>
+                    <span class="n">new_osm_vector</span><span class="p">[</span><span class="n">vector_id</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span> <span class="c1"># bigger than percentiles -&gt; &quot;high&quot;</span>
+                    <span class="n">new_osm_vector</span><span class="p">[</span><span class="n">vector_id</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__osm</span> <span class="o">=</span> <span class="n">new_osm_vector</span></div>
+
+<div class="viewcode-block" id="Dataset.log_the_osm"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.log_the_osm">[docs]</a>    <span class="k">def</span> <span class="nf">log_the_osm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Apply log to values in OSM vector.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">val</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span></div>
+
+    <span class="c1"># Data access: ---------------------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="Dataset.getDataLabels"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.getDataLabels">[docs]</a>    <span class="k">def</span> <span class="nf">getDataLabels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resize</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        # ([x,y]) as image data and labels</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">KerasPreparation</span><span class="o">.</span><span class="n">LoadActualImages</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span><span class="p">,</span> <span class="n">resize</span><span class="o">=</span><span class="n">resize</span><span class="p">,</span> <span class="n">dim_ordering</span><span class="o">=</span><span class="n">Downloader</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">KERAS_SETTING_DIMENSIONS</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__labels</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Dataset.getDataLabels_split"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.getDataLabels_split">[docs]</a>    <span class="k">def</span> <span class="nf">getDataLabels_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validation_split</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        # ([x, y, x_val, y_val]) as image data and labels after being split</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">KerasPreparation</span><span class="o">.</span><span class="n">LoadActualImages</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span><span class="p">,</span> <span class="n">resize</span><span class="o">=</span><span class="n">resize</span><span class="p">,</span> <span class="n">dim_ordering</span><span class="o">=</span><span class="n">Downloader</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">KERAS_SETTING_DIMENSIONS</span><span class="p">)</span> <span class="c1"># th or tf</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__labels</span><span class="p">)</span>
+
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span> <span class="o">=</span> <span class="n">KerasPreparation</span><span class="o">.</span><span class="n">split_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">validation_split</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Dataset.getDataLabels_split_only_y"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.getDataLabels_split_only_y">[docs]</a>    <span class="k">def</span> <span class="nf">getDataLabels_split_only_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validation_split</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        # Get just label data, after validation split</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__labels</span><span class="p">)</span>
+        <span class="n">y</span><span class="p">,</span> <span class="n">y_val</span> <span class="o">=</span> <span class="n">KerasPreparation</span><span class="o">.</span><span class="n">split_one_array</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">validation_split</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">y_val</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Dataset.getDataLabels_only_y"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.getDataLabels_only_y">[docs]</a>    <span class="k">def</span> <span class="nf">getDataLabels_only_y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        # Get just label data</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__labels</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">y</span></div>
+
+<div class="viewcode-block" id="Dataset.getDataLabels_split_only_osm"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.getDataLabels_split_only_osm">[docs]</a>    <span class="k">def</span> <span class="nf">getDataLabels_split_only_osm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">validation_split</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        # Get just osm data, after validation split</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">osm</span><span class="p">,</span> <span class="n">osm_val</span> <span class="o">=</span> <span class="n">KerasPreparation</span><span class="o">.</span><span class="n">split_one_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">,</span> <span class="n">validation_split</span><span class="p">)</span>
+        <span class="n">osm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">osm</span><span class="p">)</span>
+        <span class="n">osm_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">osm_val</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">osm</span><span class="p">,</span> <span class="n">osm_val</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Dataset.getDataLabels_only_osm"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.getDataLabels_only_osm">[docs]</a>    <span class="k">def</span> <span class="nf">getDataLabels_only_osm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        # Get just osm data</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">osm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">osm</span></div>
+
+<div class="viewcode-block" id="Dataset.getShapeOfOsm"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.getShapeOfOsm">[docs]</a>    <span class="k">def</span> <span class="nf">getShapeOfOsm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get shape of the osm data - aka dimension of the vectors, traditionally (594,) needed for building Keras models.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span></div>
+
+    <span class="c1"># For generators</span>
+<div class="viewcode-block" id="Dataset.generator_images_scores"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.generator_images_scores">[docs]</a>    <span class="k">def</span> <span class="nf">generator_images_scores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">image_paths</span><span class="p">,</span> <span class="n">scores</span><span class="p">,</span> <span class="n">resize</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get generator of images</span>
+<span class="sd">        :param order: prearanged order (1,2,3...) or (2,55,1,980, ...)</span>
+<span class="sd">        :param image_paths: paths to images, these are kept in memory while the big 640x640x3 image data is not</span>
+<span class="sd">        :param scores: score to be associated with returned image</span>
+<span class="sd">        :param resize: parameter to resize loaded images on the fly</span>
+<span class="sd">        :return: generator, which yields (image, score)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">order</span><span class="p">:</span>
+                <span class="n">img_path</span> <span class="o">=</span> <span class="n">image_paths</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+                <span class="n">image</span> <span class="o">=</span> <span class="n">KerasPreparation</span><span class="o">.</span><span class="n">LoadActualImages</span><span class="p">([</span><span class="n">img_path</span><span class="p">],</span> <span class="n">resize</span><span class="o">=</span><span class="n">resize</span><span class="p">)</span>
+                <span class="n">score</span> <span class="o">=</span> <span class="n">scores</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                <span class="k">yield</span> <span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Dataset.getImageGenerator"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.getImageGenerator">[docs]</a>    <span class="k">def</span> <span class="nf">getImageGenerator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">validation_split</span><span class="p">,</span> <span class="n">resize</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        # Return generators</span>
+<span class="sd">        # take the lists on images and their labels - split these two arrays by the validation split</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__labels</span><span class="p">)</span>
+        <span class="n">images_paths</span><span class="p">,</span> <span class="n">scores</span><span class="p">,</span> <span class="n">images_paths_val</span><span class="p">,</span> <span class="n">scores_val</span> <span class="o">=</span> <span class="n">KerasPreparation</span><span class="o">.</span><span class="n">split_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">validation_split</span><span class="p">)</span>
+
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+        <span class="n">size_val</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">scores_val</span><span class="p">)</span>
+
+        <span class="n">order</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">order_val</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">size_val</span><span class="p">)</span>
+        <span class="c1"># We can mix up the orders, but then we need to mix the future data too</span>
+
+        <span class="n">image_generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generator_images_scores</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">image_paths</span><span class="o">=</span><span class="n">images_paths</span><span class="p">,</span> <span class="n">scores</span><span class="o">=</span><span class="n">scores</span><span class="p">,</span> <span class="n">resize</span><span class="o">=</span><span class="n">resize</span><span class="p">)</span>
+        <span class="n">image_generator_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generator_images_scores</span><span class="p">(</span><span class="n">order_val</span><span class="p">,</span> <span class="n">image_paths</span><span class="o">=</span><span class="n">images_paths_val</span><span class="p">,</span> <span class="n">scores</span><span class="o">=</span><span class="n">scores_val</span><span class="p">,</span> <span class="n">resize</span><span class="o">=</span><span class="n">resize</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">order</span><span class="p">,</span> <span class="n">order_val</span><span class="p">,</span> <span class="n">image_generator</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">image_generator_val</span><span class="p">,</span> <span class="n">size_val</span><span class="p">]</span></div>
+
+    <span class="c1"># Dataset reporting: ---------------------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="Dataset.statistics"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.statistics">[docs]</a>    <span class="k">def</span> <span class="nf">statistics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        # Report important information about the dataset.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Dataset of&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span><span class="p">),</span> <span class="s2">&quot; scored images of&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_width</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_height</span><span class="p">,</span> <span class="s2">&quot;resolution.&quot;</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__labels</span><span class="p">)</span>
+        <span class="nb">min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+        <span class="nb">max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+        <span class="n">q1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+        <span class="n">q3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="mi">75</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="nb">min</span><span class="p">,</span> <span class="s2">&quot;|---[&quot;</span><span class="p">,</span> <span class="n">q1</span><span class="p">,</span> <span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="s2">&quot;}&quot;</span><span class="p">,</span> <span class="n">q3</span><span class="p">,</span> <span class="s2">&quot;]---|&quot;</span><span class="p">,</span> <span class="nb">max</span>
+        <span class="nb">print</span> <span class="s2">&quot;min |---[ 25perc { mean } 75perc ]---| max&quot;</span></div>
+
+<div class="viewcode-block" id="Dataset.debug_print_first"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.debug_print_first">[docs]</a>    <span class="k">def</span> <span class="nf">debug_print_first</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        # Debug print first n values in this dataset.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
+            <span class="nb">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">__segment_ids</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">__labels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="Dataset.plotHistogram"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.plotHistogram">[docs]</a>    <span class="k">def</span> <span class="nf">plotHistogram</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_to_pdf</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labels_override</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Plot score of this dataset as histogram.</span>
+<span class="sd">        :param save_to_pdf: flag to save into output.pdf</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">import</span> <span class="nn">DatasetVizualizators</span>
+
+        <span class="k">if</span> <span class="n">labels_override</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__labels</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">labels_override</span>
+        <span class="n">DatasetVizualizators</span><span class="o">.</span><span class="n">plotHistogram</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="s1">&#39;Score distribution histogram&#39;</span><span class="p">)</span>
+        <span class="n">DatasetVizualizators</span><span class="o">.</span><span class="n">plotWhisker</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="s1">&#39;Score box plot&#39;</span><span class="p">)</span>
+        <span class="n">DatasetVizualizators</span><span class="o">.</span><span class="n">plotX_sortValues</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="s1">&#39;Distribution of score (sorted)&#39;</span><span class="p">,</span> <span class="n">notReverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_to_pdf</span><span class="p">:</span>
+            <span class="n">DatasetVizualizators</span><span class="o">.</span><span class="n">saveAllPlotsToPDF</span><span class="p">()</span>
+        <span class="n">DatasetVizualizators</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Dataset.MapScoreToImages"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.MapScoreToImages">[docs]</a>    <span class="k">def</span> <span class="nf">MapScoreToImages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">into_bins</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Gets a dict which give to a index from 0-100 a list of images of such score (score goes in range 0-1, so *100 in this case)</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">into_bins</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="c1"># Empty dict</span>
+        <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">into_bins</span><span class="o">+</span><span class="mi">1</span><span class="p">)}</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_of_images</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__labels</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">score_label</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span>
+
+            <span class="n">score_label</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">score_label</span><span class="o">*</span><span class="n">into_bins</span><span class="o">/</span><span class="mi">100</span><span class="p">)</span>
+
+            <span class="nb">dict</span><span class="p">[</span><span class="n">score_label</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">dict</span></div>
+
+<div class="viewcode-block" id="Dataset.DumpFilesIntoDirectory_withScores"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.DumpFilesIntoDirectory_withScores">[docs]</a>    <span class="k">def</span> <span class="nf">DumpFilesIntoDirectory_withScores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_directory</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Simple way of visualizing which images are considered &quot;attractive&quot; (with high score) and which are not</span>
+<span class="sd">        :param target_directory: target directory, for example target_directory = &#39;../debugViewOfDataset/&#39;</span>
+<span class="sd">        :return: returns list of new names of files, with the order unchanged</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Copy images from their original location to a new directory while naming them:</span>
+        <span class="c1"># Score_&lt;OriginalName.jpg&gt;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">target_directory</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">target_directory</span><span class="p">)</span>
+
+        <span class="n">new_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_of_images</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="c1">#head, tail = os.path.split(name)</span>
+
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">target_directory</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{0:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">score</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="c1">#print name, score, filename</span>
+            <span class="n">new_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_names</span></div>
+
+<div class="viewcode-block" id="Dataset.sampleUniform"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.sampleUniform">[docs]</a>    <span class="k">def</span> <span class="nf">sampleUniform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desired_number</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        # randomized subsample of a dataset</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_of_images</span><span class="p">),</span> <span class="n">desired_number</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">indices</span></div>
+
+<div class="viewcode-block" id="Dataset.spawnUniformSubset"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.spawnUniformSubset">[docs]</a>    <span class="k">def</span> <span class="nf">spawnUniformSubset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desired_number</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Spawn a subset from dataset uniform distribution over the original data.</span>
+
+<span class="sd">        :param desired_number: size of the desired dataset</span>
+<span class="sd">        :return: the resulting new dataset</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampleUniform</span><span class="p">(</span><span class="n">desired_number</span><span class="p">)</span>
+
+        <span class="n">sel_imgs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__list_of_images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+        <span class="n">sel_labels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+        <span class="n">sel_segment_ids</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__segment_ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__osm</span> <span class="o">==</span> <span class="p">[]:</span>
+            <span class="n">sel_osm</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sel_osm</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+
+        <span class="n">newDataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">()</span>
+        <span class="n">newDataset</span><span class="o">.</span><span class="n">init_from_lists</span><span class="p">(</span><span class="n">sel_imgs</span><span class="p">,</span> <span class="n">sel_labels</span><span class="p">,</span> <span class="n">sel_osm</span><span class="p">,</span> <span class="n">sel_segment_ids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_height</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">newDataset</span></div>
+
+<div class="viewcode-block" id="Dataset.getDataLabels_only_osm_raw"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.getDataLabels_only_osm_raw">[docs]</a>    <span class="k">def</span> <span class="nf">getDataLabels_only_osm_raw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        # return list of osm without coversion to numpy format</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__osm</span></div>
+
+<div class="viewcode-block" id="Dataset.expandOsmDataWithMultipleRadii"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.DatasetObj.Dataset.expandOsmDataWithMultipleRadii">[docs]</a>    <span class="k">def</span> <span class="nf">expandOsmDataWithMultipleRadii</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        # idea is to load all the radii data we have available and add it to each of the segments</span>
+<span class="sd">        # we assume the basic experiment definition</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">r50</span> <span class="o">=</span> <span class="s1">&#39;SegmentsData_marked_R50_4TablesN.dump&#39;</span>
+        <span class="n">r100</span> <span class="o">=</span> <span class="s1">&#39;SegmentsData_marked_R50_4TablesN.dump&#39;</span>
+        <span class="n">r200</span> <span class="o">=</span> <span class="s1">&#39;SegmentsData_marked_R200_4TablesN.dump&#39;</span>
+
+        <span class="kn">import</span> <span class="nn">DatasetHandler</span>
+        <span class="n">dataset_r50</span> <span class="o">=</span> <span class="n">DatasetHandler</span><span class="o">.</span><span class="n">CreateDataset</span><span class="o">.</span><span class="n">load_custom</span><span class="p">(</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dataset_name&quot;</span><span class="p">],</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;pixels&quot;</span><span class="p">],</span>
+                                                           <span class="n">desired_number</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;number_of_images&quot;</span><span class="p">],</span>
+                                                           <span class="n">seed</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;seed&quot;</span><span class="p">],</span>
+                                                           <span class="n">filename_override</span><span class="o">=</span><span class="n">r50</span><span class="p">)</span>
+        <span class="n">r50osm</span> <span class="o">=</span> <span class="n">dataset_r50</span><span class="o">.</span><span class="n">getDataLabels_only_osm_raw</span><span class="p">()</span>
+        <span class="n">dataset_r100</span> <span class="o">=</span> <span class="n">DatasetHandler</span><span class="o">.</span><span class="n">CreateDataset</span><span class="o">.</span><span class="n">load_custom</span><span class="p">(</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dataset_name&quot;</span><span class="p">],</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;pixels&quot;</span><span class="p">],</span>
+                                                           <span class="n">desired_number</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;number_of_images&quot;</span><span class="p">],</span>
+                                                           <span class="n">seed</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;seed&quot;</span><span class="p">],</span>
+                                                           <span class="n">filename_override</span><span class="o">=</span><span class="n">r100</span><span class="p">)</span>
+        <span class="n">r100osm</span> <span class="o">=</span> <span class="n">dataset_r100</span><span class="o">.</span><span class="n">getDataLabels_only_osm_raw</span><span class="p">()</span>
+        <span class="n">dataset_r200</span> <span class="o">=</span> <span class="n">DatasetHandler</span><span class="o">.</span><span class="n">CreateDataset</span><span class="o">.</span><span class="n">load_custom</span><span class="p">(</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dataset_name&quot;</span><span class="p">],</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;pixels&quot;</span><span class="p">],</span>
+                                                           <span class="n">desired_number</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;number_of_images&quot;</span><span class="p">],</span>
+                                                           <span class="n">seed</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;seed&quot;</span><span class="p">],</span>
+                                                           <span class="n">filename_override</span><span class="o">=</span><span class="n">r200</span><span class="p">)</span>
+        <span class="n">r200osm</span> <span class="o">=</span> <span class="n">dataset_r200</span><span class="o">.</span><span class="n">getDataLabels_only_osm_raw</span><span class="p">()</span>
+
+        <span class="kn">from</span> <span class="nn">Omnipresent</span> <span class="k">import</span> <span class="n">len_</span>
+        <span class="nb">print</span> <span class="s2">&quot;osm&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">),</span> <span class="n">len_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+        <span class="nb">print</span> <span class="s2">&quot;osm50&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">r50osm</span><span class="p">),</span> <span class="n">len_</span><span class="p">(</span><span class="n">r50osm</span><span class="p">),</span> <span class="n">r50osm</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+        <span class="nb">print</span> <span class="s2">&quot;osm50&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">r100osm</span><span class="p">),</span> <span class="n">len_</span><span class="p">(</span><span class="n">r100osm</span><span class="p">),</span> <span class="n">r100osm</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+        <span class="nb">print</span> <span class="s2">&quot;osm200&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">r200osm</span><span class="p">),</span> <span class="n">len_</span><span class="p">(</span><span class="n">r200osm</span><span class="p">),</span> <span class="n">r200osm</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+
+        <span class="n">new_osm</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">r50osm</span><span class="p">)):</span>
+            <span class="n">osm_of_i</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;multiple_radii_mark&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;I&#39;</span><span class="p">:</span>
+                <span class="n">osm_of_i</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">r100osm</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">r50osm</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">r200osm</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;multiple_radii_mark&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;II&#39;</span><span class="p">:</span>
+                <span class="n">osm_of_i</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">r100osm</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">r200osm</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;multiple_radii_mark&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;III&#39;</span><span class="p">:</span>
+                <span class="n">osm_of_i</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">r100osm</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">r50osm</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+            <span class="n">new_osm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">osm_of_i</span><span class="p">)</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;enhanced&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_osm</span><span class="p">),</span> <span class="n">len_</span><span class="p">(</span><span class="n">new_osm</span><span class="p">),</span> <span class="n">new_osm</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__osm</span> <span class="o">=</span> <span class="n">new_osm</span>
+        <span class="nb">print</span> <span class="s2">&quot;enhanced&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">),</span> <span class="n">len_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__osm</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

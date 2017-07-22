@@ -1,0 +1,46 @@
+OSMHandler package
+==================
+
+Submodules
+----------
+
+OSMHandler\.Checker module
+--------------------------
+
+.. automodule:: OSMHandler.Checker
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+OSMHandler\.ConnectionHandlerObj module
+---------------------------------------
+
+.. automodule:: OSMHandler.ConnectionHandlerObj
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+OSMHandler\.Marker module
+-------------------------
+
+.. automodule:: OSMHandler.Marker
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+OSMHandler\.TestDebugs module
+-----------------------------
+
+.. automodule:: OSMHandler.TestDebugs
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: OSMHandler
+    :members:
+    :undoc-members:
+    :show-inheritance:

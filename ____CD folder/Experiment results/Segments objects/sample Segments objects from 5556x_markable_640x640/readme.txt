@@ -1,0 +1,2 @@
+SegmentsData.dump contains the list of Segments objects from the initial dataset.
+SegmentsData_marked_R100.dump is the same list of Segment objects, after they have been marked with OSM vectors with radius setting 100 meters.

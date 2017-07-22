@@ -1,0 +1,635 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ModelHandler.ModelOI &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ModelHandler.ModelOI</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Handles data input and output for Models</span>
+<span class="c1"># For example:</span>
+<span class="c1"># - loading data like img_features, osm_features, scores</span>
+<span class="c1"># - provide final Model saving and loading</span>
+
+<span class="kn">from</span> <span class="nn">DatasetHandler.FileHelperFunc</span> <span class="k">import</span> <span class="n">use_path_which_exists</span><span class="p">,</span> <span class="n">make_folder_ifItDoesntExist</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">DatasetHandler.CreateDataset</span>
+<span class="kn">from</span> <span class="nn">DatasetHandler.DataAugmentation</span> <span class="k">import</span> <span class="n">handle_noncanon_dataset</span>
+<span class="kn">from</span> <span class="nn">Omnipresent</span> <span class="k">import</span> <span class="n">save_job_report_page</span><span class="p">,</span> <span class="n">send_mail</span><span class="p">,</span> <span class="n">len_</span>
+
+<div class="viewcode-block" id="prepare_folders"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelOI.prepare_folders">[docs]</a><span class="k">def</span> <span class="nf">prepare_folders</span><span class="p">(</span><span class="n">Settings</span><span class="p">,</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Figures folder paths which will be used in experiment (local folder with history file, graphs, model file and also</span>
+<span class="sd">    the shared folder where features are saved. Also the paths for filename_features_train, filename_features_test for</span>
+<span class="sd">    for each model. Saves these paths into Settings.</span>
+<span class="sd">    :param Settings: This is a travelling dictionary with all the settings, we will add folder settings there</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">folders</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># Local folder</span>
+    <span class="n">log_folder</span> <span class="o">=</span> <span class="n">getLogDirectory</span><span class="p">()</span>
+    <span class="n">experiment_name</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;experiment_name&quot;</span><span class="p">]</span>
+    <span class="c1"># make /&lt;experiment&gt;/ history and model_shapes folder structure</span>
+    <span class="n">job_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;job_id&quot;</span><span class="p">]</span> <span class="o">&lt;&gt;</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">job_str</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;job_id&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span>
+
+    <span class="n">make_folder_ifItDoesntExist</span><span class="p">(</span><span class="n">log_folder</span><span class="o">+</span><span class="n">job_str</span><span class="o">+</span><span class="n">experiment_name</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="n">folders</span><span class="p">[</span><span class="s2">&quot;local_logs_folder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">log_folder</span> <span class="o">+</span> <span class="n">job_str</span> <span class="o">+</span> <span class="n">experiment_name</span><span class="o">+</span><span class="s1">&#39;/&#39;</span>
+
+    <span class="c1"># folders history and models</span>
+    <span class="n">folders</span><span class="p">[</span><span class="s2">&quot;history_folder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">folders</span><span class="p">[</span><span class="s2">&quot;local_logs_folder&quot;</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;history/&#39;</span>
+    <span class="n">folders</span><span class="p">[</span><span class="s2">&quot;models_folder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">folders</span><span class="p">[</span><span class="s2">&quot;local_logs_folder&quot;</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;models/&#39;</span>
+    <span class="n">make_folder_ifItDoesntExist</span><span class="p">(</span><span class="n">folders</span><span class="p">[</span><span class="s2">&quot;history_folder&quot;</span><span class="p">])</span>
+    <span class="n">make_folder_ifItDoesntExist</span><span class="p">(</span><span class="n">folders</span><span class="p">[</span><span class="s2">&quot;models_folder&quot;</span><span class="p">])</span>
+    <span class="n">folders</span><span class="p">[</span><span class="s2">&quot;shared_features_folder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">getSharedDirectory</span><span class="p">()</span>
+    <span class="n">folders</span><span class="p">[</span><span class="s2">&quot;together_graph_filename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">folders</span><span class="p">[</span><span class="s2">&quot;local_logs_folder&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;graph_together_&quot;</span> <span class="o">+</span> <span class="n">experiment_name</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span>
+    <span class="n">folders</span><span class="p">[</span><span class="s2">&quot;together_graph_title&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">experiment_name</span> <span class="o">+</span> <span class="s2">&quot; together graph&quot;</span>
+    <span class="n">folders</span><span class="p">[</span><span class="s2">&quot;report_txt_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">folders</span><span class="p">[</span><span class="s2">&quot;local_logs_folder&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;report.txt&quot;</span>
+    <span class="n">folders</span><span class="p">[</span><span class="s2">&quot;report_html_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">folders</span><span class="p">[</span><span class="s2">&quot;local_logs_folder&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;report_&quot;</span>
+
+    <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">folders</span>
+
+    <span class="c1"># individual model settings, manage their feature paths</span>
+    <span class="k">for</span> <span class="n">model_settings</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]:</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">datasets</span><span class="p">[</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dataset_pointer&quot;</span><span class="p">]</span> <span class="p">]</span>
+
+        <span class="n">cnn_model</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;cnn_model&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;special_case&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;base_cnn_custom_top&#39;</span><span class="p">:</span>
+            <span class="n">cnn_model</span> <span class="o">+=</span> <span class="s2">&quot;_SPECIAL-CUSTOM-TOP&quot;</span> <span class="o">+</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;mark&quot;</span><span class="p">]</span>
+
+        <span class="p">[</span><span class="n">filename_features_train</span><span class="p">,</span> <span class="n">filename_features_test</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_feature_file_names</span><span class="p">(</span>
+            <span class="n">shared_folder</span><span class="o">=</span><span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;shared_features_folder&quot;</span><span class="p">],</span> <span class="n">dataset_uid</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="n">cnn_model</span><span class="p">)</span>
+
+        <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;filename_features_train&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">filename_features_train</span>
+        <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;filename_features_test&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">filename_features_test</span>
+
+        <span class="c1"># Finetune feature filenames</span>
+        <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune&quot;</span><span class="p">]:</span>
+            <span class="n">number_of_layers_unlocked</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune_num_of_cnn_layers&quot;</span><span class="p">]</span>
+
+            <span class="p">[</span><span class="n">finetune_features_train</span><span class="p">,</span> <span class="n">finetune_features_test</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_feature_file_names</span><span class="p">(</span>
+            <span class="n">shared_folder</span><span class="o">=</span><span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;shared_features_folder&quot;</span><span class="p">],</span> <span class="n">dataset_uid</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;cnn_model&quot;</span><span class="p">],</span>
+            <span class="n">cut</span><span class="o">=</span><span class="n">number_of_layers_unlocked</span><span class="p">)</span>
+
+            <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune_features_train&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">finetune_features_train</span>
+            <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune_features_test&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">finetune_features_test</span>
+
+        <span class="n">model_identificator</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dataset_name&quot;</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;unique_id&quot;</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;epochs&quot;</span><span class="p">])</span>
+        <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;history_filename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;history_folder&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">model_identificator</span><span class="o">+</span><span class="s2">&quot;.npy&quot;</span>
+        <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;graph_filename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;local_logs_folder&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;graph_&quot;</span> <span class="o">+</span> <span class="n">model_identificator</span><span class="o">+</span><span class="s2">&quot;.png&quot;</span>
+
+        <span class="n">model_identificator_for_shape</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;unique_id&quot;</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;cnn_model&quot;</span><span class="p">]</span>
+        <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_shape_filename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;models_folder&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">model_identificator_for_shape</span><span class="o">+</span><span class="s2">&quot;.png&quot;</span>
+        <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_filename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;models_folder&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">model_identificator_for_shape</span><span class="o">+</span><span class="s2">&quot;.h5&quot;</span>
+
+        <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_save&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># 0 = don&#39;t save, 1 = save only top, 2 = save it all</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;Folder paths dump:&quot;</span>
+        <span class="nb">print</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;shared_features_folder&quot;</span><span class="p">]</span>
+        <span class="nb">print</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;local_logs_folder&quot;</span><span class="p">]</span>
+        <span class="nb">print</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;report_txt_file&quot;</span><span class="p">]</span>
+
+        <span class="nb">print</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;together_graph_filename&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">model_settings</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]:</span>
+            <span class="nb">print</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;graph_filename&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">model_settings</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]:</span>
+            <span class="nb">print</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;history_filename&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">model_settings</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]:</span>
+            <span class="nb">print</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_shape_filename&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">model_settings</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]:</span>
+            <span class="nb">print</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_filename&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">model_settings</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]:</span>
+            <span class="nb">print</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;filename_features_train&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">model_settings</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]:</span>
+            <span class="nb">print</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;filename_features_test&quot;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">model_settings</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune&quot;</span><span class="p">]:</span>
+                <span class="nb">print</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune_features_train&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">model_settings</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune&quot;</span><span class="p">]:</span>
+                <span class="nb">print</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune_features_test&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">Settings</span></div>
+
+<div class="viewcode-block" id="getLogDirectory"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelOI.getLogDirectory">[docs]</a><span class="k">def</span> <span class="nf">getLogDirectory</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Get established Log directories. Code will use the one of these paths which is available on the machine.</span>
+<span class="sd">    :return: working path to Logs directory</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">log_folders</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;/home/ekmek/Desktop/Project II/MGR-Project-Code/Logs/&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;/home/ekmek/Vitek/Logs/&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;/storage/plzen1/home/previtus/Logs/&#39;</span>
+                    <span class="p">]</span>
+    <span class="n">local_folder</span> <span class="o">=</span> <span class="n">use_path_which_exists</span><span class="p">(</span><span class="n">log_folders</span><span class="p">)</span>
+    <span class="n">make_folder_ifItDoesntExist</span><span class="p">(</span><span class="n">local_folder</span><span class="o">+</span><span class="s1">&#39;shared/&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">local_folder</span></div>
+
+<div class="viewcode-block" id="getSharedDirectory"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelOI.getSharedDirectory">[docs]</a><span class="k">def</span> <span class="nf">getSharedDirectory</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Get established Log directories. Code will use the one of these paths which is available on the machine.</span>
+<span class="sd">    :return: working path to Logs/shared directory</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">shared_folders</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;/home/ekmek/Desktop/Project II/MGR-Project-Code/Logs/&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;/home/ekmek/Vitek/Logs/&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;/storage/plzen1/home/previtus/Logs/&#39;</span>
+                    <span class="p">]</span>
+    <span class="n">shared_folder</span> <span class="o">=</span> <span class="n">use_path_which_exists</span><span class="p">(</span><span class="n">shared_folders</span><span class="p">)</span>
+    <span class="n">make_folder_ifItDoesntExist</span><span class="p">(</span><span class="n">shared_folder</span><span class="o">+</span><span class="s1">&#39;shared/&#39;</span><span class="p">)</span>
+    <span class="n">shared_folder</span> <span class="o">+=</span> <span class="s1">&#39;shared/&#39;</span>
+    <span class="k">return</span> <span class="n">shared_folder</span></div>
+
+<div class="viewcode-block" id="load_dataset"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelOI.load_dataset">[docs]</a><span class="k">def</span> <span class="nf">load_dataset</span><span class="p">(</span><span class="n">Settings</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Loads datasets according to the Settings parameters &quot;dataset_name&quot;, &quot;pixels&quot;, &quot;number_of_images&quot;, &quot;seed&quot;.</span>
+<span class="sd">    Also manages shuffling and other initial editations of the dataset.</span>
+<span class="sd">    :param Settings:</span>
+<span class="sd">    :return: dataset object</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">datasets</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">num</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">model_settings</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dataset_pointer&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">num</span><span class="o">+=</span><span class="mi">1</span>
+    <span class="nb">print</span> <span class="s2">&quot;## Loading&quot;</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="s2">&quot; unique datasets:&quot;</span>
+    <span class="n">debug_ptrs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">model_settings</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]:</span>
+
+        <span class="n">ptr</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dataset_pointer&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ptr</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;noncanon_dataset&quot;</span><span class="p">]</span> <span class="o">&lt;&gt;</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">handle_noncanon_dataset</span><span class="p">(</span><span class="n">Settings</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">)</span>
+                <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dump_file_override&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dump_file_expanded&quot;</span><span class="p">]</span>
+
+            <span class="n">dataset</span> <span class="o">=</span> <span class="n">DatasetHandler</span><span class="o">.</span><span class="n">CreateDataset</span><span class="o">.</span><span class="n">load_custom</span><span class="p">(</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dataset_name&quot;</span><span class="p">],</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;pixels&quot;</span><span class="p">],</span>
+                    <span class="n">desired_number</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;number_of_images&quot;</span><span class="p">],</span> <span class="n">seed</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;seed&quot;</span><span class="p">],</span> <span class="n">filename_override</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dump_file_override&quot;</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;special_case&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;debug&#39;</span><span class="p">:</span>
+                <span class="n">dataset</span><span class="o">.</span><span class="n">debug_print_first</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+
+            <span class="c1"># Shuffling</span>
+            <span class="c1">#  shuffle the individual block of images from different places, to get more uniformly distributed data</span>
+            <span class="c1">#  but be careful not to separate [img1,osm1,vec1] and [img2,osm1,osm1] into training and valid sets</span>
+            <span class="c1">#  which in osm_only model would both result in same data: [_,osm1,vec1]</span>
+            <span class="c1">#  This would also be problematic in mixed model case.</span>
+            <span class="c1"># ps: different shuffle should end up with different dataset.unique_id, as the feature files are also different.</span>
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;shuffle_dataset&quot;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;shuffle_dataset_method&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;default-same-segment&#39;</span><span class="p">:</span>
+                    <span class="n">dataset</span><span class="o">.</span><span class="n">randomize_all_list_order_deterministically_same_segment</span><span class="p">(</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;seed&quot;</span><span class="p">])</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dataset</span><span class="o">.</span><span class="n">unique_id</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">unique_id</span> <span class="o">+</span> <span class="s2">&quot;_notshuffled&quot;</span>
+
+            <span class="c1"># OSM data projection</span>
+            <span class="c1">#  We can try edit the osm vectors to have nicer characteristics for CNNs</span>
+            <span class="c1"># ps: no need to mark this down into dataset.unique_id as this doesn&#39;t touch images</span>
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;edit_osm_vec&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;booleans&#39;</span><span class="p">:</span>
+                <span class="n">dataset</span><span class="o">.</span><span class="n">cast_osm_to_bool</span><span class="p">()</span>
+
+            <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;edit_osm_vec&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;low-mid-high&#39;</span><span class="p">:</span>
+                <span class="n">dataset</span><span class="o">.</span><span class="n">cast_osm_to_one_hot_categories</span><span class="p">()</span>
+
+            <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;edit_osm_vec&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;log&#39;</span><span class="p">:</span>
+                <span class="n">dataset</span><span class="o">.</span><span class="n">log_the_osm</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;osm_only_unique_osms&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;osm_only&#39;</span><span class="p">:</span>
+                <span class="c1"># yup allow thin only for osm only model - that&#39;s when we have dualities</span>
+                <span class="n">dataset</span><span class="o">.</span><span class="n">remove_dual_osms</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;test_existence_of_images&quot;</span><span class="p">]:</span>
+                <span class="n">dataset</span><span class="o">.</span><span class="n">test_existence_of_all_images</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;special_case&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;debug&#39;</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;DEBUG OUTPUT ABOUT&quot;</span>
+                <span class="nb">print</span> <span class="n">dataset</span>
+                <span class="nb">print</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plotHistogram</span><span class="p">(</span><span class="n">save_to_pdf</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">datasets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+            <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dataset_pointer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span>
+
+            <span class="n">debug_ptrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="nb">print</span> <span class="s2">&quot;Datasets:&quot;</span><span class="p">,</span> <span class="n">debug_ptrs</span><span class="p">,</span> <span class="n">datasets</span>
+
+    <span class="k">return</span> <span class="n">datasets</span></div>
+
+<span class="c1"># Cooking</span>
+<div class="viewcode-block" id="do_we_need_to_cook"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelOI.do_we_need_to_cook">[docs]</a><span class="k">def</span> <span class="nf">do_we_need_to_cook</span><span class="p">(</span><span class="n">filename_features_train</span><span class="p">,</span> <span class="n">filename_features_test</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Checks for the existence of cooked feature files.</span>
+<span class="sd">    :param filename_features_train: path to training features</span>
+<span class="sd">    :param filename_features_test: path to testing features</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="ow">not</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename_features_train</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">filename_features_train</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename_features_test</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">filename_features_test</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="get_feature_file_names"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelOI.get_feature_file_names">[docs]</a><span class="k">def</span> <span class="nf">get_feature_file_names</span><span class="p">(</span><span class="n">shared_folder</span><span class="p">,</span> <span class="n">dataset_uid</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">cut</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param shared_folder: taken from getSharedDirectory()</span>
+<span class="sd">    :param dataset_uid: taken from dataset.unique_id</span>
+<span class="sd">    :param model_name: can be for example &#39;resnet50&#39;</span>
+<span class="sd">    :param cut: special case scenario, if we were cutting base CNN shorter</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">add</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">cut</span> <span class="o">&lt;&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">add</span> <span class="o">=</span> <span class="s1">&#39;_cut&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span>
+
+    <span class="n">filename_features_train</span> <span class="o">=</span> <span class="n">shared_folder</span><span class="o">+</span><span class="s1">&#39;features_train_&#39;</span><span class="o">+</span><span class="n">dataset_uid</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">model_name</span><span class="o">+</span><span class="n">add</span><span class="o">+</span><span class="s1">&#39;.npy&#39;</span>
+    <span class="n">filename_features_test</span> <span class="o">=</span> <span class="n">shared_folder</span><span class="o">+</span><span class="s1">&#39;features_validation_&#39;</span><span class="o">+</span><span class="n">dataset_uid</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">model_name</span><span class="o">+</span><span class="n">add</span><span class="o">+</span><span class="s1">&#39;.npy&#39;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">filename_features_train</span><span class="p">,</span> <span class="n">filename_features_test</span><span class="p">]</span></div>
+
+<span class="c1"># Outputs</span>
+<div class="viewcode-block" id="save_visualizations"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelOI.save_visualizations">[docs]</a><span class="k">def</span> <span class="nf">save_visualizations</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">Settings</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Save visualizations of the models, if we have set it in Settings</span>
+<span class="sd">    :param models: list of models to be plotted</span>
+<span class="sd">    :param Settings: the main Setting, used to access output paths</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+        <span class="n">model_settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">][</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;save_visualization&quot;</span><span class="p">]:</span>
+
+            <span class="c1"># TODO: MODEL_TYPE_SPLIT</span>
+            <span class="kn">from</span> <span class="nn">keras.utils</span> <span class="k">import</span> <span class="n">plot_model</span>
+
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;simple_cnn_with_top&#39;</span> <span class="ow">or</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;img_osm_mix&#39;</span><span class="p">:</span>
+                <span class="c1">#cnn_model = model[0]</span>
+                <span class="c1">#plot_model(cnn_model, to_file=model_settings[&quot;model_image_name&quot;]+&#39;_cnn.png&#39;, show_shapes=True)</span>
+                <span class="n">top_model</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">plot_model</span><span class="p">(</span><span class="n">top_model</span><span class="p">,</span> <span class="n">to_file</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_shape_filename&quot;</span><span class="p">],</span> <span class="n">show_shapes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;osm_only&#39;</span><span class="p">:</span>
+                <span class="n">plot_model</span><span class="p">(</span><span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">to_file</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_shape_filename&quot;</span><span class="p">],</span> <span class="n">show_shapes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;Yet to be programmed.&quot;</span>
+
+        <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="save_histories"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelOI.save_histories">[docs]</a><span class="k">def</span> <span class="nf">save_histories</span><span class="p">(</span><span class="n">histories</span><span class="p">,</span> <span class="n">Settings</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Save histories into .npy files, which can be used to reproduce the results.</span>
+<span class="sd">    :param histories: histories to be saved</span>
+<span class="sd">    :param Settings: Main setting dict containing the path values</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">history</span> <span class="ow">in</span> <span class="n">histories</span><span class="p">:</span>
+        <span class="n">model_settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">][</span><span class="n">index</span><span class="p">]</span>
+        <span class="kn">from</span> <span class="nn">Downloader.VisualizeHistory</span> <span class="k">import</span> <span class="n">saveHistory</span>
+        <span class="n">saveHistory</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;history_filename&quot;</span><span class="p">])</span>
+        <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;history saved &gt;&gt;&quot;</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;history_filename&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="graph_histories"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelOI.graph_histories">[docs]</a><span class="k">def</span> <span class="nf">graph_histories</span><span class="p">(</span><span class="n">histories</span><span class="p">,</span> <span class="n">Settings</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Graphs histories according to Settings[&quot;graph_histories&quot;] ~ [&#39;all&#39;,[]] #[&#39;all&#39;,[],[0,2]]</span>
+<span class="sd">    :param histories: histories to be graphed</span>
+<span class="sd">    :param Settings: Main setting dict containing the path values</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="kn">from</span> <span class="nn">Downloader.VisualizeHistory</span> <span class="k">import</span> <span class="n">visualize_history</span><span class="p">,</span> <span class="n">visualize_histories</span><span class="p">,</span> <span class="n">visualize_special_histories</span><span class="p">,</span> <span class="n">visualize_whiskered_boxed</span>
+
+    <span class="k">for</span> <span class="n">setting</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;graph_histories&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">setting</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+            <span class="c1"># graph each of them into their own image</span>
+            <span class="nb">print</span> <span class="s1">&#39;all&#39;</span>
+
+            <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">history</span> <span class="ow">in</span> <span class="n">histories</span><span class="p">:</span>
+                <span class="n">model_settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">][</span><span class="n">index</span><span class="p">]</span>
+                <span class="n">graph_file</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;graph_filename&quot;</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;k_fold_crossvalidation&quot;</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">custom_title</span> <span class="o">=</span> <span class="s1">&#39;One:&#39;</span> <span class="o">+</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;unique_id&quot;</span><span class="p">]</span>
+                <span class="n">visualize_history</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="n">graph_file</span><span class="p">,</span> <span class="n">custom_title</span><span class="o">=</span><span class="n">custom_title</span><span class="p">)</span>
+                <span class="n">index</span> <span class="o">+=</span><span class="mi">1</span>
+
+                <span class="nb">print</span> <span class="s2">&quot;graph saved &gt;&gt;&quot;</span><span class="p">,</span> <span class="n">graph_file</span>
+
+        <span class="k">elif</span> <span class="n">setting</span> <span class="o">==</span> <span class="s1">&#39;together&#39;</span><span class="p">:</span>
+            <span class="c1"># graph all of them into one image</span>
+            <span class="nb">print</span> <span class="s1">&#39;together&#39;</span>
+
+            <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">histories_selected</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">history</span> <span class="ow">in</span> <span class="n">histories</span><span class="p">:</span>
+                <span class="n">model_settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">][</span><span class="n">index</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;k_fold_crossvalidation&quot;</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">custom_name</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;unique_id&quot;</span><span class="p">]</span>
+                <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">custom_name</span><span class="p">)</span>
+                <span class="n">histories_selected</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+                <span class="n">index</span> <span class="o">+=</span><span class="mi">1</span>
+
+            <span class="n">graph_file</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;together_graph_filename&quot;</span><span class="p">]</span>
+            <span class="n">custom_title</span> <span class="o">=</span> <span class="s1">&#39;All:&#39;</span> <span class="o">+</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;together_graph_title&quot;</span><span class="p">]</span>
+            <span class="n">visualize_histories</span><span class="p">(</span><span class="n">histories_selected</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">plotvalues</span><span class="o">=</span><span class="s1">&#39;loss&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="n">graph_file</span><span class="p">,</span> <span class="n">custom_title</span><span class="o">=</span><span class="n">custom_title</span><span class="p">)</span>
+            <span class="n">visualize_histories</span><span class="p">(</span><span class="n">histories_selected</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">plotvalues</span><span class="o">=</span><span class="s1">&#39;loss&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="n">graph_file</span><span class="o">+</span><span class="s1">&#39;_justValidation.png&#39;</span><span class="p">,</span> <span class="n">custom_title</span><span class="o">=</span><span class="n">custom_title</span><span class="p">,</span> <span class="n">just_val</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="nb">print</span> <span class="s2">&quot;graph saved &gt;&gt;&quot;</span><span class="p">,</span> <span class="n">graph_file</span>
+
+        <span class="k">elif</span> <span class="n">setting</span> <span class="o">==</span> <span class="p">[]:</span>
+            <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># graph combination ~ [0,1]</span>
+            <span class="nb">print</span> <span class="s1">&#39;combination&#39;</span>
+            <span class="n">histories_subset</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">subset_names</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">combination_txt</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">setting</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">histories</span><span class="p">):</span>
+                    <span class="n">histories_subset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">histories</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                    <span class="n">custom_name</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;unique_id&quot;</span><span class="p">]</span>
+                    <span class="n">subset_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">custom_name</span><span class="p">)</span>
+                    <span class="n">combination_txt</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; &#39;</span>
+
+            <span class="n">graph_file</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;together_graph_filename&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;Combination [&#39;</span> <span class="o">+</span> <span class="n">combination_txt</span> <span class="o">+</span> <span class="s1">&#39;] &#39;</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span>
+            <span class="n">custom_title</span> <span class="o">=</span> <span class="s1">&#39;Combination [&#39;</span> <span class="o">+</span> <span class="n">combination_txt</span> <span class="o">+</span> <span class="s1">&#39;]: &#39;</span> <span class="o">+</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;together_graph_title&quot;</span><span class="p">]</span>
+            <span class="n">visualize_histories</span><span class="p">(</span><span class="n">histories_subset</span><span class="p">,</span> <span class="n">subset_names</span><span class="p">,</span> <span class="n">plotvalues</span><span class="o">=</span><span class="s1">&#39;loss&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="n">graph_file</span><span class="p">,</span> <span class="n">custom_title</span><span class="o">=</span><span class="n">custom_title</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="s2">&quot;graph saved &gt;&gt;&quot;</span><span class="p">,</span> <span class="n">graph_file</span>
+
+    <span class="n">model_index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">special_history</span> <span class="ow">in</span> <span class="n">histories</span><span class="p">:</span>
+        <span class="n">model_settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">][</span><span class="n">model_index</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;k_fold_crossvalidation&quot;</span><span class="p">]:</span>
+            <span class="c1"># by default always generate graphs if we used k-fold crossvalidation</span>
+            <span class="nb">print</span> <span class="s2">&quot;Plotting k-fold crossvalidation graphs for model&quot;</span><span class="p">,</span> <span class="n">model_index</span>
+            <span class="nb">print</span> <span class="s2">&quot;from data with&quot;</span><span class="p">,</span> <span class="n">special_history</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+            <span class="c1"># for whiskered box plots:</span>
+            <span class="c1"># - best_validation_errors</span>
+            <span class="c1"># - last_validation_errors</span>
+            <span class="c1"># - last_training_measure</span>
+            <span class="c1"># - last_validation_measure</span>
+            <span class="c1"># - last_training_errors</span>
+            <span class="c1"># - best_training_measure</span>
+            <span class="c1"># - best_validation_measure</span>
+            <span class="c1"># - best_training_errors</span>
+
+            <span class="c1"># best_validation_errors, best_training_errors</span>
+            <span class="n">data_for_whiskeredboxes</span> <span class="o">=</span> <span class="p">[</span> <span class="n">special_history</span><span class="p">[</span><span class="s2">&quot;best_training_errors&quot;</span><span class="p">],</span> <span class="n">special_history</span><span class="p">[</span><span class="s2">&quot;best_validation_errors&quot;</span><span class="p">]</span> <span class="p">]</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;best_training_errors&quot;</span><span class="p">,</span> <span class="s2">&quot;best_validation_errors&quot;</span><span class="p">]</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;BestError&#39;</span>
+
+            <span class="n">graph_file</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;together_graph_filename&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_kfoldcrossvalidation_&#39;</span> <span class="o">+</span> <span class="n">title</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span>
+            <span class="n">visualize_whiskered_boxed</span><span class="p">(</span><span class="n">data_for_whiskeredboxes</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">,</span>
+                                      <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="n">graph_file</span><span class="p">,</span> <span class="n">custom_title</span><span class="o">=</span><span class="n">title</span> <span class="p">)</span>
+
+            <span class="c1"># best_validation_errors, best_training_errors</span>
+            <span class="n">data_for_whiskeredboxes</span> <span class="o">=</span> <span class="p">[</span> <span class="n">special_history</span><span class="p">[</span><span class="s2">&quot;last_training_errors&quot;</span><span class="p">],</span> <span class="n">special_history</span><span class="p">[</span><span class="s2">&quot;best_training_errors&quot;</span><span class="p">],</span>
+                                        <span class="n">special_history</span><span class="p">[</span><span class="s2">&quot;last_validation_errors&quot;</span><span class="p">],</span> <span class="n">special_history</span><span class="p">[</span><span class="s2">&quot;best_validation_errors&quot;</span><span class="p">]</span> <span class="p">]</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;last_train&quot;</span><span class="p">,</span> <span class="s2">&quot;best_train&quot;</span><span class="p">,</span> <span class="s2">&quot;last_val&quot;</span><span class="p">,</span> <span class="s2">&quot;best_val&quot;</span><span class="p">]</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;AllErrors&#39;</span>
+
+            <span class="n">graph_file</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;together_graph_filename&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_kfoldcrossvalidation_AllErrors.png&#39;</span>
+            <span class="n">visualize_whiskered_boxed</span><span class="p">(</span><span class="n">data_for_whiskeredboxes</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">,</span>
+                                      <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="n">graph_file</span><span class="p">,</span> <span class="n">custom_title</span><span class="o">=</span><span class="n">title</span> <span class="p">)</span>
+
+            <span class="c1"># for a shared graph plot</span>
+            <span class="c1"># - all_histories_of_this_model</span>
+            <span class="n">histories</span> <span class="o">=</span> <span class="n">special_history</span><span class="p">[</span><span class="s2">&quot;all_histories_of_this_model&quot;</span><span class="p">]</span>
+            <span class="n">graph_file</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;together_graph_filename&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_kfoldcrossvalidation&#39;</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span>
+            <span class="n">custom_title</span> <span class="o">=</span> <span class="s1">&#39;k-fold crossvalidation&#39;</span>
+
+            <span class="n">visualize_special_histories</span><span class="p">(</span><span class="n">histories</span><span class="p">,</span> <span class="n">plotvalues</span><span class="o">=</span><span class="s1">&#39;loss&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="n">graph_file</span><span class="p">,</span> <span class="n">custom_title</span><span class="o">=</span><span class="n">custom_title</span><span class="p">)</span>
+
+        <span class="n">model_index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="generate_report_string"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelOI.generate_report_string">[docs]</a><span class="k">def</span> <span class="nf">generate_report_string</span><span class="p">(</span><span class="n">Settings</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Generation of text based report.</span>
+<span class="sd">    :param Settings: main settings used for the experiment.</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">text</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;Experiment [</span><span class="si">%s</span><span class="s2">] report: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;experiment_name&quot;</span><span class="p">]))</span>
+    <span class="n">text</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;With </span><span class="si">%s</span><span class="s2"> models: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">])))</span>
+    <span class="k">for</span> <span class="n">model_settings</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]:</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;unique_id&quot;</span><span class="p">]))</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]))</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;Trained for </span><span class="si">%s</span><span class="s2"> epochs with </span><span class="si">%s</span><span class="s2"> optimizer and loss function </span><span class="si">%s</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;epochs&quot;</span><span class="p">],</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">],</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;loss_func&quot;</span><span class="p">]))</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;Used dataset: </span><span class="si">%s</span><span class="s2"> with </span><span class="si">%s</span><span class="s2"> images </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dataset_name&quot;</span><span class="p">],</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;number_of_images&quot;</span><span class="p">]))</span>
+
+        <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dump_file_override&quot;</span><span class="p">]</span> <span class="o">&lt;&gt;</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;Dump file used: </span><span class="si">%s</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dump_file_override&quot;</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;edit_osm_vec&quot;</span><span class="p">]</span> <span class="o">&lt;&gt;</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;OSM vector edited to: </span><span class="si">%s</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;edit_osm_vec&quot;</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;special_case&quot;</span><span class="p">]</span> <span class="o">&lt;&gt;</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;Hacks emplyed: </span><span class="si">%s</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;special_case&quot;</span><span class="p">]))</span>
+
+        <span class="n">text</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">text</span></div>
+
+<div class="viewcode-block" id="save_report"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelOI.save_report">[docs]</a><span class="k">def</span> <span class="nf">save_report</span><span class="p">(</span><span class="n">Settings</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Saves report of the most important settings.</span>
+<span class="sd">    :param Settings:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;report_txt_file&quot;</span><span class="p">],</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">text_file</span><span class="p">:</span>
+        <span class="n">text_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">generate_report_string</span><span class="p">(</span><span class="n">Settings</span><span class="p">))</span>
+
+    <span class="nb">print</span> <span class="s2">&quot;report saved &gt;&gt;&quot;</span><span class="p">,</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;report_txt_file&quot;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="save_models"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelOI.save_models">[docs]</a><span class="k">def</span> <span class="nf">save_models</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">Settings</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Saves the trained models alongside with the experiments settings.</span>
+<span class="sd">    :param models: list of models, each can contain base cnn model or just the top model. We differentiate according</span>
+<span class="sd">    according to the Settings of model_type.</span>
+<span class="sd">    :param Settings:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+        <span class="n">model_settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">][</span><span class="n">index</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;simple_cnn_with_top&#39;</span> <span class="ow">or</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;img_osm_mix&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_save&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">model</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_filename&quot;</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;_top.h5&#39;</span><span class="p">)</span>  <span class="c1"># creates a HDF5 file</span>
+                <span class="nb">print</span> <span class="s2">&quot;model saved &gt;&gt;&quot;</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_filename&quot;</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;_top.h5&#39;</span>
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_save&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_filename&quot;</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;_cnn.h5&#39;</span><span class="p">)</span>  <span class="c1"># creates a HDF5 file</span>
+                <span class="nb">print</span> <span class="s2">&quot;model saved &gt;&gt;&quot;</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_filename&quot;</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;_cnn.h5&#39;</span>
+        <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;osm_only&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_save&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_filename&quot;</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;_osmtop.h5&#39;</span><span class="p">)</span>  <span class="c1"># creates a HDF5 file</span>
+                <span class="nb">print</span> <span class="s2">&quot;model saved &gt;&gt;&quot;</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_filename&quot;</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;_osmtop.h5&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Yet to be programmed.&quot;</span>
+
+        <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="load_model"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelOI.load_model">[docs]</a><span class="k">def</span> <span class="nf">load_model</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Load Keras model from path.</span>
+<span class="sd">    :param path:</span>
+<span class="sd">    :return: the loaded model</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">load_model</span>
+    <span class="k">return</span> <span class="n">load_model</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+
+<span class="c1"># Further potentially useful reports</span>
+
+<div class="viewcode-block" id="send_mail_with_graph"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelOI.send_mail_with_graph">[docs]</a><span class="k">def</span> <span class="nf">send_mail_with_graph</span><span class="p">(</span><span class="n">Settings</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Reporting method by sending mail with graph as an attachment.</span>
+<span class="sd">    :param Settings:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Report of Experiment finishing&#39;</span>
+    <span class="n">message</span><span class="o">=</span><span class="n">generate_report_string</span><span class="p">(</span><span class="n">Settings</span><span class="p">)</span>
+    <span class="n">attachment_path</span><span class="o">=</span><span class="kc">None</span>
+
+    <span class="k">if</span> <span class="s1">&#39;together&#39;</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;graph_histories&quot;</span><span class="p">]:</span>
+        <span class="n">attachment_path</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;together_graph_filename&quot;</span><span class="p">]</span>
+
+    <span class="n">second_path</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">model_setting</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">model_setting</span><span class="p">[</span><span class="s2">&quot;k_fold_crossvalidation&quot;</span><span class="p">]:</span>
+            <span class="n">graph_file</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;together_graph_filename&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_kfoldcrossvalidation&#39;</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span>
+            <span class="n">second_path</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;together_graph_filename&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_kfoldcrossvalidation_AllErrors.pngAllErrors.png&#39;</span>
+            <span class="n">attachment_path</span> <span class="o">=</span> <span class="n">graph_file</span>
+
+    <span class="nb">print</span> <span class="s2">&quot;## Sending report mail with attachment &quot;</span><span class="p">,</span> <span class="n">attachment_path</span>
+    <span class="n">send_mail</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">attachment_path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">second_path</span> <span class="o">&lt;&gt;</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">send_mail</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">second_path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="save_metacentrum_report"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelOI.save_metacentrum_report">[docs]</a><span class="k">def</span> <span class="nf">save_metacentrum_report</span><span class="p">(</span><span class="n">Settings</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Downloads and saves the Metacentrum generated file, according to the unique id value in Settings.</span>
+<span class="sd">    :param Settings:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">job_id</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;job_id&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">job_id</span> <span class="o">&lt;&gt;</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;## Downloading &quot;</span><span class="p">,</span> <span class="n">job_id</span><span class="o">+</span><span class="s1">&#39;.html&#39;</span>
+        <span class="n">save_job_report_page</span><span class="p">(</span><span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;folders&quot;</span><span class="p">][</span><span class="s2">&quot;report_html_file&quot;</span><span class="p">],</span> <span class="n">job_id</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;## Downloading of job page failed, we don&#39;t know job_id&quot;</span><span class="p">,</span> <span class="n">job_id</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

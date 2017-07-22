@@ -1,0 +1,493 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ModelHandler.ModelGenerator &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ModelHandler.ModelGenerator</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Provides the rest of the ModelHandler code with models. Works with the lower level of code in /Create Model</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="n">Dropout</span><span class="p">,</span> <span class="n">Flatten</span><span class="p">,</span> <span class="n">Dense</span><span class="p">,</span> <span class="n">Conv2D</span><span class="p">,</span> <span class="n">MaxPooling2D</span>
+<span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="n">Input</span><span class="p">,</span> <span class="n">concatenate</span><span class="p">,</span> <span class="n">GlobalAveragePooling2D</span>
+<span class="kn">import</span> <span class="nn">ModelHandler.CreateModel.KerasApplicationsModels</span> <span class="k">as</span> <span class="nn">Models</span>
+
+<span class="kn">from</span> <span class="nn">Omnipresent</span> <span class="k">import</span> <span class="n">len_</span>
+
+<span class="c1"># Generate Model Parts</span>
+<div class="viewcode-block" id="build_img_only_top_model"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelGenerator.build_img_only_top_model">[docs]</a><span class="k">def</span> <span class="nf">build_img_only_top_model</span><span class="p">(</span><span class="n">input_shape</span><span class="p">,</span> <span class="n">number_of_repeats</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Builds simple model of repeated FC blocks.</span>
+<span class="sd">    :param input_shape: Keras needs to know the input shape.</span>
+<span class="sd">    :param number_of_repeats: repeats of FC block additional to the first Flatten layer and the last sigmoid output layer.</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">img_features_input</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">input_shape</span><span class="p">)</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="n">Flatten</span><span class="p">()(</span><span class="n">img_features_input</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">number_of_repeats</span><span class="p">):</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">top</span><span class="p">)</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)(</span><span class="n">top</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;sigmoid&#39;</span><span class="p">)(</span><span class="n">top</span><span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">img_features_input</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="build_osm_only_model"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelGenerator.build_osm_only_model">[docs]</a><span class="k">def</span> <span class="nf">build_osm_only_model</span><span class="p">(</span><span class="n">input_shape</span><span class="p">,</span> <span class="n">number_of_repeats</span><span class="p">,</span> <span class="n">manual_width</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Build a simple model with just OSM vector as it&#39;s input, couple of FC blocks and then sigmoid output of 1 score value</span>
+<span class="sd">    :param input_shape: Keras needs to know the input shape.</span>
+<span class="sd">    :param number_of_repeats: repeats of FC block additional to the first Flatten layer and the last sigmoid output layer.</span>
+<span class="sd">    :param manual_width: manual width of the fc layers</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">osm_features_input</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">input_shape</span><span class="p">)</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">manual_width</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">osm_features_input</span><span class="p">)</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)(</span><span class="n">top</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">number_of_repeats</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">manual_width</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">top</span><span class="p">)</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)(</span><span class="n">top</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;sigmoid&#39;</span><span class="p">)(</span><span class="n">top</span><span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">osm_features_input</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="build_img_osm_mix_model"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelGenerator.build_img_osm_mix_model">[docs]</a><span class="k">def</span> <span class="nf">build_img_osm_mix_model</span><span class="p">(</span><span class="n">input_shape_img</span><span class="p">,</span> <span class="n">input_shape_osm</span><span class="p">,</span> <span class="n">number_of_repeats</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Build a combined model using both imgs and osm data.</span>
+<span class="sd">    :param input_shape_img: Keras needs to know the input shapes for imgs.</span>
+<span class="sd">    :param input_shape_osm: Keras needs to know the input shapes for osm vectors.</span>
+<span class="sd">    :param number_of_repeats: repeats of FC block additional to the first Flatten layer and the last sigmoid output layer.</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">osm_features_input</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">input_shape_osm</span><span class="p">)</span>
+    <span class="n">osm_features</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">osm_features_input</span><span class="p">)</span>
+    <span class="n">osm_features</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)(</span><span class="n">osm_features</span><span class="p">)</span>
+
+    <span class="n">img_features_input</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">input_shape_img</span><span class="p">)</span>
+    <span class="n">img_features</span> <span class="o">=</span> <span class="n">Flatten</span><span class="p">()(</span><span class="n">img_features_input</span><span class="p">)</span>
+
+    <span class="n">top</span> <span class="o">=</span> <span class="n">concatenate</span><span class="p">([</span><span class="n">osm_features</span><span class="p">,</span> <span class="n">img_features</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">number_of_repeats</span><span class="p">):</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">top</span><span class="p">)</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)(</span><span class="n">top</span><span class="p">)</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;sigmoid&#39;</span><span class="p">)(</span><span class="n">top</span><span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="p">[</span><span class="n">osm_features_input</span><span class="p">,</span> <span class="n">img_features_input</span><span class="p">],</span> <span class="n">outputs</span><span class="o">=</span><span class="n">top</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="build_img_osm_mix_model_custom_base_cnn_top"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelGenerator.build_img_osm_mix_model_custom_base_cnn_top">[docs]</a><span class="k">def</span> <span class="nf">build_img_osm_mix_model_custom_base_cnn_top</span><span class="p">(</span><span class="n">input_shape_img</span><span class="p">,</span> <span class="n">input_shape_osm</span><span class="p">,</span> <span class="n">number_of_repeats</span><span class="p">):</span>
+    <span class="c1"># Special case</span>
+    <span class="c1"># Special case scenario where we are testing different base CNN which produce large features</span>
+    <span class="c1"># Here we tested if using couple of Pooling and Convolutional layers before the input would help.</span>
+    <span class="n">osm_features_input</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">input_shape_osm</span><span class="p">)</span>
+    <span class="n">osm_features</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">osm_features_input</span><span class="p">)</span>
+    <span class="n">osm_features</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)(</span><span class="n">osm_features</span><span class="p">)</span>
+
+    <span class="n">img_features_input</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">input_shape_img</span><span class="p">)</span>
+
+    <span class="n">img_features</span> <span class="o">=</span> <span class="n">GlobalAveragePooling2D</span><span class="p">()(</span><span class="n">img_features_input</span><span class="p">)</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    img_features = Conv2D(64, 3, padding=&#39;same&#39;, name=&#39;conv_topm_1&#39;)(img_features)</span>
+<span class="sd">    img_features = Dropout(0.5)(img_features)</span>
+<span class="sd">    img_features = MaxPooling2D(pool_size=(4, 4))(img_features)</span>
+<span class="sd">    img_features = Dropout(0.5)(img_features)</span>
+<span class="sd">    img_features = Conv2D(64, 3, padding=&#39;same&#39;, name=&#39;conv_topm_2&#39;)(img_features)</span>
+<span class="sd">    img_features = Dropout(0.5)(img_features)</span>
+<span class="sd">    img_features = MaxPooling2D(pool_size=(2, 2))(img_features)</span>
+<span class="sd">    img_features = Dropout(0.5)(img_features)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">img_features</span> <span class="o">=</span> <span class="n">Flatten</span><span class="p">()(</span><span class="n">img_features</span><span class="p">)</span>
+
+    <span class="n">top</span> <span class="o">=</span> <span class="n">concatenate</span><span class="p">([</span><span class="n">osm_features</span><span class="p">,</span> <span class="n">img_features</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">number_of_repeats</span><span class="p">):</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">top</span><span class="p">)</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)(</span><span class="n">top</span><span class="p">)</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;sigmoid&#39;</span><span class="p">)(</span><span class="n">top</span><span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="p">[</span><span class="n">osm_features_input</span><span class="p">,</span> <span class="n">img_features_input</span><span class="p">],</span> <span class="n">outputs</span><span class="o">=</span><span class="n">top</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="build_full_mixed_model"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelGenerator.build_full_mixed_model">[docs]</a><span class="k">def</span> <span class="nf">build_full_mixed_model</span><span class="p">(</span><span class="n">osm_shape</span><span class="p">,</span> <span class="n">img_shape</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">299</span><span class="p">,</span> <span class="mi">299</span><span class="p">,</span> <span class="mi">3</span><span class="p">))):</span>
+    <span class="c1"># Special case</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Tests with the mixed model without using features for cooking.</span>
+<span class="sd">    :param osm_shape: shape of the osm data</span>
+<span class="sd">    :param img_shape: shape of the imgs data</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">input_shape_osm</span> <span class="o">=</span> <span class="n">osm_shape</span>
+
+    <span class="n">number_of_repeats</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="n">input_tensor</span> <span class="o">=</span> <span class="n">img_shape</span>
+    <span class="kn">from</span> <span class="nn">keras.applications.resnet50</span> <span class="k">import</span> <span class="n">ResNet50</span>
+    <span class="kn">from</span> <span class="nn">keras.utils</span> <span class="k">import</span> <span class="n">plot_model</span>
+
+
+    <span class="n">model_cnn</span> <span class="o">=</span> <span class="n">ResNet50</span><span class="p">(</span><span class="n">input_tensor</span><span class="o">=</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="s1">&#39;imagenet&#39;</span><span class="p">,</span> <span class="n">include_top</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">osm_features_input</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">input_shape_osm</span><span class="p">)</span>
+    <span class="n">osm_features</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">osm_features_input</span><span class="p">)</span>
+    <span class="n">osm_features</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)(</span><span class="n">osm_features</span><span class="p">)</span>
+
+    <span class="n">img_features</span> <span class="o">=</span> <span class="n">Flatten</span><span class="p">()(</span><span class="n">model_cnn</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="n">top</span> <span class="o">=</span> <span class="n">concatenate</span><span class="p">([</span><span class="n">osm_features</span><span class="p">,</span> <span class="n">img_features</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">number_of_repeats</span><span class="p">):</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">top</span><span class="p">)</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)(</span><span class="n">top</span><span class="p">)</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;sigmoid&#39;</span><span class="p">)(</span><span class="n">top</span><span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="p">[</span><span class="n">model_cnn</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="n">osm_features_input</span><span class="p">],</span> <span class="n">outputs</span><span class="o">=</span><span class="n">top</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+
+    <span class="n">plot_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">to_file</span><span class="o">=</span><span class="s1">&#39;TEST.png&#39;</span><span class="p">,</span> <span class="n">show_shapes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">model</span></div>
+
+<span class="c1"># Generate Whole Models</span>
+<div class="viewcode-block" id="get_top_models"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelGenerator.get_top_models">[docs]</a><span class="k">def</span> <span class="nf">get_top_models</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">Settings</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Adds the right top models, now with proper knowledge of shapes of feature files.</span>
+<span class="sd">    :param models: list of models where we will add new ones</span>
+<span class="sd">    :param datasets: using information about databases</span>
+<span class="sd">    :param Settings: and using information from Settings</span>
+<span class="sd">    :return: models are generated and returned</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">number_of_models</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">])</span>
+    <span class="nb">print</span> <span class="s2">&quot;## Adding &quot;</span><span class="p">,</span><span class="n">number_of_models</span><span class="p">,</span><span class="s2">&quot; top models.&quot;</span>
+
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">model_settings</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]:</span>
+        <span class="kn">from</span> <span class="nn">ModelHandler.ModelTester</span> <span class="k">import</span> <span class="n">load_feature_file</span>
+
+        <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;simple_cnn_with_top&#39;</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;evaluation_after_training&quot;</span><span class="p">]:</span>
+                <span class="c1"># special case, when we dont actually need any features or images - just evaluation</span>
+                <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;pixels&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">640</span><span class="p">:</span>
+                    <span class="n">input_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2048</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;pixels&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">299</span><span class="p">:</span>
+                    <span class="n">input_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2048</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="s2">&quot;uncoded model combination&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">filename_features_train</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;filename_features_train&quot;</span><span class="p">]</span>
+                <span class="n">train_data</span> <span class="o">=</span> <span class="n">load_feature_file</span><span class="p">(</span><span class="n">filename_features_train</span><span class="p">)</span>
+                <span class="n">input_shape</span> <span class="o">=</span> <span class="n">train_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+            <span class="n">model</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">build_img_only_top_model</span><span class="p">(</span><span class="n">input_shape</span><span class="o">=</span><span class="n">input_shape</span><span class="p">,</span> <span class="n">number_of_repeats</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;top_repeat_FC_block&quot;</span><span class="p">])</span>
+            <span class="nb">print</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;unique_id&quot;</span><span class="p">],</span> <span class="n">model</span>
+
+        <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;img_osm_mix&#39;</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;evaluation_after_training&quot;</span><span class="p">]:</span>
+                <span class="c1"># special case, when we dont actually need any features or images - just evaluation</span>
+                <span class="n">input_shape_osm</span> <span class="o">=</span> <span class="p">(</span><span class="mi">594</span><span class="p">,)</span>
+
+                <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;pixels&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">640</span><span class="p">:</span>
+                    <span class="n">input_shape_img</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2048</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;pixels&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">299</span><span class="p">:</span>
+                    <span class="n">input_shape_img</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2048</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="s2">&quot;uncoded model combination&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="n">filename_features_train</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;filename_features_train&quot;</span><span class="p">]</span>
+
+                <span class="n">train_data</span> <span class="o">=</span> <span class="n">load_feature_file</span><span class="p">(</span><span class="n">filename_features_train</span><span class="p">)</span>
+                <span class="n">input_shape_img</span> <span class="o">=</span> <span class="n">train_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+                <span class="n">dataset</span> <span class="o">=</span> <span class="n">datasets</span><span class="p">[</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dataset_pointer&quot;</span><span class="p">]</span> <span class="p">]</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">dataset</span><span class="o">.</span><span class="n">has_osm_loaded</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="s2">&quot;For this model type, we need OSM vectors, choose dataset accordingly.&quot;</span>
+                    <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;interrupt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+                <span class="n">input_shape_osm</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getShapeOfOsm</span><span class="p">()</span>
+
+                <span class="nb">print</span> <span class="s2">&quot;input_shape_osm&quot;</span><span class="p">,</span> <span class="n">input_shape_osm</span>
+
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;special_case&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;base_cnn_custom_top&#39;</span><span class="p">:</span>
+                <span class="n">model</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">build_img_osm_mix_model_custom_base_cnn_top</span><span class="p">(</span><span class="n">input_shape_img</span><span class="p">,</span> <span class="n">input_shape_osm</span><span class="p">,</span>
+                                                   <span class="n">number_of_repeats</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;top_repeat_FC_block&quot;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">model</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">build_img_osm_mix_model</span><span class="p">(</span><span class="n">input_shape_img</span><span class="p">,</span> <span class="n">input_shape_osm</span><span class="p">,</span> <span class="n">number_of_repeats</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;top_repeat_FC_block&quot;</span><span class="p">])</span>
+            <span class="nb">print</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;unique_id&quot;</span><span class="p">],</span> <span class="n">model</span>
+
+        <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;osm_only&#39;</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;evaluation_after_training&quot;</span><span class="p">]:</span>
+                <span class="c1"># special case, when we dont actually need any features or images - just evaluation</span>
+                <span class="n">input_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">594</span><span class="p">,)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dataset</span> <span class="o">=</span> <span class="n">datasets</span><span class="p">[</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dataset_pointer&quot;</span><span class="p">]</span> <span class="p">]</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">dataset</span><span class="o">.</span><span class="n">has_osm_loaded</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="s2">&quot;For this model type, we need OSM vectors, choose dataset accordingly.&quot;</span>
+                    <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;interrupt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+
+                <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;special_case&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;OSM_Multiple_Radii&#39;</span><span class="p">:</span>
+                    <span class="n">dataset</span><span class="o">.</span><span class="n">expandOsmDataWithMultipleRadii</span><span class="p">(</span><span class="n">model_settings</span><span class="p">)</span>
+
+                <span class="n">input_shape</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getShapeOfOsm</span><span class="p">()</span>
+                <span class="nb">print</span> <span class="s2">&quot;input_shape&quot;</span><span class="p">,</span> <span class="n">input_shape</span>
+
+            <span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">build_osm_only_model</span><span class="p">(</span><span class="n">input_shape</span><span class="o">=</span><span class="n">input_shape</span><span class="p">,</span> <span class="n">number_of_repeats</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;top_repeat_FC_block&quot;</span><span class="p">],</span> <span class="n">manual_width</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;osm_manual_width&quot;</span><span class="p">])</span>
+            <span class="nb">print</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;unique_id&quot;</span><span class="p">],</span> <span class="n">model</span>
+
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;special_case&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;OSM_Multiple_Radii&#39;</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;Specially enhanced OSM model of shape:&quot;</span>
+                <span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Yet to be programmed.&quot;</span>
+
+        <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">models</span></div>
+
+<div class="viewcode-block" id="report_models"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelGenerator.report_models">[docs]</a><span class="k">def</span> <span class="nf">report_models</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">Settings</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Debug method - report all models</span>
+<span class="sd">    :param models: list of models</span>
+<span class="sd">    :param Settings: settings files to get the individual model settings</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">number_of_models</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">])</span>
+    <span class="nb">print</span> <span class="s2">&quot;## Adding &quot;</span><span class="p">,</span><span class="n">number_of_models</span><span class="p">,</span><span class="s2">&quot; top models.&quot;</span>
+
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">model_settings</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;simple_cnn_with_top&#39;</span><span class="p">:</span>
+            <span class="n">filename_features_train</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;filename_features_train&quot;</span><span class="p">]</span>
+
+
+            <span class="nb">print</span> <span class="s2">&quot;^^^^^^ base part of IMG model&quot;</span>
+            <span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+            <span class="nb">print</span> <span class="s2">&quot;^^^^^^ top part of IMG model&quot;</span>
+            <span class="n">model</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;img_osm_mix&#39;</span><span class="p">:</span>
+
+            <span class="nb">print</span> <span class="s2">&quot;^^^^^^ base part of MIX model&quot;</span>
+            <span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+            <span class="nb">print</span> <span class="s2">&quot;^^^^^^ top part of MIX model&quot;</span>
+            <span class="n">model</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;osm_only&#39;</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;^^^^^^ main part of OSM model&quot;</span>
+            <span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Yet to be programmed.&quot;</span>
+
+        <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="get_cnn_models"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelGenerator.get_cnn_models">[docs]</a><span class="k">def</span> <span class="nf">get_cnn_models</span><span class="p">(</span><span class="n">Settings</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Loads the base CNN part of models</span>
+<span class="sd">    :param Settings: settings used to get individual model settings</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">models</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">number_of_models</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">])</span>
+    <span class="nb">print</span> <span class="s2">&quot;## Loading&quot;</span><span class="p">,</span><span class="n">number_of_models</span><span class="p">,</span><span class="s2">&quot;models with their CNNs.&quot;</span>
+
+    <span class="k">for</span> <span class="n">model_settings</span> <span class="ow">in</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]:</span>
+
+        <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;simple_cnn_with_top&#39;</span> <span class="ow">or</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;img_osm_mix&#39;</span><span class="p">:</span>
+            <span class="n">cnn_model</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;cnn_model&quot;</span><span class="p">]</span>
+            <span class="n">model_cnn</span> <span class="o">=</span> <span class="n">Models</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="n">cnn_model</span><span class="p">,</span> <span class="n">pixels</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;pixels&quot;</span><span class="p">])</span>
+            <span class="c1">#DefaultModel[&quot;cut_cnn&quot;]</span>
+
+            <span class="n">top</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1">#build_top_model(input_shape=None, number_of_repeats=model[&quot;top_repeat_FC_block&quot;])</span>
+
+            <span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">model_cnn</span><span class="p">,</span> <span class="n">top</span><span class="p">])</span>
+
+        <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;osm_only&#39;</span><span class="p">:</span>
+            <span class="c1"># No need to preload or cook features from images in this case</span>
+            <span class="n">osm_top</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">osm_top</span><span class="p">])</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Yet to be programmed.&quot;</span>
+
+    <span class="k">return</span> <span class="n">models</span></div>
+
+<div class="viewcode-block" id="split_model"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelGenerator.split_model">[docs]</a><span class="k">def</span> <span class="nf">split_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Split model by the start and end flags - we get the subset of a model.</span>
+<span class="sd">    # Thanks to https://github.com/fchollet/keras/issues/5074#issuecomment-274259404</span>
+
+<span class="sd">    :param model: model to be split</span>
+<span class="sd">    :param start: from layer</span>
+<span class="sd">    :param end: to layer</span>
+<span class="sd">    :return: subset of the model</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">confs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_config</span><span class="p">()</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="p">{</span><span class="n">l</span><span class="o">.</span><span class="n">name</span><span class="p">:</span><span class="n">l</span><span class="o">.</span><span class="n">get_weights</span><span class="p">()</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">layers</span><span class="p">}</span>
+    <span class="c1"># split model</span>
+    <span class="n">kept_layers</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">confs</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">confs</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;config&#39;</span><span class="p">][</span><span class="s1">&#39;batch_input_shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">start</span><span class="p">]</span><span class="o">.</span><span class="n">input_shape</span>
+        <span class="k">elif</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">start</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">end</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">kept_layers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+    <span class="c1"># filter layers</span>
+    <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">confs</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">l</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">kept_layers</span><span class="p">]</span>
+    <span class="n">layers</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;inbound_nodes&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+    <span class="c1"># set conf</span>
+    <span class="n">confs</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layers</span>
+    <span class="n">confs</span><span class="p">[</span><span class="s1">&#39;input_layers&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+    <span class="n">confs</span><span class="p">[</span><span class="s1">&#39;output_layers&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+
+    <span class="nb">print</span> <span class="n">confs</span>
+
+    <span class="c1"># create new model</span>
+    <span class="n">newModel</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">from_config</span><span class="p">(</span><span class="n">confs</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">newModel</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+        <span class="n">l</span><span class="o">.</span><span class="n">set_weights</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">l</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">newModel</span></div>
+
+<span class="c1"># building models for fine tuning</span>
+<div class="viewcode-block" id="build_finetune_model"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelGenerator.build_finetune_model">[docs]</a><span class="k">def</span> <span class="nf">build_finetune_model</span><span class="p">(</span><span class="n">cnn</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">):</span>
+    <span class="c1"># Special case</span>
+    <span class="c1"># experiments with finetuning whole models (base and top)</span>
+    <span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Model</span>
+
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">cnn</span><span class="o">.</span><span class="n">layers</span><span class="p">)):</span>
+        <span class="n">layer</span> <span class="o">=</span> <span class="n">cnn</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+        <span class="c1">#print layer, type(layer), layer.get_config()</span>
+        <span class="c1">#print layer.name, type(layer).__name__, layer, type(layer), layer.get_config()</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">get_config</span><span class="p">()[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;add&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="n">n</span><span class="p">,</span> <span class="n">layer</span>
+
+    <span class="nb">print</span> <span class="n">cut</span><span class="p">,</span> <span class="n">cnn</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">cut</span><span class="p">]</span>
+
+    <span class="n">cnn_rest_model</span> <span class="o">=</span> <span class="n">split_model</span><span class="p">(</span><span class="n">cnn</span><span class="p">,</span> <span class="n">cut</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">cnn</span><span class="o">.</span><span class="n">layers</span><span class="p">))</span>
+
+    <span class="n">model_middle</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="n">cnn_rest_model</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="n">top</span><span class="p">(</span><span class="n">cnn_rest_model</span><span class="o">.</span><span class="n">output</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">model_middle</span></div>
+
+<div class="viewcode-block" id="join_two_models"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelGenerator.join_two_models">[docs]</a><span class="k">def</span> <span class="nf">join_two_models</span><span class="p">(</span><span class="n">one</span><span class="p">,</span> <span class="n">two</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Join two models in a chain after each other</span>
+<span class="sd">    :param one: first model</span>
+<span class="sd">    :param two: second model</span>
+<span class="sd">    :return:  joined model</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Model</span>
+    <span class="n">finetune_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="n">one</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="n">two</span><span class="p">(</span><span class="n">one</span><span class="o">.</span><span class="n">output</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">finetune_model</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,47 @@
+This Python project depends on many libraries, such as the Keras framework. We will present here a brief "how-to" for installation of prerequisites.
+
+[Unpacking]
+0. unzip project files and place 1200x_markable_299x299 into MGR-Project-Code/Data/StreetViewData, so that there is path:
+MGR-Project-Code/Data/StreetViewData/1200x_markable_299x299/SegmentsData_marked_R100.dump
+
+[Installing]
+1. uninstall old versions:
+sudo pip uninstall theano
+sudo pip uninstall tensorflow
+sudo pip uninstall keras
+
+2. install Keras and backends
+sudo pip install git+https://github.com/Theano/Theano.git#egg=Theano
+sudo pip install tensorflow
+sudo pip install keras
+
+3. install Posgre SQL and setup database, for Marking segments
+sudo apt-get install -y postgresql postgresql-contrib
+sudo apt-get install postgresql-9.6 postgis
+
+sudo -u postgres createuser -P example_user
+sudo -u postgres createdb -O example_user gisdb
+psql -h localhost -U example_user gisdb
+sudo -u postgres psql -c "CREATE EXTENSION postgis; CREATE EXTENSION postgis_topology;" gisdb
+# get osm2pgsql from https://github.com/openstreetmap/osm2pgsql
+osm2pgsql --create --database gisdb DATAMAPFILE.osm.pbf -U example_user
+
+Y. Note that depending on the workstation settings, there will be additional requirements.
+
+[Post setup]
+X. We will also need to fill in files with secret data, such as our Google Street View api code, mail login information (for mail reporting) and settings for the PostgreSQL database.
+
+OSMHandler/ConnectionSettingsSecrets.py
+hostname = 'localhost'
+username = 'example_user'
+password = '' << fill in your information
+database = 'gisdb'
+
+
+mail_secrets.py
+fromaddr << which mail we are using to send the reports from
+toaddr << which is our target mail address
+passwrd << password for the fromaddr email account
+
+apicode.txt
+API code in textfile generated from the website https://developers.google.com/maps/documentation/streetview/. Follow https://developers.google.com/maps/documentation/streetview/get-api-key.

@@ -1,0 +1,1 @@
+This folder contains the records of past experiment runs with histories saved in .npy files. These can be used by scripts in ResultsGraphing to plot graphs.

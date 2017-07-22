@@ -1,0 +1,102 @@
+Downloader package
+==================
+
+Subpackages
+-----------
+
+.. toctree::
+
+
+    Downloader.PreprocessData
+
+Submodules
+----------
+
+Downloader\.DataOperations module
+---------------------------------
+
+.. automodule:: Downloader.DataOperations
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Downloader\.Defaults module
+---------------------------
+
+.. automodule:: Downloader.Defaults
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Downloader\.DownloaderRunner module
+-----------------------------------
+
+.. automodule:: Downloader.DownloaderRunner
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Downloader\.GenerateGIFAnimation module
+---------------------------------------
+
+.. automodule:: Downloader.GenerateGIFAnimation
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Downloader\.ImageHelpers module
+-------------------------------
+
+.. automodule:: Downloader.ImageHelpers
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Downloader\.KerasPreparation module
+-----------------------------------
+
+.. automodule:: Downloader.KerasPreparation
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Downloader\.PreprocessDataF module
+----------------------------------
+
+.. automodule:: Downloader.PreprocessDataF
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Downloader\.Tester module
+-------------------------
+
+.. automodule:: Downloader.Tester
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Downloader\.UseData module
+--------------------------
+
+.. automodule:: Downloader.UseData
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Downloader\.VisualizeHistory module
+-----------------------------------
+
+.. automodule:: Downloader.VisualizeHistory
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: Downloader
+    :members:
+    :undoc-members:
+    :show-inheritance:

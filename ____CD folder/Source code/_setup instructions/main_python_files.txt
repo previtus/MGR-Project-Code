@@ -1,0 +1,24 @@
+The main runner files are:
+
+- MGR-Project-Code/run_downloader_on_server.py
+
+Downloads the downloading process. Run with:
+python run_downloader_on_server.py NAME_OF_DATASET FROM_ID TO_ID PIXELS MIN_LEN
+which translates to:
+RunDownload(name, from_id, to_id, pixels, minimal_length, custom_geojson)
+Note that we can specify our own custom geojson file to be used (as a source of locations and scores).
+
+- MGR-Project-Code/run_on_server.py
+Runs experiment with specified settings. Specify path to the settings file, such as Settings/minimal_model.py
+# python run_on_server.py SETTINGS_PATH UNIQUE_EXPERIMENT_ID
+Note that the experiment runner needs to have the datasets downloaded and in the case of OSM models also Marked.
+
+
+- MGR-Project-Code/run_evaluator.py
+Runs evaluation of custom model (specified by its h5 file and setting specification file - MIX_model_file, MIX_settings_file) on 
+MIX_model_file = folder_path + '/models/expanded: 5556x_markable_640x640_2x_agressive_expanded_resnet50.h5_top.h5'
+MIX_settings_file = folder_path + '/builds_aggresive_expand_dataset_normalmarkable_kfold.py'
+evaluator(MIX_model_file, MIX_settings_file, 'marked_from_mix_flag1788956.geojson')
+
+- OSMHandler/SegmentsMarkingHandler.py
+Marker of already downloaded Segments. Needs the path to already existing Segment .dump file and setting of radius. Also we need to have functioning PostgreSQL database.

@@ -1,0 +1,523 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ModelHandler.ModelTester &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ModelHandler.ModelTester</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Runs tests on Models - will perform all calls to Keras functions like fit, predics, etc. and produce history of the</span>
+<span class="c1"># process.</span>
+<span class="c1"># Takes models as inputs.</span>
+<span class="c1"># Can run either simple tests, or the more complicated ones</span>
+<span class="c1"># Can perform the more precise k-fold cross validation</span>
+
+<span class="kn">from</span> <span class="nn">ModelHandler.ModelGenerator</span> <span class="k">import</span> <span class="n">build_full_mixed_model</span><span class="p">,</span> <span class="n">build_finetune_model</span><span class="p">,</span> <span class="n">join_two_models</span>
+<span class="kn">from</span> <span class="nn">ModelHandler.KfoldTester</span> <span class="k">import</span> <span class="n">k_fold_crossvalidation</span>
+<span class="kn">from</span> <span class="nn">Omnipresent</span> <span class="k">import</span> <span class="n">len_</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">keras.utils</span> <span class="k">import</span> <span class="n">plot_model</span>
+
+<div class="viewcode-block" id="cook_features"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelTester.cook_features">[docs]</a><span class="k">def</span> <span class="nf">cook_features</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">Settings</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Makes sure that we have features available for the duo of model-dataset in our shared feature folder.</span>
+<span class="sd">    If not, we will cook them.</span>
+<span class="sd">    :param models: list of models (currently without their tops)</span>
+<span class="sd">    :param datasets: list of dataset object</span>
+<span class="sd">    :param Settings: settings</span>
+<span class="sd">    :return: number of ready models</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># cooking shared data</span>
+    <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+        <span class="n">model_settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">][</span><span class="n">index</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;simple_cnn_with_top&#39;</span> <span class="ow">or</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;img_osm_mix&#39;</span><span class="p">:</span>
+
+            <span class="n">dataset</span> <span class="o">=</span> <span class="n">datasets</span><span class="p">[</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dataset_pointer&quot;</span><span class="p">]</span> <span class="p">]</span>
+            <span class="kn">from</span> <span class="nn">ModelHandler.ModelOI</span> <span class="k">import</span> <span class="n">get_feature_file_names</span><span class="p">,</span> <span class="n">do_we_need_to_cook</span>
+            <span class="c1">#ps: if this is in the header of the file, it causes mutual import of each other - and TF yells...</span>
+
+            <span class="n">filename_features_train</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;filename_features_train&quot;</span><span class="p">]</span>
+            <span class="n">filename_features_test</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;filename_features_test&quot;</span><span class="p">]</span>
+            <span class="n">do_we_need_to_cook_bool</span> <span class="o">=</span> <span class="n">do_we_need_to_cook</span><span class="p">(</span><span class="n">filename_features_train</span><span class="p">,</span> <span class="n">filename_features_test</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="s2">&quot;Looking up files:&quot;</span><span class="p">,</span> <span class="n">filename_features_train</span><span class="p">,</span> <span class="n">filename_features_test</span>
+
+            <span class="k">if</span> <span class="n">do_we_need_to_cook_bool</span><span class="p">:</span>
+                <span class="n">model_cnn</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">cooking_method</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;cooking_method&quot;</span><span class="p">]</span>
+
+                <span class="nb">print</span> <span class="s2">&quot;We need to cook, chosen method is&quot;</span><span class="p">,</span> <span class="n">cooking_method</span>
+                <span class="c1">#if True:</span>
+                <span class="k">if</span> <span class="n">cooking_method</span> <span class="o">==</span> <span class="s1">&#39;direct&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getDataLabels_split</span><span class="p">(</span><span class="n">validation_split</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;validation_split&quot;</span><span class="p">])</span>
+                        <span class="nb">print</span> <span class="n">len_</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+                    <span class="n">predict_and_save_features</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">filename_features_train</span><span class="p">,</span> <span class="n">filename_features_test</span><span class="p">,</span> <span class="n">model_cnn</span><span class="p">)</span>
+
+                <span class="c1">#if True:</span>
+                <span class="k">elif</span> <span class="n">cooking_method</span> <span class="o">==</span> <span class="s1">&#39;generators&#39;</span><span class="p">:</span>
+                    <span class="p">[</span><span class="n">order</span><span class="p">,</span> <span class="n">order_val</span><span class="p">,</span> <span class="n">image_generator</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">image_generator_val</span><span class="p">,</span> <span class="n">size_val</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getImageGenerator</span><span class="p">(</span><span class="n">validation_split</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;validation_split&quot;</span><span class="p">])</span>
+                    <span class="nb">print</span> <span class="n">len_</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+
+                    <span class="n">predict_from_generators</span><span class="p">(</span><span class="n">image_generator</span><span class="p">,</span> <span class="n">image_generator_val</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">size_val</span><span class="p">,</span> <span class="n">filename_features_train</span><span class="p">,</span> <span class="n">filename_features_test</span><span class="p">,</span> <span class="n">model_cnn</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;No need to cook, the files already exist&quot;</span>
+
+            <span class="c1"># Finetuning also requires prepared feature files.</span>
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune&quot;</span><span class="p">]:</span>
+                <span class="n">finetune_features_train</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune_features_train&quot;</span><span class="p">]</span>
+                <span class="n">finetune_features_test</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune_features_test&quot;</span><span class="p">]</span>
+                <span class="n">do_we_need_to_cook_bool</span> <span class="o">=</span> <span class="n">do_we_need_to_cook</span><span class="p">(</span><span class="n">finetune_features_train</span><span class="p">,</span> <span class="n">finetune_features_test</span><span class="p">)</span>
+                <span class="nb">print</span> <span class="s2">&quot;Looking up finetune feature files:&quot;</span><span class="p">,</span> <span class="n">finetune_features_train</span><span class="p">,</span> <span class="n">finetune_features_test</span>
+
+                <span class="k">if</span> <span class="n">do_we_need_to_cook_bool</span><span class="p">:</span>
+                    <span class="n">model_cnn</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">cooking_method</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;cooking_method&quot;</span><span class="p">]</span>
+
+                    <span class="c1">#n = len(model[0].layers) - model_settings[&quot;finetune_num_of_cnn_layers&quot;]</span>
+                    <span class="n">n</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune_num_of_cnn_layers&quot;</span><span class="p">]</span>
+
+                    <span class="nb">print</span> <span class="s2">&quot;------ Omitting layers:&quot;</span>
+                    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">n</span><span class="p">:]:</span>
+                        <span class="nb">print</span> <span class="n">layer</span><span class="o">.</span><span class="n">get_config</span><span class="p">()[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">layer</span>
+
+                    <span class="nb">print</span> <span class="s2">&quot;Saving this layers outputs:&quot;</span>
+                    <span class="nb">print</span> <span class="n">model_cnn</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">get_config</span><span class="p">()[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">model_cnn</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">model_cnn</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">get_config</span><span class="p">()</span>
+
+                    <span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Model</span>
+                    <span class="n">model_middle</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">model_cnn</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">model_cnn</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+
+                    <span class="nb">print</span> <span class="s2">&quot;We need to for finetuning files too, chosen method is&quot;</span><span class="p">,</span> <span class="n">cooking_method</span>
+                    <span class="k">if</span> <span class="n">cooking_method</span> <span class="o">==</span> <span class="s1">&#39;direct&#39;</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getDataLabels_split</span><span class="p">(</span><span class="n">validation_split</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;validation_split&quot;</span><span class="p">])</span>
+                            <span class="nb">print</span> <span class="n">len_</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                        <span class="n">predict_and_save_features</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">finetune_features_train</span><span class="p">,</span> <span class="n">finetune_features_test</span><span class="p">,</span> <span class="n">model_middle</span><span class="p">)</span>
+
+                    <span class="k">elif</span> <span class="n">cooking_method</span> <span class="o">==</span> <span class="s1">&#39;generators&#39;</span><span class="p">:</span>
+                        <span class="p">[</span><span class="n">order</span><span class="p">,</span> <span class="n">order_val</span><span class="p">,</span> <span class="n">image_generator</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">image_generator_val</span><span class="p">,</span> <span class="n">size_val</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getImageGenerator</span><span class="p">(</span><span class="n">validation_split</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;validation_split&quot;</span><span class="p">])</span>
+                        <span class="nb">print</span> <span class="n">len_</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+                        <span class="n">predict_from_generators</span><span class="p">(</span><span class="n">image_generator</span><span class="p">,</span> <span class="n">image_generator_val</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">size_val</span><span class="p">,</span> <span class="n">finetune_features_train</span><span class="p">,</span> <span class="n">finetune_features_test</span><span class="p">,</span> <span class="n">model_middle</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="s2">&quot;No need to cook finetune feature files, they already exist&quot;</span>
+
+
+        <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;osm_only&#39;</span><span class="p">:</span>
+            <span class="c1"># No need to cook features from images in this case</span>
+            <span class="nb">print</span> <span class="s2">&quot;Chosen model type (&quot;</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="p">,</span><span class="s2">&quot;) doesn&#39;t require features to be cooked and loaded.&quot;</span>
+        <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">index</span></div>
+
+<div class="viewcode-block" id="train_models"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelTester.train_models">[docs]</a><span class="k">def</span> <span class="nf">train_models</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">Settings</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Training on all models - dataset pairs from models.</span>
+<span class="sd">    :param models: array of models to run</span>
+<span class="sd">    :param dataset: datasets for the models</span>
+<span class="sd">    :param Settings: settings which also describe which dataset belongs to which model</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">number_of_models</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">])</span>
+    <span class="nb">print</span> <span class="s2">&quot;## Testing&quot;</span><span class="p">,</span><span class="n">number_of_models</span><span class="p">,</span><span class="s2">&quot;models.&quot;</span>
+
+    <span class="n">histories</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+        <span class="n">model_settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">][</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">datasets</span><span class="p">[</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;dataset_pointer&quot;</span><span class="p">]</span> <span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;k_fold_crossvalidation&quot;</span><span class="p">]:</span>
+            <span class="nb">print</span> <span class="s2">&quot;k-fold crossvalidation testing, k=&quot;</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;crossvalidation_k&quot;</span><span class="p">],</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;unique_id&quot;</span><span class="p">],</span> <span class="n">model</span>
+            <span class="n">history</span> <span class="o">=</span> <span class="n">k_fold_crossvalidation</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">)</span>
+            <span class="n">histories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">history</span><span class="p">)</span> <span class="c1"># SPECIAL HISTORY IN THIS CASE THOUGH</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Regular testing&quot;</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;unique_id&quot;</span><span class="p">],</span> <span class="n">model</span>
+            <span class="n">history</span> <span class="o">=</span> <span class="n">train_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">)</span>
+            <span class="n">histories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+
+        <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">histories</span></div>
+
+<div class="viewcode-block" id="train_model"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelTester.train_model">[docs]</a><span class="k">def</span> <span class="nf">train_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Train model on a dataset using these settings</span>
+<span class="sd">    :param model: model to be trained</span>
+<span class="sd">    :param dataset: dataset to be used</span>
+<span class="sd">    :param model_settings: model setting to be read for specifics</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">history</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;simple_cnn_with_top&#39;</span><span class="p">:</span>
+
+        <span class="n">filename_features_train</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;filename_features_train&quot;</span><span class="p">]</span>
+        <span class="n">filename_features_test</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;filename_features_test&quot;</span><span class="p">]</span>
+
+        <span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">y_val</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getDataLabels_split_only_y</span><span class="p">(</span><span class="n">validation_split</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;validation_split&quot;</span><span class="p">])</span>
+        <span class="p">[</span><span class="n">train_data</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">,</span> <span class="n">validation_data</span><span class="p">,</span> <span class="n">validation_labels</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_features</span><span class="p">(</span><span class="n">filename_features_train</span><span class="p">,</span> <span class="n">filename_features_test</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;input shape of features&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">train_data</span><span class="p">),</span> <span class="s2">&quot;and labels&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">train_labels</span><span class="p">)</span>
+
+        <span class="n">top_model</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">history</span> <span class="o">=</span> <span class="n">train_top_model</span><span class="p">(</span><span class="n">top_model</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">,</span> <span class="n">train_data</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">,</span> <span class="n">validation_data</span><span class="p">,</span> <span class="n">validation_labels</span><span class="p">)</span>
+
+        <span class="c1"># Finetuning</span>
+        <span class="nb">print</span> <span class="n">len_</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="n">history</span>
+
+        <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune&quot;</span><span class="p">]:</span>
+            <span class="n">finetune_model</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="p">[</span><span class="n">train_data</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">,</span> <span class="n">validation_data</span><span class="p">,</span> <span class="n">validation_labels</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+
+            <span class="c1"># Cut at certain spots - only possible where Resnet50 structure allows it 172, 162, 152, 140, ...</span>
+            <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune_DEBUG_METHOD_OF_MODEL_GEN&quot;</span><span class="p">]:</span>
+                <span class="n">finetune_features_train</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune_features_train&quot;</span><span class="p">]</span>
+                <span class="n">finetune_features_test</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune_features_test&quot;</span><span class="p">]</span>
+
+                <span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">y_val</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getDataLabels_split_only_y</span><span class="p">(</span><span class="n">validation_split</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;validation_split&quot;</span><span class="p">])</span>
+                <span class="p">[</span><span class="n">train_data</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">,</span> <span class="n">validation_data</span><span class="p">,</span> <span class="n">validation_labels</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_features</span><span class="p">(</span><span class="n">finetune_features_train</span><span class="p">,</span> <span class="n">finetune_features_test</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span>
+
+                <span class="nb">print</span> <span class="s2">&quot;FINE TUNE DATA input shape of features&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">train_data</span><span class="p">),</span> <span class="s2">&quot;and labels&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">train_labels</span><span class="p">)</span>
+
+                <span class="c1"># Fce (top, cnn, features_mid) &gt; new_model</span>
+                <span class="n">model_cnn</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">top_cnn</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">cut</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune_num_of_cnn_layers&quot;</span><span class="p">]</span>
+                <span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">train_data</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="nb">print</span> <span class="n">shape</span>
+
+                <span class="n">finetune_model</span> <span class="o">=</span> <span class="n">build_finetune_model</span><span class="p">(</span><span class="n">model_cnn</span><span class="p">,</span> <span class="n">top_cnn</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">input_shape</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
+                <span class="nb">print</span> <span class="s2">&quot;----- finetune model&quot;</span>
+                <span class="nb">print</span> <span class="n">finetune_model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+
+                <span class="n">plot_model</span><span class="p">(</span><span class="n">finetune_model</span><span class="p">,</span> <span class="n">to_file</span><span class="o">=</span><span class="s1">&#39;TEST_FINETUNE.png&#39;</span><span class="p">,</span> <span class="n">show_shapes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># Its possible to do it anywhere, but that will bring it lengthy evaluation here on the spot without cooking</span>
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="n">n</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune_num_of_cnn_layers&quot;</span><span class="p">]</span>
+
+                <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">layers</span><span class="p">[:</span><span class="n">n</span><span class="p">]:</span>
+                    <span class="nb">print</span> <span class="n">layer</span>
+                    <span class="n">layer</span><span class="o">.</span><span class="n">trainable</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="nb">print</span> <span class="s2">&quot;----- CNN MODEL&quot;</span>
+                <span class="nb">print</span> <span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+                <span class="nb">print</span> <span class="s2">&quot;----- TOP MODEL&quot;</span>
+                <span class="nb">print</span> <span class="n">model</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+
+                <span class="c1"># New model is made from the cnn and top model</span>
+                <span class="n">finetune_model</span> <span class="o">=</span> <span class="n">join_two_models</span><span class="p">(</span><span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">model</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+                <span class="nb">print</span> <span class="s2">&quot;----- JOINED MODEL&quot;</span>
+                <span class="nb">print</span> <span class="n">finetune_model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+
+                <span class="n">plot_model</span><span class="p">(</span><span class="n">finetune_model</span><span class="p">,</span> <span class="n">to_file</span><span class="o">=</span><span class="s1">&#39;TEST_MODEL.png&#39;</span><span class="p">,</span> <span class="n">show_shapes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                <span class="p">[</span><span class="n">train_data</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">,</span> <span class="n">validation_data</span><span class="p">,</span> <span class="n">validation_labels</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getDataLabels_split</span><span class="p">(</span><span class="n">validation_split</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;validation_split&quot;</span><span class="p">])</span>
+
+            <span class="c1"># We have the model, now lets compute</span>
+
+            <span class="n">epochs_tmp</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;epochs&quot;</span><span class="p">]</span>
+            <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;epochs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune_epochs&quot;</span><span class="p">]</span>
+            <span class="n">optimizer_tmp</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">]</span>
+            <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune_optimizer&quot;</span><span class="p">]</span>
+
+
+            <span class="n">history_to_append</span> <span class="o">=</span> <span class="n">train_top_model</span><span class="p">(</span><span class="n">finetune_model</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">,</span> <span class="n">train_data</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">,</span> <span class="n">validation_data</span><span class="p">,</span> <span class="n">validation_labels</span><span class="p">)</span>
+            <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;epochs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">epochs_tmp</span>
+            <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">optimizer_tmp</span>
+
+        <span class="c1"># Append histories</span>
+
+        <span class="c1">#{&#39;val_mean_absolute_error&#39;: [0.27633494684393978, 0.27673623693381116], &#39;loss&#39;: [0.15686354677721928, 0.12237877659907737], &#39;mean_absolute_error&#39;: [0.3303849070751238, 0.30686430593424935], &#39;val_loss&#39;: [0.10361090554317957, 0.10128958691173875]}</span>
+        <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;finetune&quot;</span><span class="p">]:</span>
+            <span class="nb">print</span> <span class="n">history</span>
+            <span class="nb">print</span> <span class="n">history_to_append</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">history</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">history</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+=</span> <span class="n">history_to_append</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="nb">print</span> <span class="n">history</span>
+
+
+    <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;img_osm_mix&#39;</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;special_case&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;hack_dont_use_features&#39;</span><span class="p">):</span>
+            <span class="c1"># Get data</span>
+            <span class="c1"># ps: be careful about their order when enhancing...</span>
+            <span class="c1"># ImageGenerator for multiple inputs</span>
+            <span class="c1"># 1 Build whole model now</span>
+            <span class="n">osm_shape</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getShapeOfOsm</span><span class="p">()</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">build_full_mixed_model</span><span class="p">(</span><span class="n">osm_shape</span><span class="p">)</span>
+
+            <span class="c1"># 2 Train (which will take some time now...)</span>
+            <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getDataLabels_split</span><span class="p">(</span><span class="n">validation_split</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;validation_split&quot;</span><span class="p">])</span>
+            <span class="p">[</span><span class="n">osm</span><span class="p">,</span> <span class="n">osm_val</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getDataLabels_split_only_osm</span><span class="p">(</span><span class="n">validation_split</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;validation_split&quot;</span><span class="p">])</span>
+
+            <span class="n">history</span> <span class="o">=</span> <span class="n">train_top_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">osm</span><span class="p">],</span> <span class="n">y</span><span class="p">,</span> <span class="p">[</span><span class="n">x_val</span><span class="p">,</span> <span class="n">osm_val</span><span class="p">],</span> <span class="n">y_val</span><span class="p">)</span>
+
+            <span class="nb">print</span> <span class="s2">&quot;special case scenario, mixed model, hack_dont_use_features&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">filename_features_train</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;filename_features_train&quot;</span><span class="p">]</span>
+            <span class="n">filename_features_test</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;filename_features_test&quot;</span><span class="p">]</span>
+
+            <span class="p">[</span><span class="n">osm</span><span class="p">,</span> <span class="n">osm_val</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getDataLabels_split_only_osm</span><span class="p">(</span><span class="n">validation_split</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;validation_split&quot;</span><span class="p">])</span>
+            <span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">y_val</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getDataLabels_split_only_y</span><span class="p">(</span><span class="n">validation_split</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;validation_split&quot;</span><span class="p">])</span>
+            <span class="p">[</span><span class="n">train_data</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">validation_data</span><span class="p">,</span> <span class="n">_</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_features</span><span class="p">(</span><span class="n">filename_features_train</span><span class="p">,</span> <span class="n">filename_features_test</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span>
+
+            <span class="nb">print</span> <span class="n">len_</span><span class="p">(</span><span class="n">train_data</span><span class="p">),</span> <span class="n">len_</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">len_</span><span class="p">(</span><span class="n">osm</span><span class="p">)</span>
+
+            <span class="n">top_model</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">history</span> <span class="o">=</span> <span class="n">train_top_model</span><span class="p">(</span><span class="n">top_model</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">,</span> <span class="p">[</span><span class="n">osm</span><span class="p">,</span> <span class="n">train_data</span><span class="p">],</span> <span class="n">y</span><span class="p">,</span> <span class="p">[</span><span class="n">osm_val</span><span class="p">,</span> <span class="n">validation_data</span><span class="p">],</span> <span class="n">y_val</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;osm_only&#39;</span><span class="p">:</span>
+
+        <span class="p">[</span><span class="n">osm</span><span class="p">,</span> <span class="n">osm_val</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getDataLabels_split_only_osm</span><span class="p">(</span><span class="n">validation_split</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;validation_split&quot;</span><span class="p">])</span>
+        <span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">y_val</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getDataLabels_split_only_y</span><span class="p">(</span><span class="n">validation_split</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;validation_split&quot;</span><span class="p">])</span>
+
+        <span class="n">osm_model</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">history</span> <span class="o">=</span> <span class="n">train_top_model</span><span class="p">(</span><span class="n">osm_model</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">,</span> <span class="n">osm</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">osm_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;Yet to be programmed.&quot;</span>
+
+    <span class="k">return</span> <span class="n">history</span></div>
+
+<span class="c1"># Generate Feature files = Predict</span>
+<div class="viewcode-block" id="predict_from_generators"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelTester.predict_from_generators">[docs]</a><span class="k">def</span> <span class="nf">predict_from_generators</span><span class="p">(</span><span class="n">test_generator</span><span class="p">,</span> <span class="n">val_generator</span><span class="p">,</span> <span class="n">number_in_test</span><span class="p">,</span> <span class="n">number_in_val</span><span class="p">,</span> <span class="n">filename_features_train</span><span class="p">,</span> <span class="n">filename_features_test</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="c1"># Predict using generators (memory sensitive)</span>
+    <span class="n">bottleneck_features_train</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict_generator</span><span class="p">(</span><span class="n">test_generator</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="n">number_in_test</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s2">&quot;saving train_features of size&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">bottleneck_features_train</span><span class="p">),</span> <span class="s2">&quot; into &quot;</span><span class="p">,</span><span class="n">filename_features_train</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filename_features_train</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">),</span> <span class="n">bottleneck_features_train</span><span class="p">)</span>
+    <span class="n">bottleneck_features_validation</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict_generator</span><span class="p">(</span><span class="n">val_generator</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="n">number_in_val</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s2">&quot;saving val_features of size&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">bottleneck_features_validation</span><span class="p">),</span> <span class="s2">&quot; into &quot;</span><span class="p">,</span><span class="n">filename_features_test</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filename_features_test</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">),</span> <span class="n">bottleneck_features_validation</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="predict_and_save_features"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelTester.predict_and_save_features">[docs]</a><span class="k">def</span> <span class="nf">predict_and_save_features</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">filename_features_train</span><span class="p">,</span> <span class="n">filename_features_test</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="c1"># dimensions of x are (num,3,x_dim, y_dim) = (75, 3, 150, 150)</span>
+    <span class="n">bottleneck_features_train</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filename_features_train</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">),</span> <span class="n">bottleneck_features_train</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s2">&quot;saving train_features of size&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">bottleneck_features_train</span><span class="p">),</span> <span class="s2">&quot; into &quot;</span><span class="p">,</span><span class="n">filename_features_train</span>
+    <span class="n">bottleneck_features_validation</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x_val</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s2">&quot;saving val_features of size&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">bottleneck_features_validation</span><span class="p">),</span> <span class="s2">&quot; into &quot;</span><span class="p">,</span><span class="n">filename_features_test</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filename_features_test</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">),</span> <span class="n">bottleneck_features_validation</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="load_features"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelTester.load_features">[docs]</a><span class="k">def</span> <span class="nf">load_features</span><span class="p">(</span><span class="n">filename_features_train</span><span class="p">,</span> <span class="n">filename_features_test</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_val</span><span class="p">):</span>
+    <span class="c1"># Load features from feature files</span>
+    <span class="n">train_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filename_features_train</span><span class="p">))</span>
+    <span class="n">train_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="n">validation_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filename_features_test</span><span class="p">))</span>
+    <span class="n">validation_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y_val</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">train_data</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">,</span> <span class="n">validation_data</span><span class="p">,</span> <span class="n">validation_labels</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="load_feature_file"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelTester.load_feature_file">[docs]</a><span class="k">def</span> <span class="nf">load_feature_file</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Just loads the features stored in one file.</span>
+<span class="sd">    :param path:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">data</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;Failed to load file&quot;</span><span class="p">,</span> <span class="n">path</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+
+<span class="c1"># Test Whole model = Fit</span>
+<div class="viewcode-block" id="train_top_model"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelTester.train_top_model">[docs]</a><span class="k">def</span> <span class="nf">train_top_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">,</span> <span class="n">train_data</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">,</span> <span class="n">validation_data</span><span class="p">,</span> <span class="n">validation_labels</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Train the whole model</span>
+<span class="sd">    :param model: model with base and top</span>
+<span class="sd">    :param model_settings:</span>
+<span class="sd">    :param train_data: data for training</span>
+<span class="sd">    :param train_labels:  labels for training</span>
+<span class="sd">    :param validation_data:  data for validation (and validation error)</span>
+<span class="sd">    :param validation_labels:  labels for validation (and validation error)</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_data</span><span class="p">)</span> <span class="o">&lt;&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">train_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">train_data</span><span class="p">)</span>
+        <span class="n">validation_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">validation_data</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">train_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">train_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">train_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">train_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">validation_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">validation_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">validation_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">validation_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">train_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">train_labels</span><span class="p">)</span>
+    <span class="n">validation_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">validation_labels</span><span class="p">)</span>
+
+    <span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">],</span> <span class="n">loss</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;loss_func&quot;</span><span class="p">],</span> <span class="n">metrics</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;metrics&quot;</span><span class="p">])</span>
+
+    <span class="n">history</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+              <span class="n">epochs</span><span class="o">=</span><span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;epochs&quot;</span><span class="p">],</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+              <span class="n">validation_data</span><span class="o">=</span><span class="p">(</span><span class="n">validation_data</span><span class="p">,</span> <span class="n">validation_labels</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">history</span><span class="o">.</span><span class="n">history</span></div>
+
+<span class="kn">from</span> <span class="nn">keras.callbacks</span> <span class="k">import</span> <span class="n">Callback</span>
+<span class="kn">import</span> <span class="nn">datetime</span><span class="o">,</span> <span class="nn">sys</span>
+
+<div class="viewcode-block" id="format_time"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelTester.format_time">[docs]</a><span class="k">def</span> <span class="nf">format_time</span><span class="p">(</span><span class="n">seconds</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">seconds</span> <span class="o">&lt;</span> <span class="mi">400</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%.1f</span><span class="s2"> seconds&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">s</span><span class="p">,)</span>
+    <span class="k">elif</span> <span class="n">seconds</span> <span class="o">&lt;</span> <span class="mi">4000</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">seconds</span> <span class="o">/</span> <span class="mf">60.0</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%.2f</span><span class="s2"> minutes&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">m</span><span class="p">,)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">seconds</span> <span class="o">/</span> <span class="mf">3600.0</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%.2f</span><span class="s2"> hours&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">h</span><span class="p">,)</span></div>
+
+<div class="viewcode-block" id="RunMonitor"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelTester.RunMonitor">[docs]</a><span class="k">class</span> <span class="nc">RunMonitor</span><span class="p">(</span><span class="n">Callback</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    # CUSTOM KERAS CALLBACK</span>
+<span class="sd">    # inspired by Kerutils at https://github.com/samyzaf/kerutils</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Callback</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;verbose&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hist</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;loss&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;val_loss&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+<div class="viewcode-block" id="RunMonitor.on_epoch_begin"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelTester.RunMonitor.on_epoch_begin">[docs]</a>    <span class="k">def</span> <span class="nf">on_epoch_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span> <span class="o">=</span> <span class="n">epoch</span></div>
+
+<div class="viewcode-block" id="RunMonitor.on_train_begin"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelTester.RunMonitor.on_train_begin">[docs]</a>    <span class="k">def</span> <span class="nf">on_train_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot;Training started:&quot;</span><span class="p">,</span> <span class="n">t</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">progress</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="RunMonitor.on_train_end"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelTester.RunMonitor.on_train_end">[docs]</a>    <span class="k">def</span> <span class="nf">on_train_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end_time</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span>
+        <span class="n">time_str</span> <span class="o">=</span> <span class="n">format_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end_time</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot;Training ended:&quot;</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="s2">&quot;(took &quot;</span><span class="p">,</span> <span class="n">time_str</span><span class="p">,</span> <span class="s2">&quot;)&quot;</span></div>
+
+    <span class="c1">#def on_batch_end(self, batch, logs={}):</span>
+
+<div class="viewcode-block" id="RunMonitor.on_epoch_end"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelTester.RunMonitor.on_epoch_end">[docs]</a>    <span class="k">def</span> <span class="nf">on_epoch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">logs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">)</span>
+        <span class="n">val_loss</span> <span class="o">=</span> <span class="n">logs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;val_loss&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">percentage</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">epoch</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;epochs&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">percentage</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">percentage</span><span class="o">%</span><span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span>
+                <span class="n">time_str</span> <span class="o">=</span> <span class="n">format_time</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
+                <span class="n">fmt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%02d%%</span><span class="s1"> epoch=</span><span class="si">%d</span><span class="s1">, loss=</span><span class="si">%f</span><span class="s1">, val_loss=</span><span class="si">%f</span><span class="s1">, time=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="n">percentage</span><span class="p">,</span>    <span class="n">epoch</span><span class="p">,</span>    <span class="n">loss</span><span class="p">,</span>    <span class="n">val_loss</span><span class="p">,</span>    <span class="n">time_str</span><span class="p">)</span>
+
+                <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fmt</span> <span class="o">%</span> <span class="n">vals</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">progress</span> <span class="o">=</span> <span class="n">percentage</span></div>
+
+<div class="viewcode-block" id="RunMonitor.print_params"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.ModelTester.RunMonitor.print_params">[docs]</a>    <span class="k">def</span> <span class="nf">print_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

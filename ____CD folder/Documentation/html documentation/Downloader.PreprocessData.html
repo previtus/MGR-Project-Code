@@ -1,0 +1,411 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Downloader.PreprocessData package &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Evaluator package" href="Evaluator.html" />
+    <link rel="prev" title="Downloader package" href="Downloader.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="downloader-preprocessdata-package">
+<h1>Downloader.PreprocessData package<a class="headerlink" href="#downloader-preprocessdata-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-Downloader.PreprocessData.DecoratorRetry">
+<span id="downloader-preprocessdata-decoratorretry-module"></span><h2>Downloader.PreprocessData.DecoratorRetry module<a class="headerlink" href="#module-Downloader.PreprocessData.DecoratorRetry" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="Downloader.PreprocessData.DecoratorRetry.retry">
+<code class="descclassname">Downloader.PreprocessData.DecoratorRetry.</code><code class="descname">retry</code><span class="sig-paren">(</span><em>ExceptionToCheck</em>, <em>tries=4</em>, <em>delay=3</em>, <em>backoff=2</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/DecoratorRetry.html#retry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.DecoratorRetry.retry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retry calling the decorated function using an exponential backoff.</p>
+<p><a class="reference external" href="http://www.saltycrane.com/blog/2009/11/trying-out-retry-decorator-python/">http://www.saltycrane.com/blog/2009/11/trying-out-retry-decorator-python/</a>
+original from: <a class="reference external" href="http://wiki.python.org/moin/PythonDecoratorLibrary#Retry">http://wiki.python.org/moin/PythonDecoratorLibrary#Retry</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ExceptionToCheck</strong> (<em>Exception</em><em> or </em><em>tuple</em>) – the exception to check. may be a tuple of
+exceptions to check</li>
+<li><strong>tries</strong> (<em>int</em>) – number of times to try (not retry) before giving up</li>
+<li><strong>delay</strong> (<em>int</em>) – initial delay between retries in seconds</li>
+<li><strong>backoff</strong> (<em>int</em>) – backoff multiplier e.g. value of 2 will double the delay
+each retry</li>
+<li><strong>logger</strong> (<em>logging.Logger instance</em>) – logger to use. If None, print</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-Downloader.PreprocessData.DownloadUrlFilenameMap">
+<span id="downloader-preprocessdata-downloadurlfilenamemap-module"></span><h2>Downloader.PreprocessData.DownloadUrlFilenameMap module<a class="headerlink" href="#module-Downloader.PreprocessData.DownloadUrlFilenameMap" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="Downloader.PreprocessData.DownloadUrlFilenameMap.DownloadUrlFilenameMap">
+<code class="descclassname">Downloader.PreprocessData.DownloadUrlFilenameMap.</code><code class="descname">DownloadUrlFilenameMap</code><span class="sig-paren">(</span><em>FilenameMap</em>, <em>Segments</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/DownloadUrlFilenameMap.html#DownloadUrlFilenameMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.DownloadUrlFilenameMap.DownloadUrlFilenameMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download multiple files according to the FilenameMap.
+List of tripples in [ (&lt;url&gt;, &lt;filename&gt;, &lt;edge id&gt;), … ]</p>
+<p>Marks entires in Segments with flags about the images.
+Returns list of failed downloads</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.PreprocessData.DownloadUrlFilenameMap.md5">
+<code class="descclassname">Downloader.PreprocessData.DownloadUrlFilenameMap.</code><code class="descname">md5</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/DownloadUrlFilenameMap.html#md5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.DownloadUrlFilenameMap.md5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="Downloader.PreprocessData.DownloadUrlFilenameMap.urlretrieve_with_retry">
+<code class="descclassname">Downloader.PreprocessData.DownloadUrlFilenameMap.</code><code class="descname">urlretrieve_with_retry</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/DownloadUrlFilenameMap.html#urlretrieve_with_retry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.DownloadUrlFilenameMap.urlretrieve_with_retry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves (image) file and returns (&lt;filename_string&gt;, &lt;object of httplib.HTTPMessage&gt;)</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-Downloader.PreprocessData.Functions">
+<span id="downloader-preprocessdata-functions-module"></span><h2>Downloader.PreprocessData.Functions module<a class="headerlink" href="#module-Downloader.PreprocessData.Functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="Downloader.PreprocessData.Functions.bearing_between_two_points">
+<code class="descclassname">Downloader.PreprocessData.Functions.</code><code class="descname">bearing_between_two_points</code><span class="sig-paren">(</span><em>start</em>, <em>end</em>, <em>degrees_offset=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/Functions.html#bearing_between_two_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.Functions.bearing_between_two_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the initial bearing between two geographical locations.
+see: <a class="reference external" href="http://www.movable-type.co.uk/scripts/latlong.html">http://www.movable-type.co.uk/scripts/latlong.html</a>
+The bearing is angular distance from NORTH.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.PreprocessData.Functions.distance_between_two_points">
+<code class="descclassname">Downloader.PreprocessData.Functions.</code><code class="descname">distance_between_two_points</code><span class="sig-paren">(</span><em>start</em>, <em>end</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/Functions.html#distance_between_two_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.Functions.distance_between_two_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate distance between start and end
+:param start:
+:param end:
+:return: the distance</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.PreprocessData.Functions.getApi">
+<code class="descclassname">Downloader.PreprocessData.Functions.</code><code class="descname">getApi</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/Functions.html#getApi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.Functions.getApi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="Downloader.PreprocessData.Functions.interpolation">
+<code class="descclassname">Downloader.PreprocessData.Functions.</code><code class="descname">interpolation</code><span class="sig-paren">(</span><em>start</em>, <em>end</em>, <em>fraction</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/Functions.html#interpolation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.Functions.interpolation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate a custom fraction between points.
+:param start:
+:param end:
+:param fraction: from 0 to 1
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.PreprocessData.Functions.midpoint">
+<code class="descclassname">Downloader.PreprocessData.Functions.</code><code class="descname">midpoint</code><span class="sig-paren">(</span><em>start</em>, <em>end</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/Functions.html#midpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.Functions.midpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate a midpoint between two points.
+:param start:
+:param end:
+:return: lat and lot of new point</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.PreprocessData.Functions.segmentIDtoListID">
+<code class="descclassname">Downloader.PreprocessData.Functions.</code><code class="descname">segmentIDtoListID</code><span class="sig-paren">(</span><em>semgentId</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/Functions.html#segmentIDtoListID"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.Functions.segmentIDtoListID" title="Permalink to this definition">¶</a></dt>
+<dd><p>segment id might be 1000 if we start there, but the list is indexing from 0</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-Downloader.PreprocessData.GenListOfUrls">
+<span id="downloader-preprocessdata-genlistofurls-module"></span><h2>Downloader.PreprocessData.GenListOfUrls module<a class="headerlink" href="#module-Downloader.PreprocessData.GenListOfUrls" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="Downloader.PreprocessData.GenListOfUrls.GenListOfUrls">
+<code class="descclassname">Downloader.PreprocessData.GenListOfUrls.</code><code class="descname">GenListOfUrls</code><span class="sig-paren">(</span><em>Segments</em>, <em>PIXELS_X</em>, <em>PIXELS_Y</em>, <em>PrependPath=''</em>, <em>minimal_length=20</em>, <em>custom=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/GenListOfUrls.html#GenListOfUrls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.GenListOfUrls.GenListOfUrls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterates over the segment list and returns a list of urls needed for download
+Outputs list of tripples in [ (&lt;url&gt;, &lt;filename&gt;, &lt;edge id&gt;), … ]</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-Downloader.PreprocessData.PrepSegments">
+<span id="downloader-preprocessdata-prepsegments-module"></span><h2>Downloader.PreprocessData.PrepSegments module<a class="headerlink" href="#module-Downloader.PreprocessData.PrepSegments" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="Downloader.PreprocessData.PrepSegments.PrepSegments">
+<code class="descclassname">Downloader.PreprocessData.PrepSegments.</code><code class="descname">PrepSegments</code><span class="sig-paren">(</span><em>EdgesGEOJSON</em>, <em>FromEdgeID=0</em>, <em>ToEdgeID=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/PrepSegments.html#PrepSegments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.PrepSegments.PrepSegments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alternative loading method, which relies just upon edge data (we don’t have nodes fully available this time).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>EdgesGEOJSON</strong> – Inputs the json object obtained via json.load(json_file)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns the whole set of Segments</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-Downloader.PreprocessData.SegmentObj">
+<span id="downloader-preprocessdata-segmentobj-module"></span><h2>Downloader.PreprocessData.SegmentObj module<a class="headerlink" href="#module-Downloader.PreprocessData.SegmentObj" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj">
+<em class="property">class </em><code class="descclassname">Downloader.PreprocessData.SegmentObj.</code><code class="descname">SegmentObj</code><span class="sig-paren">(</span><em>Start</em>, <em>End</em>, <em>Score</em>, <em>SegmentId</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Common base class for segment
+Variables: FromId, ToId, SegmentId
+Functions: getBearingString(), getGoogleViewUrl()</p>
+<dl class="method">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj.ScoreAdjustment">
+<code class="descname">ScoreAdjustment</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj.ScoreAdjustment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj.ScoreAdjustment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj.betweenPoints">
+<code class="descname">betweenPoints</code><span class="sig-paren">(</span><em>pointStart</em>, <em>pointEnd</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj.betweenPoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj.betweenPoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate urls and filenames in between these two points. They will be added to the rest of data in this Segment.
+:param pointStart:
+:param pointEnd:
+:return: urls and filenames</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj.checkOSMVersion">
+<code class="descname">checkOSMVersion</code><span class="sig-paren">(</span><em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj.checkOSMVersion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj.checkOSMVersion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj.displaySegment">
+<code class="descname">displaySegment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj.displaySegment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj.displaySegment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj.displaySegmentShort">
+<code class="descname">displaySegmentShort</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj.displaySegmentShort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj.displaySegmentShort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj.getBearingString">
+<code class="descname">getBearingString</code><span class="sig-paren">(</span><em>Location</em>, <em>Direction</em>, <em>degrees_offset=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj.getBearingString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj.getBearingString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj.getGoogleViewUrl">
+<code class="descname">getGoogleViewUrl</code><span class="sig-paren">(</span><em>Location</em>, <em>Direction</em>, <em>resx</em>, <em>resy</em>, <em>degrees_offset=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj.getGoogleViewUrl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj.getGoogleViewUrl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Google View url from the start of this segment</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj.getGoogleViewUrls">
+<code class="descname">getGoogleViewUrls</code><span class="sig-paren">(</span><em>PIXELS_X</em>, <em>PIXELS_Y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj.getGoogleViewUrls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj.getGoogleViewUrls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate urls for the Segment. Here we also reset the
+:param resx: Resolution of images, X
+:param resy: Resolution of images, Y
+:return: returns list of urls and filenames to download</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj.getGoogleViewUrls_whileUsingFractionsOfMinEdgeLen">
+<code class="descname">getGoogleViewUrls_whileUsingFractionsOfMinEdgeLen</code><span class="sig-paren">(</span><em>PIXELS_X</em>, <em>PIXELS_Y</em>, <em>minimal_length</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj.getGoogleViewUrls_whileUsingFractionsOfMinEdgeLen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj.getGoogleViewUrls_whileUsingFractionsOfMinEdgeLen" title="Permalink to this definition">¶</a></dt>
+<dd><p>More sophisticated method, splitting long edges into minimal_length
+:param PIXELS_X:
+:param PIXELS_Y:
+:param minimal_length: minimal allowed edge len
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj.getImageFilename">
+<code class="descname">getImageFilename</code><span class="sig-paren">(</span><em>i_th_image</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj.getImageFilename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj.getImageFilename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unified filename generation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj.getLocation">
+<code class="descname">getLocation</code><span class="sig-paren">(</span><em>i_th_image</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj.getLocation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj.getLocation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj.getNearbyVector">
+<code class="descname">getNearbyVector</code><span class="sig-paren">(</span><em>i_th_image</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj.getNearbyVector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj.getNearbyVector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj.getScore">
+<code class="descname">getScore</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj.getScore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj.getScore" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj.hasLoadedImageI">
+<code class="descname">hasLoadedImageI</code><span class="sig-paren">(</span><em>i</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj.hasLoadedImageI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj.hasLoadedImageI" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj.hasUnknownScore">
+<code class="descname">hasUnknownScore</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj.hasUnknownScore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj.hasUnknownScore" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj.markWithVector">
+<code class="descname">markWithVector</code><span class="sig-paren">(</span><em>nearby_vector</em>, <em>index</em>, <em>MARKING_VERSION</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj.markWithVector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj.markWithVector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj.resetImageMemory">
+<code class="descname">resetImageMemory</code><span class="sig-paren">(</span><em>number_of_images</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj.resetImageMemory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj.resetImageMemory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Downloader.PreprocessData.SegmentObj.SegmentObj.setScore">
+<code class="descname">setScore</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentObj.html#SegmentObj.setScore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentObj.SegmentObj.setScore" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-Downloader.PreprocessData.SegmentsManipulators">
+<span id="downloader-preprocessdata-segmentsmanipulators-module"></span><h2>Downloader.PreprocessData.SegmentsManipulators module<a class="headerlink" href="#module-Downloader.PreprocessData.SegmentsManipulators" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="Downloader.PreprocessData.SegmentsManipulators.AdditionalStatistics">
+<code class="descclassname">Downloader.PreprocessData.SegmentsManipulators.</code><code class="descname">AdditionalStatistics</code><span class="sig-paren">(</span><em>Segments</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentsManipulators.html#AdditionalStatistics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentsManipulators.AdditionalStatistics" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="Downloader.PreprocessData.SegmentsManipulators.StatisticsSegments">
+<code class="descclassname">Downloader.PreprocessData.SegmentsManipulators.</code><code class="descname">StatisticsSegments</code><span class="sig-paren">(</span><em>Segments</em>, <em>additionalStatistics=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/PreprocessData/SegmentsManipulators.html#StatisticsSegments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.PreprocessData.SegmentsManipulators.StatisticsSegments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide statistics for loaded dataset
+:param Segments: input list of Segments</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-Downloader.PreprocessData">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-Downloader.PreprocessData" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="Downloader.html">Downloader package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="Downloader.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Downloader.PreprocessData package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-Downloader.PreprocessData.DecoratorRetry">Downloader.PreprocessData.DecoratorRetry module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-Downloader.PreprocessData.DownloadUrlFilenameMap">Downloader.PreprocessData.DownloadUrlFilenameMap module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-Downloader.PreprocessData.Functions">Downloader.PreprocessData.Functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-Downloader.PreprocessData.GenListOfUrls">Downloader.PreprocessData.GenListOfUrls module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-Downloader.PreprocessData.PrepSegments">Downloader.PreprocessData.PrepSegments module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-Downloader.PreprocessData.SegmentObj">Downloader.PreprocessData.SegmentObj module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-Downloader.PreprocessData.SegmentsManipulators">Downloader.PreprocessData.SegmentsManipulators module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-Downloader.PreprocessData">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.html#module-Downloader.DataOperations">Downloader.DataOperations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.html#module-Downloader.Defaults">Downloader.Defaults module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.html#module-Downloader.DownloaderRunner">Downloader.DownloaderRunner module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.html#module-Downloader.GenerateGIFAnimation">Downloader.GenerateGIFAnimation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.html#module-Downloader.ImageHelpers">Downloader.ImageHelpers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.html#module-Downloader.KerasPreparation">Downloader.KerasPreparation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.html#downloader-preprocessdataf-module">Downloader.PreprocessDataF module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.html#downloader-tester-module">Downloader.Tester module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.html#downloader-usedata-module">Downloader.UseData module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.html#module-Downloader.VisualizeHistory">Downloader.VisualizeHistory module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.html#module-Downloader">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="Downloader.html">Downloader package</a><ul>
+      <li>Previous: <a href="Downloader.html" title="previous chapter">Downloader package</a></li>
+      <li>Next: <a href="Evaluator.html" title="next chapter">Evaluator package</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/Downloader.PreprocessData.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

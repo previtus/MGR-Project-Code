@@ -1,0 +1,1095 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>DatasetHandler.custom_image &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for DatasetHandler.custom_image</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Fairly basic set of tools for real-time data augmentation on image data.</span>
+<span class="sd">Can easily be extended to include new transformations,</span>
+<span class="sd">new preprocessing methods, etc...</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">linalg</span>
+<span class="kn">import</span> <span class="nn">scipy.ndimage</span> <span class="k">as</span> <span class="nn">ndi</span>
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="k">import</span> <span class="nb">range</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">keras</span> <span class="k">import</span> <span class="n">backend</span> <span class="k">as</span> <span class="n">K</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">PIL</span> <span class="k">import</span> <span class="n">Image</span> <span class="k">as</span> <span class="n">pil_image</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">pil_image</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="random_rotation"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.random_rotation">[docs]</a><span class="k">def</span> <span class="nf">random_rotation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">rg</span><span class="p">,</span> <span class="n">row_axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">col_axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">channel_axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">fill_mode</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">cval</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Performs a random rotation of a Numpy image tensor.</span>
+
+<span class="sd">    # Arguments</span>
+<span class="sd">        x: Input tensor. Must be 3D.</span>
+<span class="sd">        rg: Rotation range, in degrees.</span>
+<span class="sd">        row_axis: Index of axis for rows in the input tensor.</span>
+<span class="sd">        col_axis: Index of axis for columns in the input tensor.</span>
+<span class="sd">        channel_axis: Index of axis for channels in the input tensor.</span>
+<span class="sd">        fill_mode: Points outside the boundaries of the input</span>
+<span class="sd">            are filled according to the given mode</span>
+<span class="sd">            (one of `{&#39;constant&#39;, &#39;nearest&#39;, &#39;reflect&#39;, &#39;wrap&#39;}`).</span>
+<span class="sd">        cval: Value used for points outside the boundaries</span>
+<span class="sd">            of the input if `mode=&#39;constant&#39;`.</span>
+
+<span class="sd">    # Returns</span>
+<span class="sd">        Rotated Numpy image tensor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">rg</span><span class="p">,</span> <span class="n">rg</span><span class="p">)</span>
+    <span class="n">rotation_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                                <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+
+    <span class="n">h</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">row_axis</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">col_axis</span><span class="p">]</span>
+    <span class="n">transform_matrix</span> <span class="o">=</span> <span class="n">transform_matrix_offset_center</span><span class="p">(</span><span class="n">rotation_matrix</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">apply_transform</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">transform_matrix</span><span class="p">,</span> <span class="n">channel_axis</span><span class="p">,</span> <span class="n">fill_mode</span><span class="p">,</span> <span class="n">cval</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="random_shift"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.random_shift">[docs]</a><span class="k">def</span> <span class="nf">random_shift</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">wrg</span><span class="p">,</span> <span class="n">hrg</span><span class="p">,</span> <span class="n">row_axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">col_axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">channel_axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">fill_mode</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">cval</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Performs a random spatial shift of a Numpy image tensor.</span>
+
+<span class="sd">    # Arguments</span>
+<span class="sd">        x: Input tensor. Must be 3D.</span>
+<span class="sd">        wrg: Width shift range, as a float fraction of the width.</span>
+<span class="sd">        hrg: Height shift range, as a float fraction of the height.</span>
+<span class="sd">        row_axis: Index of axis for rows in the input tensor.</span>
+<span class="sd">        col_axis: Index of axis for columns in the input tensor.</span>
+<span class="sd">        channel_axis: Index of axis for channels in the input tensor.</span>
+<span class="sd">        fill_mode: Points outside the boundaries of the input</span>
+<span class="sd">            are filled according to the given mode</span>
+<span class="sd">            (one of `{&#39;constant&#39;, &#39;nearest&#39;, &#39;reflect&#39;, &#39;wrap&#39;}`).</span>
+<span class="sd">        cval: Value used for points outside the boundaries</span>
+<span class="sd">            of the input if `mode=&#39;constant&#39;`.</span>
+
+<span class="sd">    # Returns</span>
+<span class="sd">        Shifted Numpy image tensor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">h</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">row_axis</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">col_axis</span><span class="p">]</span>
+    <span class="n">tx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">hrg</span><span class="p">,</span> <span class="n">hrg</span><span class="p">)</span> <span class="o">*</span> <span class="n">h</span>
+    <span class="n">ty</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">wrg</span><span class="p">,</span> <span class="n">wrg</span><span class="p">)</span> <span class="o">*</span> <span class="n">w</span>
+    <span class="n">translation_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">tx</span><span class="p">],</span>
+                                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ty</span><span class="p">],</span>
+                                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+
+    <span class="n">transform_matrix</span> <span class="o">=</span> <span class="n">translation_matrix</span>  <span class="c1"># no need to do offset</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">apply_transform</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">transform_matrix</span><span class="p">,</span> <span class="n">channel_axis</span><span class="p">,</span> <span class="n">fill_mode</span><span class="p">,</span> <span class="n">cval</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="random_shear"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.random_shear">[docs]</a><span class="k">def</span> <span class="nf">random_shear</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">intensity</span><span class="p">,</span> <span class="n">row_axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">col_axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">channel_axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">fill_mode</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">cval</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Performs a random spatial shear of a Numpy image tensor.</span>
+
+<span class="sd">    # Arguments</span>
+<span class="sd">        x: Input tensor. Must be 3D.</span>
+<span class="sd">        intensity: Transformation intensity.</span>
+<span class="sd">        row_axis: Index of axis for rows in the input tensor.</span>
+<span class="sd">        col_axis: Index of axis for columns in the input tensor.</span>
+<span class="sd">        channel_axis: Index of axis for channels in the input tensor.</span>
+<span class="sd">        fill_mode: Points outside the boundaries of the input</span>
+<span class="sd">            are filled according to the given mode</span>
+<span class="sd">            (one of `{&#39;constant&#39;, &#39;nearest&#39;, &#39;reflect&#39;, &#39;wrap&#39;}`).</span>
+<span class="sd">        cval: Value used for points outside the boundaries</span>
+<span class="sd">            of the input if `mode=&#39;constant&#39;`.</span>
+
+<span class="sd">    # Returns</span>
+<span class="sd">        Sheared Numpy image tensor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">shear</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">intensity</span><span class="p">,</span> <span class="n">intensity</span><span class="p">)</span>
+    <span class="n">shear_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">shear</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                             <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">shear</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                             <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+
+    <span class="n">h</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">row_axis</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">col_axis</span><span class="p">]</span>
+    <span class="n">transform_matrix</span> <span class="o">=</span> <span class="n">transform_matrix_offset_center</span><span class="p">(</span><span class="n">shear_matrix</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">apply_transform</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">transform_matrix</span><span class="p">,</span> <span class="n">channel_axis</span><span class="p">,</span> <span class="n">fill_mode</span><span class="p">,</span> <span class="n">cval</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="random_zoom"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.random_zoom">[docs]</a><span class="k">def</span> <span class="nf">random_zoom</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">zoom_range</span><span class="p">,</span> <span class="n">row_axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">col_axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">channel_axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">fill_mode</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">cval</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Performs a random spatial zoom of a Numpy image tensor.</span>
+
+<span class="sd">    # Arguments</span>
+<span class="sd">        x: Input tensor. Must be 3D.</span>
+<span class="sd">        zoom_range: Tuple of floats; zoom range for width and height.</span>
+<span class="sd">        row_axis: Index of axis for rows in the input tensor.</span>
+<span class="sd">        col_axis: Index of axis for columns in the input tensor.</span>
+<span class="sd">        channel_axis: Index of axis for channels in the input tensor.</span>
+<span class="sd">        fill_mode: Points outside the boundaries of the input</span>
+<span class="sd">            are filled according to the given mode</span>
+<span class="sd">            (one of `{&#39;constant&#39;, &#39;nearest&#39;, &#39;reflect&#39;, &#39;wrap&#39;}`).</span>
+<span class="sd">        cval: Value used for points outside the boundaries</span>
+<span class="sd">            of the input if `mode=&#39;constant&#39;`.</span>
+
+<span class="sd">    # Returns</span>
+<span class="sd">        Zoomed Numpy image tensor.</span>
+
+<span class="sd">    # Raises</span>
+<span class="sd">        ValueError: if `zoom_range` isn&#39;t a tuple.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">zoom_range</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;zoom_range should be a tuple or list of two floats. &#39;</span>
+                         <span class="s1">&#39;Received arg: &#39;</span><span class="p">,</span> <span class="n">zoom_range</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">zoom_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">zoom_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">zx</span><span class="p">,</span> <span class="n">zy</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">zx</span><span class="p">,</span> <span class="n">zy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">zoom_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">zoom_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">zoom_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">zx</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">zy</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+
+    <span class="n">h</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">row_axis</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">col_axis</span><span class="p">]</span>
+    <span class="n">transform_matrix</span> <span class="o">=</span> <span class="n">transform_matrix_offset_center</span><span class="p">(</span><span class="n">zoom_matrix</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">apply_transform</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">transform_matrix</span><span class="p">,</span> <span class="n">channel_axis</span><span class="p">,</span> <span class="n">fill_mode</span><span class="p">,</span> <span class="n">cval</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="random_channel_shift"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.random_channel_shift">[docs]</a><span class="k">def</span> <span class="nf">random_channel_shift</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">intensity</span><span class="p">,</span> <span class="n">channel_axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rollaxis</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">channel_axis</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">min_x</span><span class="p">,</span> <span class="n">max_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">channel_images</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x_channel</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">intensity</span><span class="p">,</span> <span class="n">intensity</span><span class="p">),</span> <span class="n">min_x</span><span class="p">,</span> <span class="n">max_x</span><span class="p">)</span>
+                      <span class="k">for</span> <span class="n">x_channel</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">channel_images</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rollaxis</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">channel_axis</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="transform_matrix_offset_center"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.transform_matrix_offset_center">[docs]</a><span class="k">def</span> <span class="nf">transform_matrix_offset_center</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">o_x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">0.5</span>
+    <span class="n">o_y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">0.5</span>
+    <span class="n">offset_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">o_x</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">o_y</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+    <span class="n">reset_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">o_x</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="n">o_y</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+    <span class="n">transform_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">offset_matrix</span><span class="p">,</span> <span class="n">matrix</span><span class="p">),</span> <span class="n">reset_matrix</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">transform_matrix</span></div>
+
+
+<div class="viewcode-block" id="apply_transform"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.apply_transform">[docs]</a><span class="k">def</span> <span class="nf">apply_transform</span><span class="p">(</span><span class="n">x</span><span class="p">,</span>
+                    <span class="n">transform_matrix</span><span class="p">,</span>
+                    <span class="n">channel_axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">fill_mode</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span>
+                    <span class="n">cval</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Apply the image transformation specified by a matrix.</span>
+
+<span class="sd">    # Arguments</span>
+<span class="sd">        x: 2D numpy array, single image.</span>
+<span class="sd">        transform_matrix: Numpy array specifying the geometric transformation.</span>
+<span class="sd">        channel_axis: Index of axis for channels in the input tensor.</span>
+<span class="sd">        fill_mode: Points outside the boundaries of the input</span>
+<span class="sd">            are filled according to the given mode</span>
+<span class="sd">            (one of `{&#39;constant&#39;, &#39;nearest&#39;, &#39;reflect&#39;, &#39;wrap&#39;}`).</span>
+<span class="sd">        cval: Value used for points outside the boundaries</span>
+<span class="sd">            of the input if `mode=&#39;constant&#39;`.</span>
+
+<span class="sd">    # Returns</span>
+<span class="sd">        The transformed version of the input.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rollaxis</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">channel_axis</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">final_affine_matrix</span> <span class="o">=</span> <span class="n">transform_matrix</span><span class="p">[:</span><span class="mi">2</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">final_offset</span> <span class="o">=</span> <span class="n">transform_matrix</span><span class="p">[:</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">channel_images</span> <span class="o">=</span> <span class="p">[</span><span class="n">ndi</span><span class="o">.</span><span class="n">interpolation</span><span class="o">.</span><span class="n">affine_transform</span><span class="p">(</span>
+        <span class="n">x_channel</span><span class="p">,</span>
+        <span class="n">final_affine_matrix</span><span class="p">,</span>
+        <span class="n">final_offset</span><span class="p">,</span>
+        <span class="n">order</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="n">fill_mode</span><span class="p">,</span>
+        <span class="n">cval</span><span class="o">=</span><span class="n">cval</span><span class="p">)</span> <span class="k">for</span> <span class="n">x_channel</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">channel_images</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rollaxis</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">channel_axis</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="flip_axis"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.flip_axis">[docs]</a><span class="k">def</span> <span class="nf">flip_axis</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="array_to_img"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.array_to_img">[docs]</a><span class="k">def</span> <span class="nf">array_to_img</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts a 3D Numpy array to a PIL Image instance.</span>
+
+<span class="sd">    # Arguments</span>
+<span class="sd">        x: Input Numpy array.</span>
+<span class="sd">        data_format: Image data format.</span>
+<span class="sd">        scale: Whether to rescale image values</span>
+<span class="sd">            to be within [0, 255].</span>
+
+<span class="sd">    # Returns</span>
+<span class="sd">        A PIL Image instance.</span>
+
+<span class="sd">    # Raises</span>
+<span class="sd">        ImportError: if PIL is not available.</span>
+<span class="sd">        ValueError: if invalid `x` or `data_format` is passed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">pil_image</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Could not import PIL.Image. &#39;</span>
+                          <span class="s1">&#39;The use of `array_to_img` requires PIL.&#39;</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">K</span><span class="o">.</span><span class="n">floatx</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Expected image array to have rank 3 (single image). &#39;</span>
+                         <span class="s1">&#39;Got array with shape:&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data_format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data_format</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">image_data_format</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">data_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;channels_first&#39;</span><span class="p">,</span> <span class="s1">&#39;channels_last&#39;</span><span class="p">}:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid data_format:&#39;</span><span class="p">,</span> <span class="n">data_format</span><span class="p">)</span>
+
+    <span class="c1"># Original Numpy array x has format (height, width, channel)</span>
+    <span class="c1"># or (channel, height, width)</span>
+    <span class="c1"># but target PIL image has format (width, height, channel)</span>
+    <span class="k">if</span> <span class="n">data_format</span> <span class="o">==</span> <span class="s1">&#39;channels_first&#39;</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">scale</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="nb">max</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">x_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x_max</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">/=</span> <span class="n">x_max</span>
+        <span class="n">x</span> <span class="o">*=</span> <span class="mi">255</span>
+    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="c1"># RGB</span>
+        <span class="k">return</span> <span class="n">pil_image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;uint8&#39;</span><span class="p">),</span> <span class="s1">&#39;RGB&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># grayscale</span>
+        <span class="k">return</span> <span class="n">pil_image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;uint8&#39;</span><span class="p">),</span> <span class="s1">&#39;L&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unsupported channel number: &#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="img_to_array"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.img_to_array">[docs]</a><span class="k">def</span> <span class="nf">img_to_array</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts a PIL Image instance to a Numpy array.</span>
+
+<span class="sd">    # Arguments</span>
+<span class="sd">        img: PIL Image instance.</span>
+<span class="sd">        data_format: Image data format.</span>
+
+<span class="sd">    # Returns</span>
+<span class="sd">        A 3D Numpy array.</span>
+
+<span class="sd">    # Raises</span>
+<span class="sd">        ValueError: if invalid `img` or `data_format` is passed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">data_format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data_format</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">image_data_format</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">data_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;channels_first&#39;</span><span class="p">,</span> <span class="s1">&#39;channels_last&#39;</span><span class="p">}:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown data_format: &#39;</span><span class="p">,</span> <span class="n">data_format</span><span class="p">)</span>
+    <span class="c1"># Numpy array x has format (height, width, channel)</span>
+    <span class="c1"># or (channel, height, width)</span>
+    <span class="c1"># but original PIL image has format (width, height, channel)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">K</span><span class="o">.</span><span class="n">floatx</span><span class="p">())</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">data_format</span> <span class="o">==</span> <span class="s1">&#39;channels_first&#39;</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">data_format</span> <span class="o">==</span> <span class="s1">&#39;channels_first&#39;</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unsupported image shape: &#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="load_img"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.load_img">[docs]</a><span class="k">def</span> <span class="nf">load_img</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">grayscale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">target_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loads an image into PIL format.</span>
+
+<span class="sd">    # Arguments</span>
+<span class="sd">        path: Path to image file</span>
+<span class="sd">        grayscale: Boolean, whether to load the image as grayscale.</span>
+<span class="sd">        target_size: Either `None` (default to original size)</span>
+<span class="sd">            or tuple of ints `(img_height, img_width)`.</span>
+
+<span class="sd">    # Returns</span>
+<span class="sd">        A PIL Image instance.</span>
+
+<span class="sd">    # Raises</span>
+<span class="sd">        ImportError: if PIL is not available.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">pil_image</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Could not import PIL.Image. &#39;</span>
+                          <span class="s1">&#39;The use of `array_to_img` requires PIL.&#39;</span><span class="p">)</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">pil_image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">grayscale</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">img</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s1">&#39;L&#39;</span><span class="p">:</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s1">&#39;L&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">img</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s1">&#39;RGB&#39;</span><span class="p">:</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">target_size</span><span class="p">:</span>
+        <span class="n">wh_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">target_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">target_size</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">img</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">wh_tuple</span><span class="p">:</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">wh_tuple</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">img</span></div>
+
+
+<div class="viewcode-block" id="list_pictures"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.list_pictures">[docs]</a><span class="k">def</span> <span class="nf">list_pictures</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s1">&#39;jpg|jpeg|bmp|png&#39;</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;([\w]+\.(?:&#39;</span> <span class="o">+</span> <span class="n">ext</span> <span class="o">+</span> <span class="s1">&#39;))&#39;</span><span class="p">,</span> <span class="n">f</span><span class="p">)]</span></div>
+
+
+<div class="viewcode-block" id="ImageDataGenerator"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.ImageDataGenerator">[docs]</a><span class="k">class</span> <span class="nc">ImageDataGenerator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate minibatches of image data with real-time data augmentation.</span>
+
+<span class="sd">    # Arguments</span>
+<span class="sd">        featurewise_center: set input mean to 0 over the dataset.</span>
+<span class="sd">        samplewise_center: set each sample mean to 0.</span>
+<span class="sd">        featurewise_std_normalization: divide inputs by std of the dataset.</span>
+<span class="sd">        samplewise_std_normalization: divide each input by its std.</span>
+<span class="sd">        zca_whitening: apply ZCA whitening.</span>
+<span class="sd">        rotation_range: degrees (0 to 180).</span>
+<span class="sd">        width_shift_range: fraction of total width.</span>
+<span class="sd">        height_shift_range: fraction of total height.</span>
+<span class="sd">        shear_range: shear intensity (shear angle in radians).</span>
+<span class="sd">        zoom_range: amount of zoom. if scalar z, zoom will be randomly picked</span>
+<span class="sd">            in the range [1-z, 1+z]. A sequence of two can be passed instead</span>
+<span class="sd">            to select this range.</span>
+<span class="sd">        channel_shift_range: shift range for each channels.</span>
+<span class="sd">        fill_mode: points outside the boundaries are filled according to the</span>
+<span class="sd">            given mode (&#39;constant&#39;, &#39;nearest&#39;, &#39;reflect&#39; or &#39;wrap&#39;). Default</span>
+<span class="sd">            is &#39;nearest&#39;.</span>
+<span class="sd">        cval: value used for points outside the boundaries when fill_mode is</span>
+<span class="sd">            &#39;constant&#39;. Default is 0.</span>
+<span class="sd">        horizontal_flip: whether to randomly flip images horizontally.</span>
+<span class="sd">        vertical_flip: whether to randomly flip images vertically.</span>
+<span class="sd">        rescale: rescaling factor. If None or 0, no rescaling is applied,</span>
+<span class="sd">            otherwise we multiply the data by the value provided</span>
+<span class="sd">            (before applying any other transformation).</span>
+<span class="sd">        preprocessing_function: function that will be implied on each input.</span>
+<span class="sd">            The function will run before any other modification on it.</span>
+<span class="sd">            The function should take one argument:</span>
+<span class="sd">            one image (Numpy tensor with rank 3),</span>
+<span class="sd">            and should output a Numpy tensor with the same shape.</span>
+<span class="sd">        data_format: &#39;channels_first&#39; or &#39;channels_last&#39;. In &#39;channels_first&#39; mode, the channels dimension</span>
+<span class="sd">            (the depth) is at index 1, in &#39;channels_last&#39; mode it is at index 3.</span>
+<span class="sd">            It defaults to the `image_data_format` value found in your</span>
+<span class="sd">            Keras config file at `~/.keras/keras.json`.</span>
+<span class="sd">            If you never set it, then it will be &quot;channels_last&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">featurewise_center</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">samplewise_center</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">featurewise_std_normalization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">samplewise_std_normalization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">zca_whitening</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">rotation_range</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">width_shift_range</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">height_shift_range</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">shear_range</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">zoom_range</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">channel_shift_range</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">fill_mode</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span>
+                 <span class="n">cval</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">horizontal_flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">vertical_flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">rescale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">preprocessing_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">data_format</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">data_format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_format</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">image_data_format</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">featurewise_center</span> <span class="o">=</span> <span class="n">featurewise_center</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samplewise_center</span> <span class="o">=</span> <span class="n">samplewise_center</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">featurewise_std_normalization</span> <span class="o">=</span> <span class="n">featurewise_std_normalization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samplewise_std_normalization</span> <span class="o">=</span> <span class="n">samplewise_std_normalization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zca_whitening</span> <span class="o">=</span> <span class="n">zca_whitening</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rotation_range</span> <span class="o">=</span> <span class="n">rotation_range</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width_shift_range</span> <span class="o">=</span> <span class="n">width_shift_range</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height_shift_range</span> <span class="o">=</span> <span class="n">height_shift_range</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shear_range</span> <span class="o">=</span> <span class="n">shear_range</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zoom_range</span> <span class="o">=</span> <span class="n">zoom_range</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">channel_shift_range</span> <span class="o">=</span> <span class="n">channel_shift_range</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fill_mode</span> <span class="o">=</span> <span class="n">fill_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cval</span> <span class="o">=</span> <span class="n">cval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontal_flip</span> <span class="o">=</span> <span class="n">horizontal_flip</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vertical_flip</span> <span class="o">=</span> <span class="n">vertical_flip</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rescale</span> <span class="o">=</span> <span class="n">rescale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preprocessing_function</span> <span class="o">=</span> <span class="n">preprocessing_function</span>
+
+        <span class="k">if</span> <span class="n">data_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;channels_last&#39;</span><span class="p">,</span> <span class="s1">&#39;channels_first&#39;</span><span class="p">}:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;data_format should be &quot;channels_last&quot; (channel after row and &#39;</span>
+                             <span class="s1">&#39;column) or &quot;channels_first&quot; (channel before row and column). &#39;</span>
+                             <span class="s1">&#39;Received arg: &#39;</span><span class="p">,</span> <span class="n">data_format</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span> <span class="o">=</span> <span class="n">data_format</span>
+        <span class="k">if</span> <span class="n">data_format</span> <span class="o">==</span> <span class="s1">&#39;channels_first&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">channel_axis</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">row_axis</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">col_axis</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">if</span> <span class="n">data_format</span> <span class="o">==</span> <span class="s1">&#39;channels_last&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">channel_axis</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">row_axis</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">col_axis</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">principal_components</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">zoom_range</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">zoom_range</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="n">zoom_range</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">zoom_range</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">zoom_range</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">zoom_range</span> <span class="o">=</span> <span class="p">[</span><span class="n">zoom_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">zoom_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;zoom_range should be a float or &#39;</span>
+                             <span class="s1">&#39;a tuple or list of two floats. &#39;</span>
+                             <span class="s1">&#39;Received arg: &#39;</span><span class="p">,</span> <span class="n">zoom_range</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ImageDataGenerator.flow"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.ImageDataGenerator.flow">[docs]</a>    <span class="k">def</span> <span class="nf">flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">save_to_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s1">&#39;jpeg&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">NumpyArrayIterator</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+            <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+            <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="p">,</span>
+            <span class="n">save_to_dir</span><span class="o">=</span><span class="n">save_to_dir</span><span class="p">,</span>
+            <span class="n">save_prefix</span><span class="o">=</span><span class="n">save_prefix</span><span class="p">,</span>
+            <span class="n">save_format</span><span class="o">=</span><span class="n">save_format</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ImageDataGenerator.flow_from_directory"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.ImageDataGenerator.flow_from_directory">[docs]</a>    <span class="k">def</span> <span class="nf">flow_from_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span>
+                            <span class="n">target_size</span><span class="o">=</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span> <span class="n">color_mode</span><span class="o">=</span><span class="s1">&#39;rgb&#39;</span><span class="p">,</span>
+                            <span class="n">classes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_mode</span><span class="o">=</span><span class="s1">&#39;categorical&#39;</span><span class="p">,</span>
+                            <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                            <span class="n">save_to_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                            <span class="n">save_prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                            <span class="n">save_format</span><span class="o">=</span><span class="s1">&#39;jpeg&#39;</span><span class="p">,</span>
+                            <span class="n">follow_links</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">DirectoryIterator</span><span class="p">(</span>
+            <span class="n">directory</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span>
+            <span class="n">target_size</span><span class="o">=</span><span class="n">target_size</span><span class="p">,</span> <span class="n">color_mode</span><span class="o">=</span><span class="n">color_mode</span><span class="p">,</span>
+            <span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">,</span> <span class="n">class_mode</span><span class="o">=</span><span class="n">class_mode</span><span class="p">,</span>
+            <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+            <span class="n">save_to_dir</span><span class="o">=</span><span class="n">save_to_dir</span><span class="p">,</span>
+            <span class="n">save_prefix</span><span class="o">=</span><span class="n">save_prefix</span><span class="p">,</span>
+            <span class="n">save_format</span><span class="o">=</span><span class="n">save_format</span><span class="p">,</span>
+            <span class="n">follow_links</span><span class="o">=</span><span class="n">follow_links</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ImageDataGenerator.standardize"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.ImageDataGenerator.standardize">[docs]</a>    <span class="k">def</span> <span class="nf">standardize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Apply the normalization configuration to a batch of inputs.</span>
+
+<span class="sd">        # Arguments</span>
+<span class="sd">            x: batch of inputs to be normalized.</span>
+
+<span class="sd">        # Returns</span>
+<span class="sd">            The inputs, normalized.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessing_function</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessing_function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rescale</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rescale</span>
+        <span class="c1"># x is a single image, so it doesn&#39;t have image number at index 0</span>
+        <span class="n">img_channel_axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_axis</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplewise_center</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">img_channel_axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplewise_std_normalization</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">/=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">img_channel_axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-7</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">featurewise_center</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;This ImageDataGenerator specifies &#39;</span>
+                              <span class="s1">&#39;`featurewise_center`, but it hasn</span><span class="se">\&#39;</span><span class="s1">t&#39;</span>
+                              <span class="s1">&#39;been fit on any training data. Fit it &#39;</span>
+                              <span class="s1">&#39;first by calling `.fit(numpy_data)`.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">featurewise_std_normalization</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">/=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">+</span> <span class="mf">1e-7</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;This ImageDataGenerator specifies &#39;</span>
+                              <span class="s1">&#39;`featurewise_std_normalization`, but it hasn</span><span class="se">\&#39;</span><span class="s1">t&#39;</span>
+                              <span class="s1">&#39;been fit on any training data. Fit it &#39;</span>
+                              <span class="s1">&#39;first by calling `.fit(numpy_data)`.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">zca_whitening</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">principal_components</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">flatx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+                <span class="n">whitex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">flatx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">principal_components</span><span class="p">)</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">whitex</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;This ImageDataGenerator specifies &#39;</span>
+                              <span class="s1">&#39;`zca_whitening`, but it hasn</span><span class="se">\&#39;</span><span class="s1">t&#39;</span>
+                              <span class="s1">&#39;been fit on any training data. Fit it &#39;</span>
+                              <span class="s1">&#39;first by calling `.fit(numpy_data)`.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span></div>
+
+<div class="viewcode-block" id="ImageDataGenerator.random_transform"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.ImageDataGenerator.random_transform">[docs]</a>    <span class="k">def</span> <span class="nf">random_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Randomly augment a single image tensor.</span>
+
+<span class="sd">        # Arguments</span>
+<span class="sd">            x: 3D tensor, single image.</span>
+
+<span class="sd">        # Returns</span>
+<span class="sd">            A randomly transformed version of the input (same shape).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># x is a single image, so it doesn&#39;t have image number at index 0</span>
+        <span class="n">img_row_axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_axis</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">img_col_axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">col_axis</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">img_channel_axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_axis</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="c1"># use composition of homographies</span>
+        <span class="c1"># to generate final transform that needs to be applied</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotation_range</span><span class="p">:</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation_range</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotation_range</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">height_shift_range</span><span class="p">:</span>
+            <span class="n">tx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">height_shift_range</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height_shift_range</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">img_row_axis</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tx</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width_shift_range</span><span class="p">:</span>
+            <span class="n">ty</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">width_shift_range</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width_shift_range</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">img_col_axis</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ty</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shear_range</span><span class="p">:</span>
+            <span class="n">shear</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">shear_range</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shear_range</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">shear</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">zx</span><span class="p">,</span> <span class="n">zy</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">zx</span><span class="p">,</span> <span class="n">zy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zoom_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">transform_matrix</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">theta</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">rotation_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                                        <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                                        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+            <span class="n">transform_matrix</span> <span class="o">=</span> <span class="n">rotation_matrix</span>
+
+        <span class="k">if</span> <span class="n">tx</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">ty</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">shift_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">tx</span><span class="p">],</span>
+                                     <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ty</span><span class="p">],</span>
+                                     <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+            <span class="n">transform_matrix</span> <span class="o">=</span> <span class="n">shift_matrix</span> <span class="k">if</span> <span class="n">transform_matrix</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">transform_matrix</span><span class="p">,</span> <span class="n">shift_matrix</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">shear</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">shear_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">shear</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                                    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">shear</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                                    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+            <span class="n">transform_matrix</span> <span class="o">=</span> <span class="n">shear_matrix</span> <span class="k">if</span> <span class="n">transform_matrix</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">transform_matrix</span><span class="p">,</span> <span class="n">shear_matrix</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">zx</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">zy</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">zoom_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">zx</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                                    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">zy</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                                    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+            <span class="n">transform_matrix</span> <span class="o">=</span> <span class="n">zoom_matrix</span> <span class="k">if</span> <span class="n">transform_matrix</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">transform_matrix</span><span class="p">,</span> <span class="n">zoom_matrix</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">transform_matrix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">h</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">img_row_axis</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">img_col_axis</span><span class="p">]</span>
+            <span class="n">transform_matrix</span> <span class="o">=</span> <span class="n">transform_matrix_offset_center</span><span class="p">(</span><span class="n">transform_matrix</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">apply_transform</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">transform_matrix</span><span class="p">,</span> <span class="n">img_channel_axis</span><span class="p">,</span>
+                                <span class="n">fill_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fill_mode</span><span class="p">,</span> <span class="n">cval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cval</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_shift_range</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">random_channel_shift</span><span class="p">(</span><span class="n">x</span><span class="p">,</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">channel_shift_range</span><span class="p">,</span>
+                                     <span class="n">img_channel_axis</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizontal_flip</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">flip_axis</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">img_col_axis</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertical_flip</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">flip_axis</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">img_row_axis</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">x</span></div>
+
+<div class="viewcode-block" id="ImageDataGenerator.fit"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.ImageDataGenerator.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span>
+            <span class="n">augment</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">rounds</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fits internal statistics to some sample data.</span>
+
+<span class="sd">        Required for featurewise_center, featurewise_std_normalization</span>
+<span class="sd">        and zca_whitening.</span>
+
+<span class="sd">        # Arguments</span>
+<span class="sd">            x: Numpy array, the data to fit on. Should have rank 4.</span>
+<span class="sd">                In case of grayscale data,</span>
+<span class="sd">                the channels axis should have value 1, and in case</span>
+<span class="sd">                of RGB data, it should have value 3.</span>
+<span class="sd">            augment: Whether to fit on randomly augmented samples</span>
+<span class="sd">            rounds: If `augment`,</span>
+<span class="sd">                how many augmentation passes to do over the data</span>
+<span class="sd">            seed: random seed.</span>
+
+<span class="sd">        # Raises</span>
+<span class="sd">            ValueError: in case of invalid input `x`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">K</span><span class="o">.</span><span class="n">floatx</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Input to `.fit()` should have rank 4. &#39;</span>
+                             <span class="s1">&#39;Got array with shape: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channel_axis</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">}:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Expected input to be images (as Numpy array) &#39;</span>
+                <span class="s1">&#39;following the data format convention &quot;&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span> <span class="o">+</span> <span class="s1">&#39;&quot; &#39;</span>
+                <span class="s1">&#39;(channels on axis &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel_axis</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;), i.e. expected &#39;</span>
+                <span class="s1">&#39;either 1, 3 or 4 channels on axis &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel_axis</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. &#39;</span>
+                <span class="s1">&#39;However, it was passed an array with shape &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span>
+                <span class="s1">&#39; (&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channel_axis</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; channels).&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">augment</span><span class="p">:</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">rounds</span> <span class="o">*</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">K</span><span class="o">.</span><span class="n">floatx</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rounds</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                    <span class="n">ax</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">r</span> <span class="o">*</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_transform</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">ax</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">featurewise_center</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_axis</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">col_axis</span><span class="p">))</span>
+            <span class="n">broadcast_shape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">broadcast_shape</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channel_axis</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channel_axis</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">broadcast_shape</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">featurewise_std_normalization</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_axis</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">col_axis</span><span class="p">))</span>
+            <span class="n">broadcast_shape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">broadcast_shape</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channel_axis</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channel_axis</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std</span><span class="p">,</span> <span class="n">broadcast_shape</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">/=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">+</span> <span class="n">K</span><span class="o">.</span><span class="n">epsilon</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">zca_whitening</span><span class="p">:</span>
+            <span class="n">flat_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">flat_x</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">flat_x</span><span class="p">)</span> <span class="o">/</span> <span class="n">flat_x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">u</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">principal_components</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s</span> <span class="o">+</span> <span class="mf">10e-7</span><span class="p">))),</span> <span class="n">u</span><span class="o">.</span><span class="n">T</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="Iterator"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.Iterator">[docs]</a><span class="k">class</span> <span class="nc">Iterator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for image data iterators.</span>
+
+<span class="sd">    # Arguments</span>
+<span class="sd">        n: Integer, total number of samples in the dataset to loop over.</span>
+<span class="sd">        batch_size: Integer, size of a batch.</span>
+<span class="sd">        shuffle: Boolean, whether to shuffle the data between epochs.</span>
+<span class="sd">        seed: Random seeding for data shuffling.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">,</span> <span class="n">seed</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span> <span class="o">=</span> <span class="n">shuffle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_batches_seen</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flow_index</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Iterator.reset"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.Iterator.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_index</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+    <span class="k">def</span> <span class="nf">_flow_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Ensure self.batch_index is 0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_batches_seen</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">index_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">shuffle</span><span class="p">:</span>
+                    <span class="n">index_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+            <span class="n">current_index</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_index</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="n">current_index</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">:</span>
+                <span class="n">current_batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">batch_index</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">current_batch_size</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="n">current_index</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">batch_index</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">total_batches_seen</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">yield</span> <span class="p">(</span><span class="n">index_array</span><span class="p">[</span><span class="n">current_index</span><span class="p">:</span> <span class="n">current_index</span> <span class="o">+</span> <span class="n">current_batch_size</span><span class="p">],</span>
+                   <span class="n">current_index</span><span class="p">,</span> <span class="n">current_batch_size</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Needed if we want to do something like:</span>
+        <span class="c1"># for x, y in data_gen.flow(...):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NumpyArrayIterator"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.NumpyArrayIterator">[docs]</a><span class="k">class</span> <span class="nc">NumpyArrayIterator</span><span class="p">(</span><span class="n">Iterator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Iterator yielding data from a Numpy array.</span>
+
+<span class="sd">    # Arguments</span>
+<span class="sd">        x: Numpy array of input data.</span>
+<span class="sd">        y: Numpy array of targets data.</span>
+<span class="sd">        image_data_generator: Instance of `ImageDataGenerator`</span>
+<span class="sd">            to use for random transformations and normalization.</span>
+<span class="sd">        batch_size: Integer, size of a batch.</span>
+<span class="sd">        shuffle: Boolean, whether to shuffle the data between epochs.</span>
+<span class="sd">        seed: Random seed for data shuffling.</span>
+<span class="sd">        data_format: String, one of `channels_first`, `channels_last`.</span>
+<span class="sd">        save_to_dir: Optional directory where to save the pictures</span>
+<span class="sd">            being yielded, in a viewable format. This is useful</span>
+<span class="sd">            for visualizing the random transformations being</span>
+<span class="sd">            applied, for debugging purposes.</span>
+<span class="sd">        save_prefix: String prefix to use for saving sample</span>
+<span class="sd">            images (if `save_to_dir` is set).</span>
+<span class="sd">        save_format: Format to use for saving sample images</span>
+<span class="sd">            (if `save_to_dir` is set).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">image_data_generator</span><span class="p">,</span>
+                 <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">data_format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">save_to_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s1">&#39;jpeg&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;X (images tensor) and y (labels) &#39;</span>
+                             <span class="s1">&#39;should have the same length. &#39;</span>
+                             <span class="s1">&#39;Found: X.shape = </span><span class="si">%s</span><span class="s1">, y.shape = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                             <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">data_format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_format</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">image_data_format</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">K</span><span class="o">.</span><span class="n">floatx</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Input data in `NumpyArrayIterator` &#39;</span>
+                             <span class="s1">&#39;should have rank 4. You passed an array &#39;</span>
+                             <span class="s1">&#39;with shape&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">channels_axis</span> <span class="o">=</span> <span class="mi">3</span> <span class="k">if</span> <span class="n">data_format</span> <span class="o">==</span> <span class="s1">&#39;channels_last&#39;</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">channels_axis</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">}:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;NumpyArrayIterator is set to use the &#39;</span>
+                             <span class="s1">&#39;data format convention &quot;&#39;</span> <span class="o">+</span> <span class="n">data_format</span> <span class="o">+</span> <span class="s1">&#39;&quot; &#39;</span>
+                             <span class="s1">&#39;(channels on axis &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">channels_axis</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;), i.e. expected &#39;</span>
+                             <span class="s1">&#39;either 1, 3 or 4 channels on axis &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">channels_axis</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. &#39;</span>
+                             <span class="s1">&#39;However, it was passed an array with shape &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span>
+                             <span class="s1">&#39; (&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">channels_axis</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; channels).&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_data_generator</span> <span class="o">=</span> <span class="n">image_data_generator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span> <span class="o">=</span> <span class="n">data_format</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_to_dir</span> <span class="o">=</span> <span class="n">save_to_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_prefix</span> <span class="o">=</span> <span class="n">save_prefix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_format</span> <span class="o">=</span> <span class="n">save_format</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">NumpyArrayIterator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
+
+<div class="viewcode-block" id="NumpyArrayIterator.next"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.NumpyArrayIterator.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;For python 2.x.</span>
+
+<span class="sd">        # Returns</span>
+<span class="sd">            The next batch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Keeps under lock only the mechanism which advances</span>
+        <span class="c1"># the indexing of each batch.</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+            <span class="n">index_array</span><span class="p">,</span> <span class="n">current_index</span><span class="p">,</span> <span class="n">current_batch_size</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index_generator</span><span class="p">)</span>
+        <span class="c1"># The transformation of images is not under thread lock</span>
+        <span class="c1"># so it can be done in parallel</span>
+        <span class="n">batch_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">current_batch_size</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">K</span><span class="o">.</span><span class="n">floatx</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">index_array</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_data_generator</span><span class="o">.</span><span class="n">random_transform</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">floatx</span><span class="p">()))</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_data_generator</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">batch_x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+
+        <span class="n">list_of_filenames</span><span class="o">=</span><span class="p">[]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_to_dir</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">current_batch_size</span><span class="p">):</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">array_to_img</span><span class="p">(</span><span class="n">batch_x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">fname</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{prefix}</span><span class="s1">_</span><span class="si">{index}</span><span class="s1">_</span><span class="si">{hash}</span><span class="s1">.</span><span class="si">{format}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">save_prefix</span><span class="p">,</span>
+                                                                  <span class="n">index</span><span class="o">=</span><span class="n">current_index</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span>
+                                                                  <span class="nb">hash</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mf">1e4</span><span class="p">),</span>
+                                                                  <span class="nb">format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">save_format</span><span class="p">)</span>
+                <span class="n">list_of_filenames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_to_dir</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span>
+                <span class="n">img</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_to_dir</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">batch_x</span>
+        <span class="n">batch_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">index_array</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">batch_x</span><span class="p">,</span> <span class="p">[</span><span class="n">batch_y</span><span class="p">,</span> <span class="n">list_of_filenames</span><span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="DirectoryIterator"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.DirectoryIterator">[docs]</a><span class="k">class</span> <span class="nc">DirectoryIterator</span><span class="p">(</span><span class="n">Iterator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Iterator capable of reading images from a directory on disk.</span>
+
+<span class="sd">    # Arguments</span>
+<span class="sd">        directory: Path to the directory to read images from.</span>
+<span class="sd">            Each subdirectory in this directory will be</span>
+<span class="sd">            considered to contain images from one class,</span>
+<span class="sd">            or alternatively you could specify class subdirectories</span>
+<span class="sd">            via the `classes` argument.</span>
+<span class="sd">        image_data_generator: Instance of `ImageDataGenerator`</span>
+<span class="sd">            to use for random transformations and normalization.</span>
+<span class="sd">        target_size: tuple of integers, dimensions to resize input images to.</span>
+<span class="sd">        color_mode: One of `&quot;rgb&quot;`, `&quot;grayscale&quot;`. Color mode to read images.</span>
+<span class="sd">        classes: Optional list of strings, names of sudirectories</span>
+<span class="sd">            containing images from each class (e.g. `[&quot;dogs&quot;, &quot;cats&quot;]`).</span>
+<span class="sd">            It will be computed automatically if not set.</span>
+<span class="sd">        class_mode: Mode for yielding the targets:</span>
+<span class="sd">            `&quot;binary&quot;`: binary targets (if there are only two classes),</span>
+<span class="sd">            `&quot;categorical&quot;`: categorical targets,</span>
+<span class="sd">            `&quot;sparse&quot;`: integer targets,</span>
+<span class="sd">            `None`: no targets get yielded (only input images are yielded).</span>
+<span class="sd">        batch_size: Integer, size of a batch.</span>
+<span class="sd">        shuffle: Boolean, whether to shuffle the data between epochs.</span>
+<span class="sd">        seed: Random seed for data shuffling.</span>
+<span class="sd">        data_format: String, one of `channels_first`, `channels_last`.</span>
+<span class="sd">        save_to_dir: Optional directory where to save the pictures</span>
+<span class="sd">            being yielded, in a viewable format. This is useful</span>
+<span class="sd">            for visualizing the random transformations being</span>
+<span class="sd">            applied, for debugging purposes.</span>
+<span class="sd">        save_prefix: String prefix to use for saving sample</span>
+<span class="sd">            images (if `save_to_dir` is set).</span>
+<span class="sd">        save_format: Format to use for saving sample images</span>
+<span class="sd">            (if `save_to_dir` is set).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">image_data_generator</span><span class="p">,</span>
+                 <span class="n">target_size</span><span class="o">=</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span> <span class="n">color_mode</span><span class="o">=</span><span class="s1">&#39;rgb&#39;</span><span class="p">,</span>
+                 <span class="n">classes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_mode</span><span class="o">=</span><span class="s1">&#39;categorical&#39;</span><span class="p">,</span>
+                 <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">data_format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">save_to_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s1">&#39;jpeg&#39;</span><span class="p">,</span>
+                 <span class="n">follow_links</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">data_format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_format</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">image_data_format</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">directory</span> <span class="o">=</span> <span class="n">directory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_data_generator</span> <span class="o">=</span> <span class="n">image_data_generator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_size</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">target_size</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">color_mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;rgb&#39;</span><span class="p">,</span> <span class="s1">&#39;grayscale&#39;</span><span class="p">}:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid color mode:&#39;</span><span class="p">,</span> <span class="n">color_mode</span><span class="p">,</span>
+                             <span class="s1">&#39;; expected &quot;rgb&quot; or &quot;grayscale&quot;.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color_mode</span> <span class="o">=</span> <span class="n">color_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span> <span class="o">=</span> <span class="n">data_format</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">color_mode</span> <span class="o">==</span> <span class="s1">&#39;rgb&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span> <span class="o">==</span> <span class="s1">&#39;channels_last&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">image_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_size</span> <span class="o">+</span> <span class="p">(</span><span class="mi">3</span><span class="p">,)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">image_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_size</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span> <span class="o">==</span> <span class="s1">&#39;channels_last&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">image_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_size</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">image_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes</span> <span class="o">=</span> <span class="n">classes</span>
+        <span class="k">if</span> <span class="n">class_mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;categorical&#39;</span><span class="p">,</span> <span class="s1">&#39;binary&#39;</span><span class="p">,</span> <span class="s1">&#39;sparse&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">}:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid class_mode:&#39;</span><span class="p">,</span> <span class="n">class_mode</span><span class="p">,</span>
+                             <span class="s1">&#39;; expected one of &quot;categorical&quot;, &#39;</span>
+                             <span class="s1">&#39;&quot;binary&quot;, &quot;sparse&quot;, or None.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_mode</span> <span class="o">=</span> <span class="n">class_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_to_dir</span> <span class="o">=</span> <span class="n">save_to_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_prefix</span> <span class="o">=</span> <span class="n">save_prefix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_format</span> <span class="o">=</span> <span class="n">save_format</span>
+
+        <span class="n">white_list_formats</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;png&#39;</span><span class="p">,</span> <span class="s1">&#39;jpg&#39;</span><span class="p">,</span> <span class="s1">&#39;jpeg&#39;</span><span class="p">,</span> <span class="s1">&#39;bmp&#39;</span><span class="p">}</span>
+
+        <span class="c1"># first, count the number of samples and classes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">classes</span><span class="p">:</span>
+            <span class="n">classes</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">subdir</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">subdir</span><span class="p">)):</span>
+                    <span class="n">classes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subdir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_class</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_indices</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">classes</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">))))</span>
+
+        <span class="k">def</span> <span class="nf">_recursive_list</span><span class="p">(</span><span class="n">subpath</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">subpath</span><span class="p">,</span> <span class="n">followlinks</span><span class="o">=</span><span class="n">follow_links</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">tpl</span><span class="p">:</span> <span class="n">tpl</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">subdir</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">:</span>
+            <span class="n">subpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">subdir</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">_recursive_list</span><span class="p">(</span><span class="n">subpath</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                    <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">for</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">white_list_formats</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">extension</span><span class="p">):</span>
+                            <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">break</span>
+                    <span class="k">if</span> <span class="n">is_valid</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">samples</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Found </span><span class="si">%d</span><span class="s1"> images belonging to </span><span class="si">%d</span><span class="s1"> classes.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_class</span><span class="p">))</span>
+
+        <span class="c1"># second, build an index of the images in the different class subfolders</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filenames</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">subdir</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">:</span>
+            <span class="n">subpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">subdir</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">_recursive_list</span><span class="p">(</span><span class="n">subpath</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                    <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">for</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">white_list_formats</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">extension</span><span class="p">):</span>
+                            <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">break</span>
+                    <span class="k">if</span> <span class="n">is_valid</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_indices</span><span class="p">[</span><span class="n">subdir</span><span class="p">]</span>
+                        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="c1"># add filename relative to directory</span>
+                        <span class="n">absolute_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">filenames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">absolute_path</span><span class="p">,</span> <span class="n">directory</span><span class="p">))</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DirectoryIterator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DirectoryIterator.next"><a class="viewcode-back" href="../../DatasetHandler.html#DatasetHandler.custom_image.DirectoryIterator.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;For python 2.x.</span>
+
+<span class="sd">        # Returns</span>
+<span class="sd">            The next batch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+            <span class="n">index_array</span><span class="p">,</span> <span class="n">current_index</span><span class="p">,</span> <span class="n">current_batch_size</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index_generator</span><span class="p">)</span>
+        <span class="c1"># The transformation of images is not under thread lock</span>
+        <span class="c1"># so it can be done in parallel</span>
+        <span class="n">batch_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">current_batch_size</span><span class="p">,)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">K</span><span class="o">.</span><span class="n">floatx</span><span class="p">())</span>
+        <span class="n">grayscale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">color_mode</span> <span class="o">==</span> <span class="s1">&#39;grayscale&#39;</span>
+        <span class="c1"># build batch of image data</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">index_array</span><span class="p">):</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filenames</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">load_img</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directory</span><span class="p">,</span> <span class="n">fname</span><span class="p">),</span>
+                           <span class="n">grayscale</span><span class="o">=</span><span class="n">grayscale</span><span class="p">,</span>
+                           <span class="n">target_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_size</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">img_to_array</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_data_generator</span><span class="o">.</span><span class="n">random_transform</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_data_generator</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">batch_x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="c1"># optionally save augmented images to disk for debugging purposes</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_to_dir</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">current_batch_size</span><span class="p">):</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">array_to_img</span><span class="p">(</span><span class="n">batch_x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">fname</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{prefix}</span><span class="s1">_</span><span class="si">{index}</span><span class="s1">_</span><span class="si">{hash}</span><span class="s1">.</span><span class="si">{format}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">save_prefix</span><span class="p">,</span>
+                                                                  <span class="n">index</span><span class="o">=</span><span class="n">current_index</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span>
+                                                                  <span class="nb">hash</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mf">1e4</span><span class="p">),</span>
+                                                                  <span class="nb">format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">save_format</span><span class="p">)</span>
+                <span class="n">img</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_to_dir</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span>
+        <span class="c1"># build batch of labels</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_mode</span> <span class="o">==</span> <span class="s1">&#39;sparse&#39;</span><span class="p">:</span>
+            <span class="n">batch_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="n">index_array</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_mode</span> <span class="o">==</span> <span class="s1">&#39;binary&#39;</span><span class="p">:</span>
+            <span class="n">batch_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="n">index_array</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">floatx</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_mode</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+            <span class="n">batch_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">batch_x</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_class</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">K</span><span class="o">.</span><span class="n">floatx</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="n">index_array</span><span class="p">]):</span>
+                <span class="n">batch_y</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">batch_x</span>
+        <span class="k">return</span> <span class="n">batch_x</span><span class="p">,</span> <span class="n">batch_y</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

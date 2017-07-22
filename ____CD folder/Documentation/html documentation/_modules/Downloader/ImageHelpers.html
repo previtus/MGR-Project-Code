@@ -1,0 +1,176 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Downloader.ImageHelpers &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Downloader.ImageHelpers</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.misc</span> <span class="k">import</span> <span class="n">imread</span><span class="p">,</span> <span class="n">imresize</span><span class="p">,</span> <span class="n">imsave</span>
+<span class="kn">from</span> <span class="nn">keras.preprocessing.image</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">Downloader.Defaults</span> <span class="k">import</span> <span class="n">KERAS_SETTING_DIMENSIONS</span>
+
+<span class="c1"># Helper functions for loading of images</span>
+
+<div class="viewcode-block" id="list_images"><a class="viewcode-back" href="../../Downloader.html#Downloader.ImageHelpers.list_images">[docs]</a><span class="k">def</span> <span class="nf">list_images</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; prepare list of image names &#39;&#39;&#39;</span>
+    <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">listdir</span>
+    <span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">isfile</span><span class="p">,</span> <span class="n">join</span>
+    <span class="n">image_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">folder</span> <span class="o">+</span> <span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span> <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">f</span><span class="p">))]</span>
+    <span class="k">return</span> <span class="n">image_list</span></div>
+
+<div class="viewcode-block" id="len_"><a class="viewcode-back" href="../../Downloader.html#Downloader.ImageHelpers.len_">[docs]</a><span class="k">def</span> <span class="nf">len_</span><span class="p">(</span><span class="n">L</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">L</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span></div>
+
+<div class="viewcode-block" id="load_image_with_keras"><a class="viewcode-back" href="../../Downloader.html#Downloader.ImageHelpers.load_image_with_keras">[docs]</a><span class="k">def</span> <span class="nf">load_image_with_keras</span><span class="p">(</span><span class="n">img_path</span><span class="p">,</span> <span class="n">target_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dim_ordering</span><span class="o">=</span><span class="n">KERAS_SETTING_DIMENSIONS</span><span class="p">):</span>
+    <span class="n">pil_img</span> <span class="o">=</span> <span class="n">load_img</span><span class="p">(</span><span class="n">img_path</span><span class="p">,</span> <span class="n">target_size</span><span class="p">)</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">img_to_array</span><span class="p">(</span><span class="n">pil_img</span><span class="p">,</span> <span class="n">dim_ordering</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">arr</span></div>
+
+<div class="viewcode-block" id="load_images_with_keras"><a class="viewcode-back" href="../../Downloader.html#Downloader.ImageHelpers.load_images_with_keras">[docs]</a><span class="k">def</span> <span class="nf">load_images_with_keras</span><span class="p">(</span><span class="n">img_paths</span><span class="p">,</span> <span class="n">target_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dim_ordering</span><span class="o">=</span><span class="n">KERAS_SETTING_DIMENSIONS</span><span class="p">):</span>
+    <span class="n">imgs_arr</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">img_path</span> <span class="ow">in</span> <span class="n">img_paths</span><span class="p">:</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="n">load_image_with_keras</span><span class="p">(</span><span class="n">img_path</span><span class="p">,</span> <span class="n">target_size</span><span class="p">,</span> <span class="n">dim_ordering</span><span class="p">)</span>
+        <span class="n">imgs_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">imgs_arr</span></div>
+
+<div class="viewcode-block" id="preprocess_image_batch"><a class="viewcode-back" href="../../Downloader.html#Downloader.ImageHelpers.preprocess_image_batch">[docs]</a><span class="k">def</span> <span class="nf">preprocess_image_batch</span><span class="p">(</span><span class="n">image_paths</span><span class="p">,</span> <span class="n">img_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crop_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color_mode</span><span class="o">=</span><span class="s2">&quot;rgb&quot;</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">img_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">im_path</span> <span class="ow">in</span> <span class="n">image_paths</span><span class="p">:</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">imread</span><span class="p">(</span><span class="n">im_path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;RGB&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">img_size</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">imresize</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">img_size</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s1">&#39;failed resizing image&#39;</span><span class="p">,</span> <span class="n">im_path</span>
+                <span class="k">raise</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="c1">## We normalize the colors (in RGB space) with the empirical means on the training set</span>
+        <span class="c1">#img[:, :, 0] -= 123.68</span>
+        <span class="c1">#img[:, :, 1] -= 116.779</span>
+        <span class="c1">#img[:, :, 2] -= 103.939</span>
+        <span class="c1"># We permute the colors to get them in the BGR order</span>
+        <span class="k">if</span> <span class="n">color_mode</span><span class="o">==</span><span class="s2">&quot;bgr&quot;</span><span class="p">:</span>
+            <span class="n">img</span><span class="p">[:,:,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">img</span><span class="p">[:,:,[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">transpose</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">crop_size</span><span class="p">:</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="p">[:,(</span><span class="n">img_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">crop_size</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">//</span><span class="mi">2</span><span class="p">:(</span><span class="n">img_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">crop_size</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">//</span><span class="mi">2</span>
+                      <span class="p">,(</span><span class="n">img_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">crop_size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">//</span><span class="mi">2</span><span class="p">:(</span><span class="n">img_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">crop_size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">//</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">img_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">img_batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">img_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;when img_size and crop_size are None, images&#39;</span>
+                <span class="s1">&#39; in image_paths must have the same shapes.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="s1">&#39;append&#39;</span><span class="p">):</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">img_batch</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">img_batch</span></div>
+
+<div class="viewcode-block" id="saveArrayToCSV"><a class="viewcode-back" href="../../Downloader.html#Downloader.ImageHelpers.saveArrayToCSV">[docs]</a><span class="k">def</span> <span class="nf">saveArrayToCSV</span><span class="p">(</span><span class="n">array</span><span class="p">,</span><span class="n">filename</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

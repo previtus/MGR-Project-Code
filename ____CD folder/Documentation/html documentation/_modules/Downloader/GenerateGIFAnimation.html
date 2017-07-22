@@ -1,0 +1,140 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Downloader.GenerateGIFAnimation &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Downloader.GenerateGIFAnimation</h1><div class="highlight"><pre>
+<span></span><span class="c1"># GenerateGIFAnimation.py</span>
+<span class="kn">import</span> <span class="nn">imageio</span>
+
+<div class="viewcode-block" id="GenerateGIFAnimation"><a class="viewcode-back" href="../../Downloader.html#Downloader.GenerateGIFAnimation.GenerateGIFAnimation">[docs]</a><span class="k">def</span> <span class="nf">GenerateGIFAnimation</span><span class="p">(</span><span class="n">Segments</span><span class="p">,</span> <span class="n">GIFFileName</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Create GIF animation from Segments.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="n">frames</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">with</span> <span class="n">imageio</span><span class="o">.</span><span class="n">get_writer</span><span class="p">(</span><span class="n">GIFFileName</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;I&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+        <span class="c1"># there</span>
+        <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">Segments</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">HasLoadedImages</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">segment</span><span class="o">.</span><span class="n">getImageFilename</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="c1">#for fileTuple in FilenameMap:</span>
+                <span class="c1">#filename = fileTuple[1]</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="n">imageio</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">append_data</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+                <span class="n">frames</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># and back</span>
+        <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">Segments</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">HasLoadedImages</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">segment</span><span class="o">.</span><span class="n">getImageFilename</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="c1">#for fileTuple in FilenameMap:</span>
+                <span class="c1">#filename = fileTuple[1]</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="n">imageio</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">append_data</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+                <span class="n">frames</span> <span class="o">+=</span> <span class="mi">1</span>
+
+
+    <span class="nb">print</span> <span class="s2">&quot;Saved to&quot;</span><span class="p">,</span> <span class="n">GIFFileName</span><span class="p">,</span> <span class="s2">&quot;with &lt;&quot;</span><span class="p">,</span> <span class="n">frames</span><span class="p">,</span> <span class="s2">&quot;&gt; frames.&quot;</span>
+
+
+    <span class="k">return</span> <span class="p">[]</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

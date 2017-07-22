@@ -1,0 +1,325 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Evaluator package &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ExperimentRunner package" href="ExperimentRunner.html" />
+    <link rel="prev" title="Downloader.PreprocessData package" href="Downloader.PreprocessData.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="evaluator-package">
+<h1>Evaluator package<a class="headerlink" href="#evaluator-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-Evaluator.Evaluator">
+<span id="evaluator-evaluator-module"></span><h2>Evaluator.Evaluator module<a class="headerlink" href="#module-Evaluator.Evaluator" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="Evaluator.Evaluator.evaluator">
+<code class="descclassname">Evaluator.Evaluator.</code><code class="descname">evaluator</code><span class="sig-paren">(</span><em>model_file</em>, <em>settings_file</em>, <em>name_output_file</em>, <em>custom_target_geojson=None</em>, <em>show_segments_histo_stats=False</em>, <em>actually_save=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Evaluator.html#evaluator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Evaluator.evaluator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main Evaluator function.
+:param model_file: path to model .h5 file.
+:param settings_file: path to settings file which was used to train this model.
+:param name_output_file: name of labeled geojson data
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Evaluator.evaluator_generators_predict">
+<code class="descclassname">Evaluator.Evaluator.</code><code class="descname">evaluator_generators_predict</code><span class="sig-paren">(</span><em>model_base</em>, <em>model_top</em>, <em>model_settings</em>, <em>img_generator</em>, <em>osm</em>, <em>size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Evaluator.html#evaluator_generators_predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Evaluator.evaluator_generators_predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use generators to evaluate model.
+:param model_base: base CNN model
+:param model_top: attached custom top classifier model
+:param model_settings: settings of the model (to recognize the type of the model)
+:param img_generator: image generator
+:param osm: list of corresponding osm vectors
+:param size: amount of images.
+:return: Returns labeled data (labeled from images and osm)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Evaluator.evaluator_load_model">
+<code class="descclassname">Evaluator.Evaluator.</code><code class="descname">evaluator_load_model</code><span class="sig-paren">(</span><em>model_file</em>, <em>settings_file</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Evaluator.html#evaluator_load_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Evaluator.evaluator_load_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load skeleton of model and dataset
+:param model_file: model h5 file
+:param settings_file: corresponding settings file
+:param verbose:
+:return: model_base, model_top, model_settings</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Evaluator.evaluator_predict_on_dataset">
+<code class="descclassname">Evaluator.Evaluator.</code><code class="descname">evaluator_predict_on_dataset</code><span class="sig-paren">(</span><em>model_base</em>, <em>model_top</em>, <em>model_settings</em>, <em>x</em>, <em>osm</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Evaluator.html#evaluator_predict_on_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Evaluator.evaluator_predict_on_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate model by just loading data into memory. This is effective with OSM models, but with others it will likely
+flood the memory and be terminated - use generators in that case.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>model_base</strong> – base CNN model</li>
+<li><strong>model_top</strong> – attached custom top classifier model</li>
+<li><strong>model_settings</strong> – settings of the model (to recognize the type of the model)</li>
+<li><strong>x</strong> – image data</li>
+<li><strong>osm</strong> – list of corresponding osm vectors</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Returns labeled data (labeled from images and osm)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Evaluator.load_tmp_dataset">
+<code class="descclassname">Evaluator.Evaluator.</code><code class="descname">load_tmp_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Evaluator.html#load_tmp_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Evaluator.load_tmp_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Example of how a dataset can be loaded.
+:return:</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-Evaluator.Functions">
+<span id="evaluator-functions-module"></span><h2>Evaluator.Functions module<a class="headerlink" href="#module-Evaluator.Functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="Evaluator.Functions.AlterSegments">
+<code class="descclassname">Evaluator.Functions.</code><code class="descname">AlterSegments</code><span class="sig-paren">(</span><em>EvaluatedData</em>, <em>Segments</em>, <em>only_unknown_scores=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Functions.html#AlterSegments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Functions.AlterSegments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Edit internal values of Segments depending on what data we got.
+:param EvaluatedData: processed dictionary which can give us list of values for segment id
+:param Segments: list of Segment objects, which we iterate through and change their scores.
+:param only_unknown_scores: Flag whether we overwrite only those Segments which had unknown score in
+the initial dataset.
+:return: Altered Segments list</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Functions.analyze_lists">
+<code class="descclassname">Evaluator.Functions.</code><code class="descname">analyze_lists</code><span class="sig-paren">(</span><em>lists</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Functions.html#analyze_lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Functions.analyze_lists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Analyze statistics inside lists. Count for unique segments and numbers of images.
+:param lists:
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Functions.default_segments_path">
+<code class="descclassname">Evaluator.Functions.</code><code class="descname">default_segments_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Functions.html#default_segments_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Functions.default_segments_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>assembles path to the segments files</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Functions.generator_img">
+<code class="descclassname">Evaluator.Functions.</code><code class="descname">generator_img</code><span class="sig-paren">(</span><em>order</em>, <em>image_paths</em>, <em>resize=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Functions.html#generator_img"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Functions.generator_img" title="Permalink to this definition">¶</a></dt>
+<dd><p>generator yields loaded images one by one, needed to save memory</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Functions.generator_osm">
+<code class="descclassname">Evaluator.Functions.</code><code class="descname">generator_osm</code><span class="sig-paren">(</span><em>order</em>, <em>osms</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Functions.html#generator_osm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Functions.generator_osm" title="Permalink to this definition">¶</a></dt>
+<dd><p>generator yields osm vectors one by one, not really needed</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Functions.getImgGenerator_from_lists">
+<code class="descclassname">Evaluator.Functions.</code><code class="descname">getImgGenerator_from_lists</code><span class="sig-paren">(</span><em>lists</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Functions.html#getImgGenerator_from_lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Functions.getImgGenerator_from_lists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create generator on given list, yielding imagery data.
+:param lists:
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Functions.getOsmGenerator_from_lists">
+<code class="descclassname">Evaluator.Functions.</code><code class="descname">getOsmGenerator_from_lists</code><span class="sig-paren">(</span><em>lists</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Functions.html#getOsmGenerator_from_lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Functions.getOsmGenerator_from_lists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create generator on given list, yielding vector data.
+:param lists:
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Functions.internalToExternal">
+<code class="descclassname">Evaluator.Functions.</code><code class="descname">internalToExternal</code><span class="sig-paren">(</span><em>score</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Functions.html#internalToExternal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Functions.internalToExternal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert score notations back to how geojson file used it.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Functions.loadDataFromSegments">
+<code class="descclassname">Evaluator.Functions.</code><code class="descname">loadDataFromSegments</code><span class="sig-paren">(</span><em>path_to_segments_file</em>, <em>SCORE</em>, <em>verbose=False</em>, <em>we_dont_care_about_missing_images=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Functions.html#loadDataFromSegments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Functions.loadDataFromSegments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load lists from Segments
+:param path_to_segments_file: Segments file to be loaded.
+:param SCORE: flag for if we care for only scored Segments
+:param verbose:
+:param we_dont_care_about_missing_images: flag for if we care for only those Segments with images
+(OSM model doesnt need them.)
+:return: lists and Segments</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Functions.loadDefaultGEOJSON">
+<code class="descclassname">Evaluator.Functions.</code><code class="descname">loadDefaultGEOJSON</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Functions.html#loadDefaultGEOJSON"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Functions.loadDefaultGEOJSON" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load default GeoJSON file, which is the initial attractivity_previtus_data_1_edges.geojson file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Functions.loadGeoJson">
+<code class="descclassname">Evaluator.Functions.</code><code class="descname">loadGeoJson</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Functions.html#loadGeoJson"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Functions.loadGeoJson" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load GeoJSON file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Functions.markGeoJSON">
+<code class="descclassname">Evaluator.Functions.</code><code class="descname">markGeoJSON</code><span class="sig-paren">(</span><em>GeoJSON</em>, <em>Segments</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Functions.html#markGeoJSON"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Functions.markGeoJSON" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mark geojson object with data from corresponding Segment object in Segments
+:param GeoJSON: geojson object
+:param Segments: list of objects
+:return: altered GeoJSON object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Functions.osm_from_lists">
+<code class="descclassname">Evaluator.Functions.</code><code class="descname">osm_from_lists</code><span class="sig-paren">(</span><em>lists</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Functions.html#osm_from_lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Functions.osm_from_lists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get osm data</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Functions.prepEvaluatedData">
+<code class="descclassname">Evaluator.Functions.</code><code class="descname">prepEvaluatedData</code><span class="sig-paren">(</span><em>y_pred</em>, <em>segment_ids</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Functions.html#prepEvaluatedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Functions.prepEvaluatedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>prepare dictionary which will give us scores of certain segment id all clustered together into one list.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Functions.saveGeoJson">
+<code class="descclassname">Evaluator.Functions.</code><code class="descname">saveGeoJson</code><span class="sig-paren">(</span><em>GeoJSON</em>, <em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Functions.html#saveGeoJson"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Functions.saveGeoJson" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save GeoJSON file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Functions.small_lists">
+<code class="descclassname">Evaluator.Functions.</code><code class="descname">small_lists</code><span class="sig-paren">(</span><em>lists</em>, <em>n=50</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Functions.html#small_lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Functions.small_lists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subset of first n values.
+:param lists:
+:param n:
+:return: subsets of lists</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Evaluator.Functions.traverseGeoJSON">
+<code class="descclassname">Evaluator.Functions.</code><code class="descname">traverseGeoJSON</code><span class="sig-paren">(</span><em>GeoJSON</em>, <em>Segments</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evaluator/Functions.html#traverseGeoJSON"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Evaluator.Functions.traverseGeoJSON" title="Permalink to this definition">¶</a></dt>
+<dd><p>For testing purposes we go through all entries in GeoJSON and check for scores in Segments,
+we report the altered values.
+:param GeoJSON:
+:param Segments:
+:return:</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-Evaluator">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-Evaluator" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Downloader.html">Downloader package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Evaluator package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Evaluator.Evaluator">Evaluator.Evaluator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Evaluator.Functions">Evaluator.Functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Evaluator">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Downloader.PreprocessData.html" title="previous chapter">Downloader.PreprocessData package</a></li>
+      <li>Next: <a href="ExperimentRunner.html" title="next chapter">ExperimentRunner package</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/Evaluator.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

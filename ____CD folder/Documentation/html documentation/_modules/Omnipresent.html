@@ -1,0 +1,230 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Omnipresent &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Omnipresent</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Collection of helper functions easily accessible in the entire project.</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">urllib2</span>
+
+<div class="viewcode-block" id="len_"><a class="viewcode-back" href="../Omnipresent.html#Omnipresent.len_">[docs]</a><span class="k">def</span> <span class="nf">len_</span><span class="p">(</span><span class="n">L</span><span class="p">):</span>
+    <span class="c1"># Ultimate report on any kind of list.</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">L</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="n">comb</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">L</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">len_</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="n">comb</span> <span class="o">+=</span> <span class="n">s</span> <span class="o">+</span> <span class="s2">&quot; + &quot;</span>
+
+        <span class="k">return</span> <span class="n">comb</span></div>
+
+<div class="viewcode-block" id="send_mail"><a class="viewcode-back" href="../Omnipresent.html#Omnipresent.send_mail">[docs]</a><span class="k">def</span> <span class="nf">send_mail</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">attachment_path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Send mail!</span>
+<span class="sd">    :param subject: Mail subject</span>
+<span class="sd">    :param message: Mail message</span>
+<span class="sd">    :param attachment_path: Login details and specifics of mails.</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">smtplib</span><span class="o">,</span> <span class="nn">os</span>
+        <span class="kn">from</span> <span class="nn">email.mime.multipart</span> <span class="k">import</span> <span class="n">MIMEMultipart</span>
+        <span class="kn">from</span> <span class="nn">email.mime.text</span> <span class="k">import</span> <span class="n">MIMEText</span>
+        <span class="kn">from</span> <span class="nn">email.mime.base</span> <span class="k">import</span> <span class="n">MIMEBase</span>
+        <span class="kn">from</span> <span class="nn">email</span> <span class="k">import</span> <span class="n">encoders</span>
+
+        <span class="kn">from</span> <span class="nn">mail_secrets</span> <span class="k">import</span> <span class="n">fromaddr</span><span class="p">,</span> <span class="n">toaddr</span><span class="p">,</span> <span class="n">passwrd</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">MIMEMultipart</span><span class="p">()</span>
+
+        <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;From&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fromaddr</span>
+        <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;To&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">toaddr</span>
+        <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;Subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subject</span> <span class="c1">#&quot;SUBJECT OF THE EMAIL&quot;</span>
+
+        <span class="n">body</span> <span class="o">=</span> <span class="n">message</span> <span class="c1">#&quot;TEXT YOU WANT TO SEND&quot;</span>
+
+        <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">MIMEText</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s1">&#39;plain&#39;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">attachment_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="n">attachment_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">attachment_path</span><span class="p">)</span>
+            <span class="n">attachment</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">attachment_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="c1">#&quot;PATH OF THE FILE&quot;</span>
+
+            <span class="n">part</span> <span class="o">=</span> <span class="n">MIMEBase</span><span class="p">(</span><span class="s1">&#39;application&#39;</span><span class="p">,</span> <span class="s1">&#39;octet-stream&#39;</span><span class="p">)</span>
+            <span class="n">part</span><span class="o">.</span><span class="n">set_payload</span><span class="p">((</span><span class="n">attachment</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+            <span class="n">encoders</span><span class="o">.</span><span class="n">encode_base64</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+            <span class="n">part</span><span class="o">.</span><span class="n">add_header</span><span class="p">(</span><span class="s1">&#39;Content-Disposition&#39;</span><span class="p">,</span> <span class="s2">&quot;attachment; filename= </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">attachment_filename</span><span class="p">)</span>
+
+            <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+
+        <span class="n">server</span> <span class="o">=</span> <span class="n">smtplib</span><span class="o">.</span><span class="n">SMTP</span><span class="p">(</span><span class="s1">&#39;smtp.gmail.com&#39;</span><span class="p">,</span> <span class="mi">587</span><span class="p">)</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">starttls</span><span class="p">()</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">fromaddr</span><span class="p">,</span> <span class="n">passwrd</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">as_string</span><span class="p">()</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">sendmail</span><span class="p">(</span><span class="n">fromaddr</span><span class="p">,</span> <span class="n">toaddr</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">inst</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;Exception when trying to send mail.&quot;</span>
+        <span class="nb">print</span> <span class="nb">type</span><span class="p">(</span><span class="n">inst</span><span class="p">)</span>     <span class="c1"># the exception instance</span>
+        <span class="nb">print</span> <span class="n">inst</span><span class="o">.</span><span class="n">args</span>      <span class="c1"># arguments stored in .args</span>
+        <span class="nb">print</span> <span class="n">inst</span>           <span class="c1"># __str__ allows args to be printed directly</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+    <span class="c1"># Usage example:</span>
+    <span class="c1"># send_mail(&#39;automatic mail&#39;, &#39;test&#39;, &#39;/home/ekmek/Vitek/Logs/Number_of_FC_blocks_test/graph_together_Number_of_FC_blocks_test.png&#39;)</span>
+
+
+<div class="viewcode-block" id="save_job_report_page"><a class="viewcode-back" href="../Omnipresent.html#Omnipresent.save_job_report_page">[docs]</a><span class="k">def</span> <span class="nf">save_job_report_page</span><span class="p">(</span><span class="n">folder_path</span><span class="p">,</span> <span class="n">job_id</span><span class="p">,</span> <span class="n">cut</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Saves webpage generated by metacentrum just before the experiment run is finished. There wa can for example read the</span>
+<span class="sd">     consumption of resources and time requirements.</span>
+<span class="sd">    :param folder_path:</span>
+<span class="sd">    :param job_id: unique id provided by Metacentrum scheduling system. Links to the one unique page we want to get.</span>
+<span class="sd">    :param cut: Shorten the output</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+
+        <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;https://metavo.metacentrum.cz/pbsmon2/job/&#39;</span> <span class="o">+</span> <span class="n">job_id</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">webContent</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">cut</span><span class="p">:</span>
+            <span class="n">substr</span> <span class="o">=</span> <span class="s1">&#39;Job &#39;</span><span class="o">+</span><span class="n">job_id</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">webContent</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">substr</span><span class="p">,</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">substr</span><span class="p">)</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="mi">18</span>
+            <span class="n">webContent</span> <span class="o">=</span> <span class="n">webContent</span><span class="p">[</span><span class="n">index</span><span class="o">+</span><span class="n">offset</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1">#print(webContent)</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">folder_path</span> <span class="o">+</span> <span class="n">job_id</span><span class="o">+</span><span class="s1">&#39;.html&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">webContent</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">inst</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;Exception in the report page downloading from Metacentrum&quot;</span>
+        <span class="nb">print</span> <span class="nb">type</span><span class="p">(</span><span class="n">inst</span><span class="p">)</span>     <span class="c1"># the exception instance</span>
+        <span class="nb">print</span> <span class="n">inst</span><span class="o">.</span><span class="n">args</span>      <span class="c1"># arguments stored in .args</span>
+        <span class="nb">print</span> <span class="n">inst</span>           <span class="c1"># __str__ allows args to be printed directly</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+    <span class="c1"># example usage:</span>
+    <span class="c1">#save_job_report_page(folder_path=&#39;&#39;,job_id=&#39;1398409.arien-pro.ics.muni.cz&#39;)</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<div class="viewcode-block" id="file_exists_and_accesible"><a class="viewcode-back" href="../Omnipresent.html#Omnipresent.file_exists_and_accesible">[docs]</a><span class="k">def</span> <span class="nf">file_exists_and_accesible</span><span class="p">(</span><span class="n">PATH</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">PATH</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">PATH</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">R_OK</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="array_md5"><a class="viewcode-back" href="../Omnipresent.html#Omnipresent.array_md5">[docs]</a><span class="k">def</span> <span class="nf">array_md5</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+    <span class="c1"># get md5 value of a list, for their comparison or duality checks</span>
+    <span class="kn">import</span> <span class="nn">hashlib</span>
+    <span class="kn">import</span> <span class="nn">cPickle</span> <span class="k">as</span> <span class="nn">pickle</span>
+    <span class="n">data_pickle</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+    <span class="n">data_md5</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">data_pickle</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">data_md5</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

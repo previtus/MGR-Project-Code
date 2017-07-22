@@ -1,0 +1,4 @@
+model: 		Mixed model
+dataset: 	5556x_markable_640x640
+
+variable base models

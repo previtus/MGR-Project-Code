@@ -1,0 +1,30 @@
+Evaluator package
+=================
+
+Submodules
+----------
+
+Evaluator\.Evaluator module
+---------------------------
+
+.. automodule:: Evaluator.Evaluator
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Evaluator\.Functions module
+---------------------------
+
+.. automodule:: Evaluator.Functions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: Evaluator
+    :members:
+    :undoc-members:
+    :show-inheritance:

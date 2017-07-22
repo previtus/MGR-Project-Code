@@ -1,0 +1,6 @@
+Model: OSM with variable settings for width and depth
+Dataset: 5556x_markable_640x640
+
+naming scheme
+w = width
+d = depth

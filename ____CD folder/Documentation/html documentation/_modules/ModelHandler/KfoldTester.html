@@ -1,0 +1,324 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ModelHandler.KfoldTester &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ModelHandler.KfoldTester</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">Omnipresent</span> <span class="k">import</span> <span class="n">len_</span>
+
+<div class="viewcode-block" id="chunks"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.KfoldTester.chunks">[docs]</a><span class="k">def</span> <span class="nf">chunks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Chunk data from list l into n fjords.&#39;&#39;&#39;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">l</span><span class="p">),</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">b</span></div>
+
+<div class="viewcode-block" id="kfold"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.KfoldTester.kfold">[docs]</a><span class="k">def</span> <span class="nf">kfold</span><span class="p">(</span><span class="n">indices_in_fjords</span><span class="p">,</span> <span class="n">selected</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; indices come like [] [] [] ... [], we want to select the one in &lt;selected&gt; as validation and rest as tests&#39;&#39;&#39;</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">train_indices</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">validation_indices</span> <span class="o">=</span> <span class="n">indices_in_fjords</span><span class="p">[</span><span class="n">selected</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">fjord</span> <span class="ow">in</span> <span class="n">indices_in_fjords</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">i</span><span class="o">&lt;&gt;</span><span class="n">selected</span><span class="p">:</span>
+            <span class="n">train_indices</span> <span class="o">+=</span> <span class="n">fjord</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">train_indices</span><span class="p">,</span> <span class="n">validation_indices</span></div>
+
+<div class="viewcode-block" id="indices_to_data"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.KfoldTester.indices_to_data">[docs]</a><span class="k">def</span> <span class="nf">indices_to_data</span><span class="p">(</span><span class="n">any_indices</span><span class="p">,</span> <span class="n">any_data</span><span class="p">):</span>
+    <span class="n">selected_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">any_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">any_indices</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">selected_data</span></div>
+
+<div class="viewcode-block" id="select_data"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.KfoldTester.select_data">[docs]</a><span class="k">def</span> <span class="nf">select_data</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    # select from data, while considering that data can be either list of items to directly select from</span>
+<span class="sd">    # or it can be a list of size two, where we select from both items and later join</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">selected</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">second</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">first_selected</span> <span class="o">=</span> <span class="n">indices_to_data</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">first</span><span class="p">)</span>
+        <span class="n">second_selected</span> <span class="o">=</span> <span class="n">indices_to_data</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">second</span><span class="p">)</span>
+
+        <span class="n">selected</span> <span class="o">=</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">first_selected</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">second_selected</span><span class="p">)]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">selected</span> <span class="o">=</span> <span class="n">indices_to_data</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">selected</span></div>
+
+<div class="viewcode-block" id="best_min"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.KfoldTester.best_min">[docs]</a><span class="k">def</span> <span class="nf">best_min</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; return the smallest value&#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="k_fold_crossvalidation"><a class="viewcode-back" href="../../ModelHandler.html#ModelHandler.KfoldTester.k_fold_crossvalidation">[docs]</a><span class="k">def</span> <span class="nf">k_fold_crossvalidation</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    # K fold crossvalidation scheme</span>
+<span class="sd">    # includes proper loading of models, testing and processing of the results.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="kn">from</span> <span class="nn">ModelHandler.ModelTester</span> <span class="k">import</span> <span class="n">load_features</span>
+    <span class="kn">from</span> <span class="nn">ModelHandler.ModelTester</span> <span class="k">import</span> <span class="n">train_top_model</span>
+
+    <span class="n">k</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;crossvalidation_k&quot;</span><span class="p">]</span>
+
+    <span class="c1"># idea is to generate k=4 folds of indices</span>
+    <span class="c1"># with dataset having been shuffled already, we can just use the indices 0-number_of_images</span>
+
+    <span class="n">number_of_images_total</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">num_of_images</span>
+
+    <span class="nb">print</span> <span class="s2">&quot;Total of &quot;</span><span class="p">,</span> <span class="n">number_of_images_total</span><span class="p">,</span> <span class="s2">&quot; images.&quot;</span>
+
+    <span class="n">indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_images_total</span><span class="p">)</span>
+
+    <span class="n">indices_in_fjords</span> <span class="o">=</span> <span class="n">chunks</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+    <span class="c1">#print indices_in_fjords</span>
+    <span class="nb">print</span> <span class="s2">&quot;sizes of fjords:&quot;</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span><span class="n">indices_in_fjords</span><span class="p">)</span>
+
+    <span class="c1"># (tests)</span>
+    <span class="n">test</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">fjord</span> <span class="ow">in</span> <span class="n">indices_in_fjords</span><span class="p">:</span>
+        <span class="n">test</span> <span class="o">+=</span> <span class="n">fjord</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">test</span> <span class="o">==</span> <span class="n">indices</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s1">&#39;not the same!&#39;</span>
+
+    <span class="c1"># fold indices are now prepared</span>
+    <span class="c1"># collect all_inputs and all_outputs depending on the type of experiment we are running.</span>
+    <span class="n">all_inputs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">all_outputs</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># outputs are always score labels</span>
+    <span class="n">all_outputs</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getDataLabels_only_y</span><span class="p">()</span>
+
+    <span class="n">features</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">active_model</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;img_osm_mix&#39;</span> <span class="ow">or</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;simple_cnn_with_top&#39;</span><span class="p">:</span>
+        <span class="n">filename_features_train</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;filename_features_train&quot;</span><span class="p">]</span>
+        <span class="n">filename_features_test</span> <span class="o">=</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;filename_features_test&quot;</span><span class="p">]</span>
+        <span class="p">[</span><span class="n">train_data</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">validation_data</span><span class="p">,</span> <span class="n">_</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_features</span><span class="p">(</span><span class="n">filename_features_train</span><span class="p">,</span> <span class="n">filename_features_test</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">features</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">validation_data</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1">#arr_test = arr[0:split_at]</span>
+    <span class="c1">#arr_val = arr[split_at:]</span>
+
+
+    <span class="c1"># TODO: MODEL_TYPE_SPLIT</span>
+    <span class="k">if</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;simple_cnn_with_top&#39;</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;Prepare all_inputs and all_outputs for Image only model.&quot;</span>
+        <span class="c1"># inputs are all the images, but for our model its the features</span>
+        <span class="n">all_inputs</span> <span class="o">=</span> <span class="n">features</span>
+        <span class="n">active_model</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;osm_only&#39;</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;Prepare all_inputs and all_outputs for OSM only model.&quot;</span>
+        <span class="c1"># inputs are all the osm vectors</span>
+        <span class="n">all_inputs</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getDataLabels_only_osm</span><span class="p">()</span>
+        <span class="n">active_model</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">model_settings</span><span class="p">[</span><span class="s2">&quot;model_type&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;img_osm_mix&#39;</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;Prepare all_inputs and all_outputs for Mixed model.&quot;</span>
+        <span class="c1"># inputs list of features and osm vectors</span>
+        <span class="n">osms</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getDataLabels_only_osm</span><span class="p">()</span>
+        <span class="n">all_inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">osms</span><span class="p">,</span> <span class="n">features</span><span class="p">]</span>
+        <span class="n">active_model</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="nb">print</span> <span class="n">len_</span><span class="p">(</span><span class="n">osms</span><span class="p">),</span> <span class="s2">&quot;and&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;Yet to be programmed.&quot;</span>
+
+    <span class="c1"># save active_models weights, so we don&#39;t cheat by cumulating better and better results...</span>
+    <span class="n">initial_weights</span> <span class="o">=</span> <span class="n">active_model</span><span class="o">.</span><span class="n">get_weights</span><span class="p">()</span>
+
+    <span class="nb">print</span> <span class="s2">&quot;Sizes of all_inputs:&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">all_inputs</span><span class="p">),</span> <span class="s2">&quot;and all_outputs:&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">all_outputs</span><span class="p">)</span>
+
+    <span class="c1"># variables for remembering data from histories</span>
+    <span class="n">last_training_errors</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">best_training_errors</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">last_validation_errors</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">best_validation_errors</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">all_histories_of_this_model</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">last_training_measure</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">best_training_measure</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">last_validation_measure</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">best_validation_measure</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">selected_fjord</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">k</span><span class="p">):</span>
+        <span class="n">active_model</span><span class="o">.</span><span class="n">set_weights</span><span class="p">(</span><span class="n">initial_weights</span><span class="p">)</span>
+
+        <span class="n">train_indices</span><span class="p">,</span> <span class="n">valid_indices</span> <span class="o">=</span> <span class="n">kfold</span><span class="p">(</span><span class="n">indices_in_fjords</span><span class="p">,</span> <span class="n">selected_fjord</span><span class="p">)</span>
+
+        <span class="n">train_inputs</span> <span class="o">=</span> <span class="n">select_data</span><span class="p">(</span><span class="n">train_indices</span><span class="p">,</span> <span class="n">all_inputs</span><span class="p">)</span>
+        <span class="n">valid_inputs</span> <span class="o">=</span> <span class="n">select_data</span><span class="p">(</span><span class="n">valid_indices</span><span class="p">,</span> <span class="n">all_inputs</span><span class="p">)</span>
+        <span class="n">train_outputs</span> <span class="o">=</span> <span class="n">select_data</span><span class="p">(</span><span class="n">train_indices</span><span class="p">,</span> <span class="n">all_outputs</span><span class="p">)</span>
+        <span class="n">valid_outputs</span> <span class="o">=</span> <span class="n">select_data</span><span class="p">(</span><span class="n">valid_indices</span><span class="p">,</span> <span class="n">all_outputs</span><span class="p">)</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;selected_fjord&quot;</span><span class="p">,</span> <span class="n">selected_fjord</span>
+        <span class="nb">print</span> <span class="s2">&quot;Sizes of train_inputs:&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">train_inputs</span><span class="p">),</span> <span class="s2">&quot;and train_outputs:&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">train_outputs</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot;Sizes of valid_inputs:&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">valid_inputs</span><span class="p">),</span> <span class="s2">&quot;and valid_outputs:&quot;</span><span class="p">,</span> <span class="n">len_</span><span class="p">(</span><span class="n">valid_outputs</span><span class="p">)</span>
+
+        <span class="c1"># into training and result collecting</span>
+        <span class="n">history</span> <span class="o">=</span> <span class="n">train_top_model</span><span class="p">(</span><span class="n">active_model</span><span class="p">,</span> <span class="n">model_settings</span><span class="p">,</span> <span class="n">train_inputs</span><span class="p">,</span> <span class="n">train_outputs</span><span class="p">,</span> <span class="n">valid_inputs</span><span class="p">,</span> <span class="n">valid_outputs</span><span class="p">)</span>
+        <span class="c1">#print history</span>
+
+        <span class="n">measure</span> <span class="o">=</span> <span class="s1">&#39;mean_absolute_error&#39;</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="s1">&#39;loss&#39;</span>
+        <span class="n">val_measure</span> <span class="o">=</span> <span class="s1">&#39;val_&#39;</span> <span class="o">+</span> <span class="n">measure</span>
+        <span class="n">val_error</span> <span class="o">=</span> <span class="s1">&#39;val_&#39;</span> <span class="o">+</span> <span class="n">error</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">         {&#39;val_mean_absolute_error&#39;:</span>
+<span class="sd">             [0.00036219754838384688, 7.0134797169885132e-06, 3.973643103449831e-08, 3.973643103449831e-08, 3.973643103449831e-08],</span>
+<span class="sd">         &#39;loss&#39;:</span>
+<span class="sd">             [0.34813621640205383, 0.16262358427047729, 0.19959338009357452, 0.16045540571212769, 0.16040021181106567],</span>
+<span class="sd">         &#39;mean_absolute_error&#39;:</span>
+<span class="sd">             [0.50139808654785156, 0.22280247509479523, 0.25902602076530457, 0.21229584515094757, 0.21108284592628479],</span>
+<span class="sd">         &#39;val_loss&#39;:</span>
+<span class="sd">             [1.7484823899849289e-07, 9.398822692352482e-11, 4.7369517129061591e-15, 4.7369517129061591e-15, 4.7369517129061591e-15]</span>
+<span class="sd">         }</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># process history!</span>
+        <span class="n">all_histories_of_this_model</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+        <span class="n">last_training_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">history</span><span class="p">[</span><span class="n">error</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>
+        <span class="n">last_validation_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">history</span><span class="p">[</span><span class="n">val_error</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>
+
+        <span class="n">last_training_measure</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">history</span><span class="p">[</span><span class="n">measure</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>
+        <span class="n">last_validation_measure</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">history</span><span class="p">[</span><span class="n">val_measure</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>
+
+        <span class="n">best_training_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">best_min</span><span class="p">(</span><span class="n">history</span><span class="p">[</span><span class="n">error</span><span class="p">])</span> <span class="p">)</span>
+        <span class="n">best_validation_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">best_min</span><span class="p">(</span><span class="n">history</span><span class="p">[</span><span class="n">val_error</span><span class="p">])</span> <span class="p">)</span>
+
+        <span class="n">best_training_measure</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">best_min</span><span class="p">(</span><span class="n">history</span><span class="p">[</span><span class="n">measure</span><span class="p">])</span> <span class="p">)</span>
+        <span class="n">best_validation_measure</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">best_min</span><span class="p">(</span><span class="n">history</span><span class="p">[</span><span class="n">val_measure</span><span class="p">])</span> <span class="p">)</span>
+
+    <span class="nb">print</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="n">error</span>
+    <span class="nb">print</span> <span class="s2">&quot;last_training_errors&quot;</span><span class="p">,</span> <span class="n">last_training_errors</span>
+    <span class="nb">print</span> <span class="s2">&quot;best_training_errors&quot;</span><span class="p">,</span> <span class="n">best_training_errors</span>
+    <span class="nb">print</span> <span class="s2">&quot;last_validation_errors&quot;</span><span class="p">,</span> <span class="n">last_validation_errors</span>
+    <span class="nb">print</span> <span class="s2">&quot;best_validation_errors&quot;</span><span class="p">,</span> <span class="n">best_validation_errors</span>
+
+    <span class="nb">print</span> <span class="s2">&quot;measure&quot;</span><span class="p">,</span> <span class="n">measure</span>
+    <span class="nb">print</span> <span class="s2">&quot;last_training_measure&quot;</span><span class="p">,</span> <span class="n">last_training_measure</span>
+    <span class="nb">print</span> <span class="s2">&quot;best_training_measure&quot;</span><span class="p">,</span> <span class="n">best_training_measure</span>
+    <span class="nb">print</span> <span class="s2">&quot;last_validation_measure&quot;</span><span class="p">,</span> <span class="n">last_validation_measure</span>
+    <span class="nb">print</span> <span class="s2">&quot;best_validation_measure&quot;</span><span class="p">,</span> <span class="n">best_validation_measure</span>
+
+    <span class="nb">print</span> <span class="s2">&quot;all_histories_of_this_model&quot;</span><span class="p">,</span> <span class="n">all_histories_of_this_model</span>
+
+    <span class="n">special_history_dictionary</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">special_history_dictionary</span><span class="p">[</span><span class="s2">&quot;last_training_errors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">last_training_errors</span>
+    <span class="n">special_history_dictionary</span><span class="p">[</span><span class="s2">&quot;best_training_errors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_training_errors</span>
+    <span class="n">special_history_dictionary</span><span class="p">[</span><span class="s2">&quot;last_validation_errors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">last_validation_errors</span>
+    <span class="n">special_history_dictionary</span><span class="p">[</span><span class="s2">&quot;best_validation_errors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_validation_errors</span>
+
+    <span class="n">special_history_dictionary</span><span class="p">[</span><span class="s2">&quot;last_training_measure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">last_training_measure</span>
+    <span class="n">special_history_dictionary</span><span class="p">[</span><span class="s2">&quot;best_training_measure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_training_measure</span>
+    <span class="n">special_history_dictionary</span><span class="p">[</span><span class="s2">&quot;last_validation_measure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">last_validation_measure</span>
+    <span class="n">special_history_dictionary</span><span class="p">[</span><span class="s2">&quot;best_validation_measure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_validation_measure</span>
+
+    <span class="n">special_history_dictionary</span><span class="p">[</span><span class="s2">&quot;all_histories_of_this_model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_histories_of_this_model</span>
+
+    <span class="n">history</span> <span class="o">=</span> <span class="n">special_history_dictionary</span>
+    <span class="k">return</span> <span class="n">history</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

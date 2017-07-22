@@ -1,0 +1,7 @@
+Omnipresent module
+==================
+
+.. automodule:: Omnipresent
+    :members:
+    :undoc-members:
+    :show-inheritance:

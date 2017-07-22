@@ -1,0 +1,53 @@
+DatasetHandler package
+======================
+
+Submodules
+----------
+
+DatasetHandler\.CreateDataset module
+------------------------------------
+
+.. automodule:: DatasetHandler.CreateDataset
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+DatasetHandler\.DataAugmentation module
+---------------------------------------
+
+.. automodule:: DatasetHandler.DataAugmentation
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+DatasetHandler\.DatasetObj module
+---------------------------------
+
+.. automodule:: DatasetHandler.DatasetObj
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+DatasetHandler\.DatasetVizualizators module
+-------------------------------------------
+
+.. automodule:: DatasetHandler.DatasetVizualizators
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+DatasetHandler\.FileHelperFunc module
+-------------------------------------
+
+.. automodule:: DatasetHandler.FileHelperFunc
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: DatasetHandler
+    :members:
+    :undoc-members:
+    :show-inheritance:

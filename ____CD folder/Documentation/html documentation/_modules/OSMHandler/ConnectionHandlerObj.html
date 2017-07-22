@@ -1,0 +1,380 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>OSMHandler.ConnectionHandlerObj &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for OSMHandler.ConnectionHandlerObj</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Manages the connection with our OSM data resource, the PosgreSQL database</span>
+<span class="c1"># also has the individual queries.</span>
+
+<span class="nb">print</span> <span class="s2">&quot;imported ConnectionHandlerObj.py, inside DB requiring section.&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">psycopg2</span>
+<span class="kn">from</span> <span class="nn">OSMHandler.ConnectionSettingsSecrets</span> <span class="k">import</span> <span class="n">hostname</span><span class="p">,</span><span class="n">username</span><span class="p">,</span><span class="n">password</span><span class="p">,</span><span class="n">database</span>
+
+<div class="viewcode-block" id="ConnectionHandler"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.ConnectionHandlerObj.ConnectionHandler">[docs]</a><span class="k">class</span> <span class="nc">ConnectionHandler</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Connection Handler</span>
+
+<span class="sd">    What does ConnectionHandler have?</span>
+
+<span class="sd">     - link to the database, set in initialization</span>
+
+<span class="sd">    What can it do?</span>
+
+<span class="sd">     - initialize connection to DB, prepare lists of columns we want to pay attention too</span>
+<span class="sd">     - query for a location</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">__connection</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">__distinct_keys</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">__list_of_watched_pairs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">__indices_dict</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># inverted indices with location of watcher key=attr pair in the final vector</span>
+    <span class="c1"># ex: final_vector[ indices_dict[pair] ] = 4</span>
+    <span class="c1"># indices_dict[&#39;highway=bus_stop&#39;] = 39, so in final_vector[39] we indicate that there are 4 bus stops nearby</span>
+    <span class="n">opened</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">foo</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Initialization and loading of pairs</span>
+        <span class="n">key_attr_pairs_file</span> <span class="o">=</span> <span class="s1">&#39;key-attr-pairs.csv&#39;</span>
+        <span class="n">number_of_loaded_pairs</span> <span class="o">=</span> <span class="mi">1103</span> <span class="c1"># out of 1103 rows</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__connection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_db_connection</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">database</span><span class="p">)</span>
+        <span class="n">columns_we_have_in_database</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_column_names_in_db</span><span class="p">()</span>
+        <span class="c1">#print columns_we_have_in_database</span>
+
+        <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__distinct_keys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__list_of_watched_pairs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__indices_dict</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_key_attr_pairs</span><span class="p">(</span>
+            <span class="n">key_attr_pairs_file</span><span class="p">,</span> <span class="n">limit_number</span><span class="o">=</span><span class="n">number_of_loaded_pairs</span><span class="p">,</span>
+            <span class="n">dont_take_keys_which_are_not_in_list</span> <span class="o">=</span> <span class="n">columns_we_have_in_database</span> <span class="p">)</span>
+
+        <span class="n">verbal</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">verbal</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__list_of_watched_pairs</span><span class="p">)):</span>
+                <span class="nb">print</span> <span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__list_of_watched_pairs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+
+        <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ConnectionHandler.final_vec_invert_indices"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.ConnectionHandlerObj.ConnectionHandler.final_vec_invert_indices">[docs]</a>    <span class="k">def</span> <span class="nf">final_vec_invert_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="c1"># inverted indices, get pairs</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__list_of_watched_pairs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ConnectionHandler.setup_db_connection"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.ConnectionHandlerObj.ConnectionHandler.setup_db_connection">[docs]</a>    <span class="k">def</span> <span class="nf">setup_db_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">database</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Establish connection</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">connection</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">psycopg2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">hostname</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">,</span> <span class="n">dbname</span><span class="o">=</span><span class="n">database</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="s2">&quot;Connected to DB.&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opened</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;I am was to connect to host &quot;</span><span class="o">+</span> <span class="n">hostname</span> <span class="o">+</span><span class="s2">&quot; and database &quot;</span> <span class="o">+</span> <span class="n">database</span> <span class="o">+</span> <span class="s2">&quot; with username &quot;</span> <span class="o">+</span> <span class="n">username</span>
+        <span class="k">return</span> <span class="n">connection</span></div>
+
+<div class="viewcode-block" id="ConnectionHandler.close_connection"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.ConnectionHandlerObj.ConnectionHandler.close_connection">[docs]</a>    <span class="k">def</span> <span class="nf">close_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Close connection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opened</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="ConnectionHandler.load_key_attr_pairs"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.ConnectionHandlerObj.ConnectionHandler.load_key_attr_pairs">[docs]</a>    <span class="k">def</span> <span class="nf">load_key_attr_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">csv_name</span><span class="p">,</span> <span class="n">dont_take_keys_which_are_not_in_list</span><span class="p">,</span> <span class="n">limit_number</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Builds the lists of interesting key-attribute pairs.</span>
+<span class="sd">         distinct_keys contains just the names of keys</span>
+<span class="sd">            ex: [&#39;building&#39;, &#39;bridge&#39;, &#39;amenity&#39;, ...]</span>
+<span class="sd">            We will load these columns out of the database.</span>
+
+<span class="sd">         list_of_watched_pairs contains</span>
+<span class="sd">            ex: [&#39;building=yes&#39;, &#39;highway=residential&#39;, &#39;building=house&#39;, ...]</span>
+<span class="sd">            We will count these occurances in the resulting neighborhood.</span>
+
+<span class="sd">        In list_of_watched_pairs we can find only combinations of key=attribute which have keys from distinct_keys!</span>
+
+<span class="sd">        In dont_take_keys_which_are_not_in_list we have column names of our available database, those show us, which</span>
+<span class="sd">        keys we actually have about the data - so for any key not in there, we don&#39;t have to make space in the final</span>
+<span class="sd">        vector (as it would always be 0, for all the data).</span>
+
+<span class="sd">        :param csv_name: Name of tha file containing most common pairs of key-attribute combinations</span>
+<span class="sd">        :param limit_number: Number of rows we would like to look at</span>
+<span class="sd">        :return: lists of distinct keys and key=attribute pairs we will pay attention to in sql query results</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">list_of_watched_pairs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">indices_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">csv_name</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">csvfile</span><span class="p">:</span>
+            <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">csvfile</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">quotechar</span><span class="o">=</span><span class="s1">&#39;|&#39;</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">i</span><span class="o">&gt;=</span><span class="n">limit_number</span> <span class="ow">and</span> <span class="n">limit_number</span><span class="o">&lt;&gt;-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+                <span class="n">key</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">attr</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">count</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dont_take_keys_which_are_not_in_list</span><span class="p">:</span>
+
+                    <span class="n">key_attr_pair</span> <span class="o">=</span> <span class="s2">&quot;=&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">key</span><span class="p">,</span> <span class="n">attr</span><span class="p">])</span>
+
+                    <span class="n">list_of_watched_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">key_attr_pair</span> <span class="p">)</span>
+                    <span class="n">indices_dict</span><span class="p">[</span><span class="n">key_attr_pair</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span> <span class="c1"># inverted indices to the pairs</span>
+
+                    <span class="n">keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="n">attributes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+                    <span class="n">counts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+                    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">distinct_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">distinct_keys</span><span class="p">,</span> <span class="n">list_of_watched_pairs</span><span class="p">,</span> <span class="n">indices_dict</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ConnectionHandler.run_command"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.ConnectionHandlerObj.ConnectionHandler.run_command">[docs]</a>    <span class="k">def</span> <span class="nf">run_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Runs command and returns the rows and column names</span>
+<span class="sd">        :param command: sql command</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__connection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+        <span class="n">colnames</span> <span class="o">=</span> <span class="p">[</span><span class="n">desc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">desc</span> <span class="ow">in</span> <span class="n">cursor</span><span class="o">.</span><span class="n">description</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">rows</span><span class="p">,</span> <span class="n">colnames</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ConnectionHandler.get_column_names_in_db"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.ConnectionHandlerObj.ConnectionHandler.get_column_names_in_db">[docs]</a>    <span class="k">def</span> <span class="nf">get_column_names_in_db</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Get which column names we in fact have in our table</span>
+        <span class="n">table_name</span> <span class="o">=</span> <span class="s1">&#39;planet_osm_line&#39;</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="s1">&#39;SELECT * FROM &#39;</span> <span class="o">+</span> <span class="n">table_name</span> <span class="o">+</span> <span class="s2">&quot; LIMIT 1&quot;</span>
+        <span class="p">[</span><span class="n">_</span><span class="p">,</span> <span class="n">columns_we_have</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">columns_we_have</span></div>
+
+<div class="viewcode-block" id="ConnectionHandler.extract_all_pairs"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.ConnectionHandlerObj.ConnectionHandler.extract_all_pairs">[docs]</a>    <span class="k">def</span> <span class="nf">extract_all_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">colnames</span><span class="p">,</span> <span class="n">excluded_column</span><span class="o">=</span><span class="s1">&#39;dist_meters&#39;</span><span class="p">):</span>
+        <span class="c1"># Extract all pairs from the query result</span>
+        <span class="n">key_attr_pairs</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+
+            <span class="n">value_index</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">colnames</span><span class="p">[</span><span class="n">value_index</span><span class="p">]</span>
+                <span class="n">attr</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">attr</span> <span class="o">=</span> <span class="n">value</span>
+
+                <span class="c1">#print key, attr</span>
+
+                <span class="c1"># temporary solution - we exclude the &#39;dist_meters&#39; column</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="o">!=</span> <span class="n">excluded_column</span><span class="p">):</span>
+                    <span class="n">key_attr_pair</span> <span class="o">=</span> <span class="s2">&quot;=&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">key</span><span class="p">,</span> <span class="n">attr</span><span class="p">])</span>
+                    <span class="n">key_attr_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key_attr_pair</span><span class="p">)</span>
+
+                <span class="n">value_index</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">key_attr_pairs</span></div>
+
+<div class="viewcode-block" id="ConnectionHandler.query_location"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.ConnectionHandlerObj.ConnectionHandler.query_location">[docs]</a>    <span class="k">def</span> <span class="nf">query_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">table_name</span><span class="p">):</span>
+        <span class="c1"># run query to get neighborhood</span>
+        <span class="n">sql_command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sql_cmd_radius</span><span class="p">(</span><span class="n">column_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__distinct_keys</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="n">location</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">table_name</span><span class="o">=</span><span class="n">table_name</span><span class="p">)</span>
+        <span class="c1">#print sql_command</span>
+
+        <span class="p">[</span><span class="n">rows</span><span class="p">,</span> <span class="n">colnames</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span><span class="n">sql_command</span><span class="p">)</span>
+
+        <span class="n">all_pairs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_all_pairs</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">colnames</span><span class="p">)</span>
+
+        <span class="c1"># count the occurrences</span>
+        <span class="n">nearby_vector</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__list_of_watched_pairs</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">all_pairs</span><span class="p">:</span>
+            <span class="c1"># pair can be &#39;building=yes&#39; but also &#39;building=&#39;</span>
+            <span class="k">if</span> <span class="n">pair</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__indices_dict</span><span class="p">:</span>
+                <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__indices_dict</span><span class="p">[</span><span class="n">pair</span><span class="p">]</span>
+                <span class="n">nearby_vector</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># debug report:</span>
+        <span class="c1"># print &quot;We ended up with these not-null:&quot;</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">final_vec_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">sorted_final_vec</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">nearby_vector</span><span class="p">:</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__list_of_watched_pairs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="c1">#if (value &gt; 0):</span>
+            <span class="c1">#    print ind, &quot; *= &quot;, value</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">sorted_final_vec</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ind</span><span class="p">,</span> <span class="n">value</span><span class="p">])</span>
+            <span class="n">final_vec_dict</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="n">sorted_final_vec</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># For debug purposes:</span>
+        <span class="c1">#for itm in sorted_final_vec:</span>
+        <span class="c1">#    print itm[0], itm[1]</span>
+        <span class="c1">#    if int(itm[1]) == 0:</span>
+        <span class="c1">#        print &quot;The rest is just zero values!&quot;</span>
+        <span class="c1">#        break</span>
+        <span class="c1">#print sorted_final_vec</span>
+
+        <span class="c1"># final neighborhood vector is in nearby_vector</span>
+        <span class="c1"># and final neighborhood dictionary in final_vec_dict</span>
+        <span class="c1">#print nearby_vector</span>
+        <span class="c1">#print final_vec_dict</span>
+
+        <span class="c1"># i-th value in nearby_vector has descriptor (key=attr pair) of self.__list_of_watched_pairs[i]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">nearby_vector</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__list_of_watched_pairs</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ConnectionHandler.sql_cmd_radius"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.ConnectionHandlerObj.ConnectionHandler.sql_cmd_radius">[docs]</a>    <span class="k">def</span> <span class="nf">sql_cmd_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_names</span><span class="p">,</span> <span class="n">table_name</span> <span class="o">=</span> <span class="s1">&#39;planet_osm_line&#39;</span><span class="p">,</span><span class="n">sql_limit_rows</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="p">[],</span> <span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="c1"># SELECT &lt;&gt; FROM planet_osm_line</span>
+
+        <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;SELECT * FROM ( &quot;</span><span class="p">]</span>
+
+
+        <span class="n">inner_select</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;SELECT ST_Distance(ST_Transform(way, 4326), ST_MakePoint(&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">location</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="s2">&quot;, &quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">location</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="s2">&quot;)::geography) AS dist_meters, &quot;</span><span class="p">]</span>
+        <span class="n">inner_select</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">inner_select</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1">, </span><span class="se">\&quot;</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">column_names</span><span class="p">))</span>
+        <span class="n">inner_select</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2"> FROM &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="p">)</span>
+
+        <span class="nb">list</span> <span class="o">=</span> <span class="nb">list</span> <span class="o">+</span> <span class="n">inner_select</span>
+
+        <span class="nb">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;) AS A WHERE A.dist_meters &lt; &quot;</span><span class="p">)</span>
+        <span class="nb">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">radius</span><span class="p">))</span>
+        <span class="nb">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)</span>
+
+        <span class="n">command</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+
+        <span class="c1">#print &#39;&#39;.join(inner_select)</span>
+        <span class="nb">print</span> <span class="n">command</span>
+
+        <span class="k">return</span> <span class="n">command</span></div>
+
+<div class="viewcode-block" id="ConnectionHandler.sql_cmd_everywhere"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.ConnectionHandlerObj.ConnectionHandler.sql_cmd_everywhere">[docs]</a>    <span class="k">def</span> <span class="nf">sql_cmd_everywhere</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_names</span><span class="p">,</span> <span class="n">table_name</span> <span class="o">=</span> <span class="s1">&#39;planet_osm_line&#39;</span><span class="p">,</span><span class="n">sql_limit_rows</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># SELECT &lt;&gt; FROM planet_osm_line</span>
+
+        <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;SELECT </span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">]</span>
+        <span class="nb">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1">, </span><span class="se">\&quot;</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">column_names</span><span class="p">))</span>
+        <span class="nb">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2"> FROM &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sql_limit_rows</span><span class="o">&lt;&gt;-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="nb">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot; LIMIT &quot;</span><span class="p">)</span>
+            <span class="nb">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sql_limit_rows</span><span class="p">))</span>
+
+        <span class="nb">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)</span>
+
+        <span class="n">command</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">command</span></div>
+
+<div class="viewcode-block" id="ConnectionHandler.report"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.ConnectionHandlerObj.ConnectionHandler.report">[docs]</a>    <span class="k">def</span> <span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Report on the state of connection.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">opened</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Connection is opened to host &quot;</span><span class="o">+</span> <span class="n">hostname</span> <span class="o">+</span><span class="s2">&quot; and database &quot;</span> <span class="o">+</span> <span class="n">database</span> <span class="o">+</span> <span class="s2">&quot; with username &quot;</span> <span class="o">+</span> <span class="n">username</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Connection is closed.&quot;</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

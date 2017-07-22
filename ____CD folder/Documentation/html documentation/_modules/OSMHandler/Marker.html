@@ -1,0 +1,283 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>OSMHandler.Marker &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for OSMHandler.Marker</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Marks loaded Segments with vector indicating what is around the location - it&#39;s nearby neighbourhood.</span>
+<span class="c1"># Needs access to the DB.</span>
+<span class="c1"># Will use ConnectionHandler to mark segments.</span>
+
+<span class="kn">from</span> <span class="nn">OSMHandler.Checker</span> <span class="k">import</span> <span class="n">Check</span>
+<span class="kn">from</span> <span class="nn">Downloader.Defaults</span> <span class="k">import</span> <span class="n">OSM_MARKING_VERSION</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+
+<span class="nb">print</span> <span class="s2">&quot;imported Marker.py, inside DB requiring section.&quot;</span>
+<span class="n">stopfile</span> <span class="o">=</span> <span class="s1">&#39;/home/ekmek/Desktop/Project II/stop_dir/stop.txt&#39;</span>
+
+<span class="c1"># global variable - we can reuse Marker</span>
+<span class="n">ConnHandler</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Mark"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.Marker.Mark">[docs]</a><span class="k">def</span> <span class="nf">Mark</span><span class="p">(</span><span class="n">Segments</span><span class="p">,</span> <span class="n">radius</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">interval</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">backwards</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Mark Segments with radius. Call MarkSegment on each Segment.</span>
+<span class="sd">    :param Segments:</span>
+<span class="sd">    :param radius: radius in meters</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="kn">from</span> <span class="nn">OSMHandler.ConnectionHandlerObj</span> <span class="k">import</span> <span class="n">ConnectionHandler</span>
+
+    <span class="k">global</span> <span class="n">ConnHandler</span>
+    <span class="k">if</span> <span class="n">ConnHandler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ConnHandler</span> <span class="o">=</span> <span class="n">ConnectionHandler</span><span class="p">()</span>
+
+    <span class="n">ConnHandler</span><span class="o">.</span><span class="n">report</span><span class="p">()</span>
+    <span class="c1">#if Check(Segments):</span>
+    <span class="c1">#    print &quot;Segments seem to be up to date, breaking.&quot;</span>
+    <span class="c1">#    return True</span>
+
+    <span class="c1"># Mark segments</span>
+
+    <span class="k">if</span> <span class="n">interval</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">interval</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Segments</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="n">backwards</span><span class="p">:</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">interval</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">interval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">interval</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="nb">print</span> <span class="n">interval</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+        <span class="n">Segment</span> <span class="o">=</span> <span class="n">Segments</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="n">checkForStopFile</span><span class="p">()</span>
+        <span class="n">is_marked</span> <span class="o">=</span> <span class="n">Segment</span><span class="o">.</span><span class="n">checkOSMVersion</span><span class="p">()</span>
+
+
+        <span class="nb">print</span> <span class="n">i</span><span class="p">,</span> <span class="s2">&quot;th from&quot;</span><span class="p">,</span> <span class="n">interval</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">interval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;[stop &quot;</span><span class="p">,</span><span class="n">stop</span><span class="p">,</span><span class="s2">&quot;, is marked &quot;</span><span class="p">,</span><span class="n">is_marked</span><span class="p">,</span><span class="s2">&quot;]&quot;</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="s2">&quot;index=&quot;</span><span class="p">,</span> <span class="n">index</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">stop</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_marked</span><span class="p">:</span>
+            <span class="n">MarkSegment</span><span class="p">(</span><span class="n">Segment</span><span class="p">,</span> <span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span><span class="p">)</span>
+
+        <span class="n">Segments</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">Segment</span></div>
+
+<div class="viewcode-block" id="checkForStopFile"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.Marker.checkForStopFile">[docs]</a><span class="k">def</span> <span class="nf">checkForStopFile</span><span class="p">():</span>
+    <span class="n">stopfile_present</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">stopfile</span><span class="p">)</span>
+    <span class="n">stop</span> <span class="o">=</span> <span class="n">stopfile_present</span>
+    <span class="k">return</span> <span class="n">stop</span></div>
+
+
+<div class="viewcode-block" id="MarkSegment"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.Marker.MarkSegment">[docs]</a><span class="k">def</span> <span class="nf">MarkSegment</span><span class="p">(</span><span class="n">Segment</span><span class="p">,</span> <span class="n">radius</span> <span class="o">=</span> <span class="mi">50</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Mark Segment with new OSM vector depending on what the PosgreSQL db will tell us about the neighborhood.</span>
+<span class="sd">    :param Segment: One Segment object initially without OSM data.</span>
+<span class="sd">    :param radius: radius in meters</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">distinctLocation</span> <span class="ow">in</span> <span class="n">Segment</span><span class="o">.</span><span class="n">DistinctLocations</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;We are in &quot;</span><span class="p">,</span> <span class="n">distinctLocation</span>
+
+        <span class="c1"># we combine them here!</span>
+        <span class="n">table_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;planet_osm_line&quot;</span><span class="p">,</span> <span class="s2">&quot;planet_osm_point&quot;</span><span class="p">,</span> <span class="s2">&quot;planet_osm_polygon&quot;</span><span class="p">,</span> <span class="s2">&quot;planet_osm_roads&quot;</span><span class="p">]</span>
+
+        <span class="k">global</span> <span class="n">ConnHandler</span>
+
+        <span class="n">cumulative_vector</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">table_names</span><span class="p">:</span>
+            <span class="p">[</span><span class="n">nearby_vector</span><span class="p">,</span> <span class="n">_</span><span class="p">]</span> <span class="o">=</span> <span class="n">ConnHandler</span><span class="o">.</span><span class="n">query_location</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="p">[</span><span class="n">distinctLocation</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">distinctLocation</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">table_name</span><span class="o">=</span><span class="n">table</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cumulative_vector</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">cumulative_vector</span> <span class="o">=</span> <span class="n">nearby_vector</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">operator</span> <span class="k">import</span> <span class="n">add</span>
+                <span class="n">cumulative_vector</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">add</span><span class="p">,</span> <span class="n">cumulative_vector</span><span class="p">,</span> <span class="n">nearby_vector</span><span class="p">)</span>
+
+        <span class="nb">print</span> <span class="nb">len</span><span class="p">(</span><span class="n">nearby_vector</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">nearby_vector</span><span class="p">),</span> <span class="n">nearby_vector</span>
+
+        <span class="n">Segment</span><span class="o">.</span><span class="n">markWithVector</span><span class="p">(</span><span class="n">cumulative_vector</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">OSM_MARKING_VERSION</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="nb">print</span> <span class="n">Segment</span></div>
+
+<div class="viewcode-block" id="closeConnection"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.Marker.closeConnection">[docs]</a><span class="k">def</span> <span class="nf">closeConnection</span><span class="p">():</span>
+    <span class="c1"># Close connection please.</span>
+    <span class="k">global</span> <span class="n">ConnHandler</span>
+    <span class="n">ConnHandler</span><span class="o">.</span><span class="n">close_connection</span><span class="p">()</span>
+    <span class="n">ConnHandler</span><span class="o">.</span><span class="n">report</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MergeMarking_LoadAndSave"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.Marker.MergeMarking_LoadAndSave">[docs]</a><span class="k">def</span> <span class="nf">MergeMarking_LoadAndSave</span><span class="p">(</span><span class="n">pats_seg1</span><span class="p">,</span> <span class="n">path_seg2</span><span class="p">,</span> <span class="n">path_out</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">Downloader.DataOperations</span>
+
+    <span class="n">Segments1</span> <span class="o">=</span> <span class="n">Downloader</span><span class="o">.</span><span class="n">DataOperations</span><span class="o">.</span><span class="n">LoadDataFile</span><span class="p">(</span><span class="n">pats_seg1</span><span class="p">)</span>
+    <span class="n">Segments2</span> <span class="o">=</span> <span class="n">Downloader</span><span class="o">.</span><span class="n">DataOperations</span><span class="o">.</span><span class="n">LoadDataFile</span><span class="p">(</span><span class="n">path_seg2</span><span class="p">)</span>
+
+    <span class="n">MergedSegments</span> <span class="o">=</span> <span class="n">MergeMarking</span><span class="p">(</span><span class="n">Segments1</span><span class="p">,</span> <span class="n">Segments2</span><span class="p">)</span>
+
+    <span class="n">Downloader</span><span class="o">.</span><span class="n">DataOperations</span><span class="o">.</span><span class="n">SaveDataFile</span><span class="p">(</span><span class="n">path_out</span><span class="p">,</span> <span class="n">MergedSegments</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MergeMarking"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.Marker.MergeMarking">[docs]</a><span class="k">def</span> <span class="nf">MergeMarking</span><span class="p">(</span><span class="n">Segments1</span><span class="p">,</span> <span class="n">Segments2</span><span class="p">):</span>
+    <span class="nb">print</span> <span class="s2">&quot;Merging labeling from two segments files, lens:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Segments1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">Segments2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Segments1</span><span class="p">)</span> <span class="o">&lt;&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">Segments2</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Segments1</span><span class="p">)):</span>
+        <span class="n">S1</span> <span class="o">=</span> <span class="n">Segments1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">S2</span> <span class="o">=</span> <span class="n">Segments2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="n">s1_is_marked</span> <span class="o">=</span> <span class="n">S1</span><span class="o">.</span><span class="n">checkOSMVersion</span><span class="p">()</span>
+        <span class="n">s2_is_marked</span> <span class="o">=</span> <span class="n">S2</span><span class="o">.</span><span class="n">checkOSMVersion</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">s1_is_marked</span> <span class="ow">and</span> <span class="n">s2_is_marked</span><span class="p">:</span>
+            <span class="c1"># mark s1 by the osms which are in s2!</span>
+            <span class="n">osm_version</span> <span class="o">=</span> <span class="n">S2</span><span class="o">.</span><span class="n">Segment_OSM_MARKING_VERSION</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">S2</span><span class="o">.</span><span class="n">DistinctNearbyVector</span><span class="p">)):</span>
+                <span class="n">nearby_vector</span> <span class="o">=</span> <span class="n">S2</span><span class="o">.</span><span class="n">DistinctNearbyVector</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">S1</span><span class="o">.</span><span class="n">markWithVector</span><span class="p">(</span><span class="n">nearby_vector</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">osm_version</span><span class="p">)</span>
+
+        <span class="n">Segments1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">S1</span>
+
+    <span class="k">return</span> <span class="n">Segments1</span></div>
+
+<div class="viewcode-block" id="loadAndAnalyzeMarking"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.Marker.loadAndAnalyzeMarking">[docs]</a><span class="k">def</span> <span class="nf">loadAndAnalyzeMarking</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">Downloader.DataOperations</span>
+
+    <span class="n">Segments</span> <span class="o">=</span> <span class="n">Downloader</span><span class="o">.</span><span class="n">DataOperations</span><span class="o">.</span><span class="n">LoadDataFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="n">analyzeMarking</span><span class="p">(</span><span class="n">Segments</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="analyzeMarking"><a class="viewcode-back" href="../../OSMHandler.html#OSMHandler.Marker.analyzeMarking">[docs]</a><span class="k">def</span> <span class="nf">analyzeMarking</span><span class="p">(</span><span class="n">Segments</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    prints index boundaries of which segments are marked and which are not</span>
+<span class="sd">    :param Segments:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">started_marked_region</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">i</span><span class="o">&lt;</span><span class="nb">len</span><span class="p">(</span><span class="n">Segments</span><span class="p">):</span>
+        <span class="n">is_marked</span> <span class="o">=</span> <span class="n">Segments</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">checkOSMVersion</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_marked</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">started_marked_region</span><span class="p">:</span>
+            <span class="n">started_marked_region</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_marked</span> <span class="ow">and</span> <span class="n">started_marked_region</span><span class="p">:</span>
+            <span class="n">started_marked_region</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="nb">print</span> <span class="s2">&quot;Region &quot;</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="s2">&quot;-&quot;</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="s2">&quot; was marked!&quot;</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">started_marked_region</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;Region &quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="s2">&quot; was marked!&quot;</span>
+        <span class="n">started_marked_region</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">s1path = &#39;/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/SegmentsData_MERGED.dump&#39;</span>
+<span class="sd">s2path = &#39;/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/SegmentsData_fromBack__backup_995.dump&#39;</span>
+<span class="sd">s_merged=&#39;/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/SegmentsData_MERGED.dump&#39;</span>
+
+<span class="sd">MergeMarking_LoadAndSave(s1path, s2path, s_merged)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="c1">#s_merged=&#39;/home/ekmek/Desktop/Project II/MGR-Project-Code/Data/StreetViewData/Prague_DOP_Cyklotrasy_l/SegmentsData_MERGED.dump&#39;</span>
+<span class="c1">#loadAndAnalyzeMarking(s_merged)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

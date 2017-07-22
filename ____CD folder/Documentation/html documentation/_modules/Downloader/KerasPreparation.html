@@ -1,0 +1,262 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Downloader.KerasPreparation &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Downloader.KerasPreparation</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">ImageHelpers</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">keras.preprocessing.image</span> <span class="k">import</span> <span class="n">ImageDataGenerator</span>
+
+<span class="kn">from</span> <span class="nn">Defaults</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">DataOperations</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">PreprocessData.SegmentsManipulators</span> <span class="k">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="split_one_array"><a class="viewcode-back" href="../../Downloader.html#Downloader.KerasPreparation.split_one_array">[docs]</a><span class="k">def</span> <span class="nf">split_one_array</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span><span class="n">validation_split</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param arr: list of data to be split</span>
+<span class="sd">    :param validation_split: Split ratio, defaults to 80% for test set and 20% of validation set</span>
+<span class="sd">    :return: Returns split data</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="mi">0</span> <span class="o">&lt;</span> <span class="n">validation_split</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Choose validation_split in between 0 and 1. Setting the default value of 0.2&quot;</span>
+        <span class="n">validation_split</span> <span class="o">=</span> <span class="mf">0.2</span>
+
+    <span class="n">split_at</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">validation_split</span><span class="p">))</span>
+    <span class="n">arr_train</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">split_at</span><span class="p">]</span>
+    <span class="n">arr_val</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">split_at</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="n">arr_train</span><span class="p">,</span><span class="n">arr_val</span></div>
+
+<div class="viewcode-block" id="split_data"><a class="viewcode-back" href="../../Downloader.html#Downloader.KerasPreparation.split_data">[docs]</a><span class="k">def</span> <span class="nf">split_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">validation_split</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param x: Dataset, can be paths to images or directly the image data for example (?, 3,222,222)</span>
+<span class="sd">    :param y: Labels of the datasets</span>
+<span class="sd">    :param validation_split: Split ratio, defaults to 80% for test set and 20% of validation set</span>
+<span class="sd">    :return: Returns split data</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="mi">0</span> <span class="o">&lt;</span> <span class="n">validation_split</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Choose validation_split in between 0 and 1. Setting the default value of 0.2&quot;</span>
+        <span class="n">validation_split</span> <span class="o">=</span> <span class="mf">0.2</span>
+
+    <span class="n">split_at</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">validation_split</span><span class="p">))</span>
+    <span class="n">x_test</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">split_at</span><span class="p">]</span>
+    <span class="n">y_test</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">split_at</span><span class="p">]</span>
+    <span class="n">x_val</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">split_at</span><span class="p">:]</span>
+    <span class="n">y_val</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">split_at</span><span class="p">:]</span>
+
+    <span class="c1">#print &quot;Split&quot;, len(x), &quot;images into&quot;, len(x_test), &quot;test and&quot;, len(x_val), &quot;validation sets.&quot;</span>
+    <span class="k">return</span> <span class="n">x_test</span><span class="p">,</span><span class="n">y_test</span><span class="p">,</span><span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span></div>
+
+<div class="viewcode-block" id="split_osm"><a class="viewcode-back" href="../../Downloader.html#Downloader.KerasPreparation.split_osm">[docs]</a><span class="k">def</span> <span class="nf">split_osm</span><span class="p">(</span><span class="n">osm</span><span class="p">,</span><span class="n">validation_split</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Split array of osm vectors by validation split.</span>
+<span class="sd">    :param osm: osm data</span>
+<span class="sd">    :param validation_split: 0 to 1 fraction</span>
+<span class="sd">    :return: splitted osm data into osm_test, osm_val</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="mi">0</span> <span class="o">&lt;</span> <span class="n">validation_split</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Choose validation_split in between 0 and 1. Setting the default value of 0.2&quot;</span>
+        <span class="n">validation_split</span> <span class="o">=</span> <span class="mf">0.2</span>
+
+    <span class="n">split_at</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">osm</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">validation_split</span><span class="p">))</span>
+    <span class="n">osm_test</span> <span class="o">=</span> <span class="n">osm</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">split_at</span><span class="p">]</span>
+    <span class="n">osm_val</span> <span class="o">=</span> <span class="n">osm</span><span class="p">[</span><span class="n">split_at</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="n">osm_test</span><span class="p">,</span> <span class="n">osm_val</span></div>
+
+<div class="viewcode-block" id="LoadDataFromSegments"><a class="viewcode-back" href="../../Downloader.html#Downloader.KerasPreparation.LoadDataFromSegments">[docs]</a><span class="k">def</span> <span class="nf">LoadDataFromSegments</span><span class="p">(</span><span class="n">Segments</span><span class="p">,</span> <span class="n">has_score</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">path_to_images</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">we_dont_care_about_missing_images</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Turns loaded segments into data we will need for keras.</span>
+<span class="sd">    :param Segments: Loaded segments</span>
+<span class="sd">    :param path_to_images: additional path specification which we need before &#39;images/---.jpg&#39;</span>
+<span class="sd">    :return: Returns list of urls of images and their labels (score in the Segment)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">list_of_images</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">osm_vectors</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">segment_ids</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">segment_id</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">flag_is_extended</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    number_no_score_yes_img = 0</span>
+<span class="sd">    number_no_score_no_img = 0</span>
+<span class="sd">    number_yes_score_yes_img = 0</span>
+<span class="sd">    number_yes_score_no_img = 0</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">Segment</span> <span class="ow">in</span> <span class="n">Segments</span><span class="p">:</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        # stats:</span>
+<span class="sd">        if Segment.hasUnknownScore():</span>
+<span class="sd">            for i_th_image in range(0,Segment.number_of_images):</span>
+<span class="sd">                if Segment.hasLoadedImageI(i_th_image):</span>
+<span class="sd">                    number_no_score_yes_img += 1</span>
+<span class="sd">                else:</span>
+<span class="sd">                    number_no_score_no_img += 1</span>
+<span class="sd">        else:</span>
+<span class="sd">            for i_th_image in range(0,Segment.number_of_images):</span>
+<span class="sd">                if Segment.hasLoadedImageI(i_th_image):</span>
+<span class="sd">                    number_yes_score_yes_img += 1</span>
+<span class="sd">                else:</span>
+<span class="sd">                    number_yes_score_no_img += 1</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+
+        <span class="c1"># if we care for score</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">has_score</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">Segment</span><span class="o">.</span><span class="n">hasUnknownScore</span><span class="p">())</span> <span class="ow">or</span> <span class="p">(</span><span class="n">has_score</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="c1"># but we always care for images</span>
+            <span class="k">for</span> <span class="n">i_th_image</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">Segment</span><span class="o">.</span><span class="n">number_of_images</span><span class="p">):</span>
+                <span class="n">location_index</span> <span class="o">=</span> <span class="n">Segment</span><span class="o">.</span><span class="n">LocationsIndex</span><span class="p">[</span><span class="n">i_th_image</span><span class="p">]</span>
+
+                <span class="n">is_extended</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">location_index</span> <span class="o">&gt;</span> <span class="mi">500</span><span class="p">:</span>
+                    <span class="c1"># then this particular image is loaded from an extended folder</span>
+                    <span class="n">is_extended</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">location_index</span> <span class="o">-=</span> <span class="mi">1000</span>
+                    <span class="n">flag_is_extended</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">Segment</span><span class="o">.</span><span class="n">hasLoadedImageI</span><span class="p">(</span><span class="n">i_th_image</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">we_dont_care_about_missing_images</span><span class="p">):</span>
+
+                    <span class="n">filename</span> <span class="o">=</span> <span class="n">Segment</span><span class="o">.</span><span class="n">getImageFilename</span><span class="p">(</span><span class="n">i_th_image</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">is_extended</span><span class="p">:</span>
+                        <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;images&#39;</span> <span class="o">+</span> <span class="n">filename</span><span class="p">[</span><span class="mi">6</span><span class="p">:]</span>
+
+                    <span class="n">list_of_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                    <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Segment</span><span class="o">.</span><span class="n">getScore</span><span class="p">())</span>
+                    <span class="n">segment_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segment_id</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">Segment</span><span class="o">.</span><span class="n">Segment_OSM_MARKING_VERSION</span> <span class="o">==</span> <span class="n">OSM_MARKING_VERSION</span><span class="p">:</span>
+                        <span class="c1"># only if we have one - checkOSMVersion could be used too</span>
+
+                        <span class="c1"># Aaardwark, fix Segment.getNearbyVector(i_th_image) in Segment.LocationsIndex(i_th_image) -&gt; Segment.LocationsIndex[i_th_image]</span>
+                        <span class="n">osm</span> <span class="o">=</span> <span class="n">Segment</span><span class="o">.</span><span class="n">DistinctNearbyVector</span><span class="p">[</span><span class="n">location_index</span><span class="p">]</span>
+
+                        <span class="n">osm_vectors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">osm</span><span class="p">)</span>
+
+            <span class="c1">#print len(list_of_images), len(labels), len(osm_vectors), len(segment_ids)</span>
+
+        <span class="n">segment_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># If the path to images is specific, modify it from simple &quot;Data/images/&quot; with putting path_to_images before it.</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">path_to_images</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># for example to [&#39;images/000.jpg&#39;, ...] it will add &quot;DifferentPath/&quot; -&gt; [&#39;DifferentPath/images/000.jpg&#39;, ...]</span>
+        <span class="n">list_of_images</span> <span class="o">=</span> <span class="p">[(</span><span class="n">path_to_images</span><span class="o">+</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">list_of_images</span><span class="p">]</span>
+
+
+    <span class="c1"># stats printing</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    print &#39;number_no_score_yes_img&#39;, number_no_score_yes_img</span>
+<span class="sd">    print &#39;number_no_score_no_img&#39;, number_no_score_no_img</span>
+<span class="sd">    print &#39;number_yes_score_yes_img&#39;, number_yes_score_yes_img</span>
+<span class="sd">    print &#39;number_yes_score_no_img&#39;, number_yes_score_no_img</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">osm_vectors</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">osm_vectors</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_images</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">list_of_images</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">osm_vectors</span><span class="p">,</span> <span class="n">segment_ids</span><span class="p">,</span> <span class="n">flag_is_extended</span></div>
+
+<div class="viewcode-block" id="LoadActualImages"><a class="viewcode-back" href="../../Downloader.html#Downloader.KerasPreparation.LoadActualImages">[docs]</a><span class="k">def</span> <span class="nf">LoadActualImages</span><span class="p">(</span><span class="n">list_of_images</span><span class="p">,</span> <span class="n">resize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dim_ordering</span><span class="o">=</span><span class="n">KERAS_SETTING_DIMENSIONS</span><span class="p">):</span>
+    <span class="c1"># Load actual image data from paths</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">load_images_with_keras</span><span class="p">(</span><span class="n">list_of_images</span><span class="p">,</span> <span class="n">target_size</span><span class="o">=</span><span class="n">resize</span><span class="p">,</span> <span class="n">dim_ordering</span><span class="o">=</span><span class="n">dim_ordering</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

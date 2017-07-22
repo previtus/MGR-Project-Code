@@ -1,0 +1,436 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Downloader package &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Downloader.PreprocessData package" href="Downloader.PreprocessData.html" />
+    <link rel="prev" title="DatasetHandler package" href="DatasetHandler.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="downloader-package">
+<h1>Downloader package<a class="headerlink" href="#downloader-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Downloader.PreprocessData.html">Downloader.PreprocessData package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.PreprocessData.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.PreprocessData.html#module-Downloader.PreprocessData.DecoratorRetry">Downloader.PreprocessData.DecoratorRetry module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.PreprocessData.html#module-Downloader.PreprocessData.DownloadUrlFilenameMap">Downloader.PreprocessData.DownloadUrlFilenameMap module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.PreprocessData.html#module-Downloader.PreprocessData.Functions">Downloader.PreprocessData.Functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.PreprocessData.html#module-Downloader.PreprocessData.GenListOfUrls">Downloader.PreprocessData.GenListOfUrls module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.PreprocessData.html#module-Downloader.PreprocessData.PrepSegments">Downloader.PreprocessData.PrepSegments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.PreprocessData.html#module-Downloader.PreprocessData.SegmentObj">Downloader.PreprocessData.SegmentObj module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.PreprocessData.html#module-Downloader.PreprocessData.SegmentsManipulators">Downloader.PreprocessData.SegmentsManipulators module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Downloader.PreprocessData.html#module-Downloader.PreprocessData">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-Downloader.DataOperations">
+<span id="downloader-dataoperations-module"></span><h2>Downloader.DataOperations module<a class="headerlink" href="#module-Downloader.DataOperations" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="Downloader.DataOperations.FixDataFile_FailedDownloads">
+<code class="descclassname">Downloader.DataOperations.</code><code class="descname">FixDataFile_FailedDownloads</code><span class="sig-paren">(</span><em>name</em>, <em>ERROR_TYPE</em>, <em>PIXELS_X</em>, <em>PIXELS_Y</em>, <em>PrependPath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/DataOperations.html#FixDataFile_FailedDownloads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.DataOperations.FixDataFile_FailedDownloads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads, fixes and saves the structure of Segments. Looks at those
+with particular error messages ERROR_TYPE and redownloads images.
+Returns fixed Segments while it also saves them.</p>
+<dl class="docutils">
+<dt>Error codes in Default.py:</dt>
+<dd><ul class="first last simple">
+<li>ERROR_MESSAGE_NOT_FOUND = 404</li>
+<li>ERROR_MESSAGE_FAILED_MANY_TIMES = 101</li>
+</ul>
+</dd>
+<dt>Eample call:</dt>
+<dd>FixDataFile_FailedDownloads(DATASTRUCTUREFILE, ERROR_MESSAGE_FAILED_MANY_TIMES)</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.DataOperations.HasSomeErrorneousData">
+<code class="descclassname">Downloader.DataOperations.</code><code class="descname">HasSomeErrorneousData</code><span class="sig-paren">(</span><em>Segments</em>, <em>ERROR_TYPE</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/DataOperations.html#HasSomeErrorneousData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.DataOperations.HasSomeErrorneousData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check for errors. Example:
+if (HasSomeErrorneousData(Segments,E)):</p>
+<blockquote>
+<div>Segments = FixDataFile_FailedDownloads(_,E)</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.DataOperations.LoadDataFile">
+<code class="descclassname">Downloader.DataOperations.</code><code class="descname">LoadDataFile</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/DataOperations.html#LoadDataFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.DataOperations.LoadDataFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load Segments from the file &lt;name&gt;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.DataOperations.MarkBadSegments">
+<code class="descclassname">Downloader.DataOperations.</code><code class="descname">MarkBadSegments</code><span class="sig-paren">(</span><em>Segments</em>, <em>MD5_list</em>, <em>MARKERR</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/DataOperations.html#MarkBadSegments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.DataOperations.MarkBadSegments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to manually mark bad segments after they are downloaded (using the rest of the set and not having to
+re-download it all).
+Ps: all of the known errors we mark directly while downloading in DownloadUrlFilenameMap</p>
+<p>Example call:
+# manual marking and saving
+#Segments = MarkSegmentsWithImagesOfMD5(Segments, QUOTA_EXCEEDED_CHECKSUM, ERROR_MESSAGE_QUOTA)
+#SaveDataFile(DATASTRUCTUREFILE, Segments)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Segments</strong> – Input segments (remember to save them after! and possibly back them up before)</li>
+<li><strong>MD5_list</strong> – we are looking for certain md5 of the image - for example “b2328ec7ff935944a85723daddf0e8b7” was quota</li>
+<li><strong>MARKERR</strong> – we want to mark the <em>bad</em> segments - we will thus force all the photos related to one Segment to redownload</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Edited Segments, remember to save them.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.DataOperations.SaveDataFile">
+<code class="descclassname">Downloader.DataOperations.</code><code class="descname">SaveDataFile</code><span class="sig-paren">(</span><em>name</em>, <em>Segments</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/DataOperations.html#SaveDataFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.DataOperations.SaveDataFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save structure of Segments into file &lt;name&gt;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.DataOperations.save_segments_file_as_without_missing_files">
+<code class="descclassname">Downloader.DataOperations.</code><code class="descname">save_segments_file_as_without_missing_files</code><span class="sig-paren">(</span><em>in_segments_file</em>, <em>path_to_images</em>, <em>out_segments_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/DataOperations.html#save_segments_file_as_without_missing_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.DataOperations.save_segments_file_as_without_missing_files" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="Downloader.DataOperations.save_segments_file_marking_missing_files_as_errors">
+<code class="descclassname">Downloader.DataOperations.</code><code class="descname">save_segments_file_marking_missing_files_as_errors</code><span class="sig-paren">(</span><em>in_segments_file</em>, <em>path_to_images</em>, <em>out_segments_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/DataOperations.html#save_segments_file_marking_missing_files_as_errors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.DataOperations.save_segments_file_marking_missing_files_as_errors" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-Downloader.Defaults">
+<span id="downloader-defaults-module"></span><h2>Downloader.Defaults module<a class="headerlink" href="#module-Downloader.Defaults" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-Downloader.DownloaderRunner">
+<span id="downloader-downloaderrunner-module"></span><h2>Downloader.DownloaderRunner module<a class="headerlink" href="#module-Downloader.DownloaderRunner" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="Downloader.DownloaderRunner.RunCheck">
+<code class="descclassname">Downloader.DownloaderRunner.</code><code class="descname">RunCheck</code><span class="sig-paren">(</span><em>name</em>, <em>px_py</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/DownloaderRunner.html#RunCheck"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.DownloaderRunner.RunCheck" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check downloaded Segment files while downloading missing data.
+:param name: name of the Segments file
+:param px_py: pixel sizes
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.DownloaderRunner.RunDownload">
+<code class="descclassname">Downloader.DownloaderRunner.</code><code class="descname">RunDownload</code><span class="sig-paren">(</span><em>name</em>, <em>from_edge</em>, <em>to_edge</em>, <em>px_py</em>, <em>minimal_length</em>, <em>custom_geojson=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/DownloaderRunner.html#RunDownload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.DownloaderRunner.RunDownload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run downloader while setting the most important variables here
+:param name: name of the folder it will safe in Data/StreetViewData/&lt;name&gt;
+:param from_edge: start with edge id
+:param to_edge: end with edge id
+:param px_py: pixels x and y - both same
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.DownloaderRunner.RunMarkBad">
+<code class="descclassname">Downloader.DownloaderRunner.</code><code class="descname">RunMarkBad</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/DownloaderRunner.html#RunMarkBad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.DownloaderRunner.RunMarkBad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mark errorneous segments by Error flag.
+:param name:
+:return:</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-Downloader.GenerateGIFAnimation">
+<span id="downloader-generategifanimation-module"></span><h2>Downloader.GenerateGIFAnimation module<a class="headerlink" href="#module-Downloader.GenerateGIFAnimation" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="Downloader.GenerateGIFAnimation.GenerateGIFAnimation">
+<code class="descclassname">Downloader.GenerateGIFAnimation.</code><code class="descname">GenerateGIFAnimation</code><span class="sig-paren">(</span><em>Segments</em>, <em>GIFFileName</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/GenerateGIFAnimation.html#GenerateGIFAnimation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.GenerateGIFAnimation.GenerateGIFAnimation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create GIF animation from Segments.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-Downloader.ImageHelpers">
+<span id="downloader-imagehelpers-module"></span><h2>Downloader.ImageHelpers module<a class="headerlink" href="#module-Downloader.ImageHelpers" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="Downloader.ImageHelpers.len_">
+<code class="descclassname">Downloader.ImageHelpers.</code><code class="descname">len_</code><span class="sig-paren">(</span><em>L</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/ImageHelpers.html#len_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.ImageHelpers.len_" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="Downloader.ImageHelpers.list_images">
+<code class="descclassname">Downloader.ImageHelpers.</code><code class="descname">list_images</code><span class="sig-paren">(</span><em>folder</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/ImageHelpers.html#list_images"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.ImageHelpers.list_images" title="Permalink to this definition">¶</a></dt>
+<dd><p>prepare list of image names</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.ImageHelpers.load_image_with_keras">
+<code class="descclassname">Downloader.ImageHelpers.</code><code class="descname">load_image_with_keras</code><span class="sig-paren">(</span><em>img_path</em>, <em>target_size=None</em>, <em>dim_ordering='channels_last'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/ImageHelpers.html#load_image_with_keras"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.ImageHelpers.load_image_with_keras" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="Downloader.ImageHelpers.load_images_with_keras">
+<code class="descclassname">Downloader.ImageHelpers.</code><code class="descname">load_images_with_keras</code><span class="sig-paren">(</span><em>img_paths</em>, <em>target_size=None</em>, <em>dim_ordering='channels_last'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/ImageHelpers.html#load_images_with_keras"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.ImageHelpers.load_images_with_keras" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="Downloader.ImageHelpers.preprocess_image_batch">
+<code class="descclassname">Downloader.ImageHelpers.</code><code class="descname">preprocess_image_batch</code><span class="sig-paren">(</span><em>image_paths</em>, <em>img_size=None</em>, <em>crop_size=None</em>, <em>color_mode='rgb'</em>, <em>out=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/ImageHelpers.html#preprocess_image_batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.ImageHelpers.preprocess_image_batch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="Downloader.ImageHelpers.saveArrayToCSV">
+<code class="descclassname">Downloader.ImageHelpers.</code><code class="descname">saveArrayToCSV</code><span class="sig-paren">(</span><em>array</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/ImageHelpers.html#saveArrayToCSV"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.ImageHelpers.saveArrayToCSV" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-Downloader.KerasPreparation">
+<span id="downloader-keraspreparation-module"></span><h2>Downloader.KerasPreparation module<a class="headerlink" href="#module-Downloader.KerasPreparation" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="Downloader.KerasPreparation.LoadActualImages">
+<code class="descclassname">Downloader.KerasPreparation.</code><code class="descname">LoadActualImages</code><span class="sig-paren">(</span><em>list_of_images</em>, <em>resize=None</em>, <em>dim_ordering='channels_last'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/KerasPreparation.html#LoadActualImages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.KerasPreparation.LoadActualImages" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="Downloader.KerasPreparation.LoadDataFromSegments">
+<code class="descclassname">Downloader.KerasPreparation.</code><code class="descname">LoadDataFromSegments</code><span class="sig-paren">(</span><em>Segments</em>, <em>has_score=True</em>, <em>path_to_images=None</em>, <em>we_dont_care_about_missing_images=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/KerasPreparation.html#LoadDataFromSegments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.KerasPreparation.LoadDataFromSegments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turns loaded segments into data we will need for keras.
+:param Segments: Loaded segments
+:param path_to_images: additional path specification which we need before ‘images/—.jpg’
+:return: Returns list of urls of images and their labels (score in the Segment)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.KerasPreparation.split_data">
+<code class="descclassname">Downloader.KerasPreparation.</code><code class="descname">split_data</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>validation_split=0.2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/KerasPreparation.html#split_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.KerasPreparation.split_data" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> – Dataset, can be paths to images or directly the image data for example (?, 3,222,222)</li>
+<li><strong>y</strong> – Labels of the datasets</li>
+<li><strong>validation_split</strong> – Split ratio, defaults to 80% for test set and 20% of validation set</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Returns split data</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.KerasPreparation.split_one_array">
+<code class="descclassname">Downloader.KerasPreparation.</code><code class="descname">split_one_array</code><span class="sig-paren">(</span><em>arr</em>, <em>validation_split=0.2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/KerasPreparation.html#split_one_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.KerasPreparation.split_one_array" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>arr</strong> – list of data to be split</li>
+<li><strong>validation_split</strong> – Split ratio, defaults to 80% for test set and 20% of validation set</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Returns split data</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.KerasPreparation.split_osm">
+<code class="descclassname">Downloader.KerasPreparation.</code><code class="descname">split_osm</code><span class="sig-paren">(</span><em>osm</em>, <em>validation_split=0.2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/KerasPreparation.html#split_osm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.KerasPreparation.split_osm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split array of osm vectors by validation split.
+:param osm: osm data
+:param validation_split: 0 to 1 fraction
+:return: splitted osm data into osm_test, osm_val</p>
+</dd></dl>
+
+</div>
+<div class="section" id="downloader-preprocessdataf-module">
+<h2>Downloader.PreprocessDataF module<a class="headerlink" href="#downloader-preprocessdataf-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="downloader-tester-module">
+<h2>Downloader.Tester module<a class="headerlink" href="#downloader-tester-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="downloader-usedata-module">
+<h2>Downloader.UseData module<a class="headerlink" href="#downloader-usedata-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-Downloader.VisualizeHistory">
+<span id="downloader-visualizehistory-module"></span><h2>Downloader.VisualizeHistory module<a class="headerlink" href="#module-Downloader.VisualizeHistory" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="Downloader.VisualizeHistory.loadHistory">
+<code class="descclassname">Downloader.VisualizeHistory.</code><code class="descname">loadHistory</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/VisualizeHistory.html#loadHistory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.VisualizeHistory.loadHistory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="Downloader.VisualizeHistory.saveHistory">
+<code class="descclassname">Downloader.VisualizeHistory.</code><code class="descname">saveHistory</code><span class="sig-paren">(</span><em>history_dict</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/VisualizeHistory.html#saveHistory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.VisualizeHistory.saveHistory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="Downloader.VisualizeHistory.visualize_histories">
+<code class="descclassname">Downloader.VisualizeHistory.</code><code class="descname">visualize_histories</code><span class="sig-paren">(</span><em>histories</em>, <em>names</em>, <em>plotvalues='loss'</em>, <em>show=True</em>, <em>save=False</em>, <em>save_path=''</em>, <em>custom_title=None</em>, <em>just_val=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/VisualizeHistory.html#visualize_histories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.VisualizeHistory.visualize_histories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualize multiple histories.</p>
+<dl class="docutils">
+<dt>Example usage:</dt>
+<dd>h1 = loadHistory(‘history1.npy’)
+h2 = loadHistory(‘history2.npy’)
+visualize_histories([h1, h2], [‘history1’, ‘history2’])</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.VisualizeHistory.visualize_history">
+<code class="descclassname">Downloader.VisualizeHistory.</code><code class="descname">visualize_history</code><span class="sig-paren">(</span><em>hi</em>, <em>show=True</em>, <em>save=False</em>, <em>save_path=''</em>, <em>show_also=''</em>, <em>custom_title=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/VisualizeHistory.html#visualize_history"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.VisualizeHistory.visualize_history" title="Permalink to this definition">¶</a></dt>
+<dd><p>Example calls:
+hi = model.fit(…)</p>
+<p>saveHistory(hi.history, ‘tmp_saved_history.npy’)
+visualize_history(loadHistory(‘tmp_saved_history.npy’))</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.VisualizeHistory.visualize_special_histories">
+<code class="descclassname">Downloader.VisualizeHistory.</code><code class="descname">visualize_special_histories</code><span class="sig-paren">(</span><em>histories</em>, <em>plotvalues='loss'</em>, <em>show=True</em>, <em>save=False</em>, <em>save_path=''</em>, <em>custom_title=None</em>, <em>just_val=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/VisualizeHistory.html#visualize_special_histories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.VisualizeHistory.visualize_special_histories" title="Permalink to this definition">¶</a></dt>
+<dd><p>We are visualizing results of a k-fold crossvalidation training. In &lt;histories&gt; we have the individual runs of the experiment.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Downloader.VisualizeHistory.visualize_whiskered_boxed">
+<code class="descclassname">Downloader.VisualizeHistory.</code><code class="descname">visualize_whiskered_boxed</code><span class="sig-paren">(</span><em>whiskered_boxes_data</em>, <em>names</em>, <em>show=True</em>, <em>save=False</em>, <em>save_path=''</em>, <em>custom_title=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Downloader/VisualizeHistory.html#visualize_whiskered_boxed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Downloader.VisualizeHistory.visualize_whiskered_boxed" title="Permalink to this definition">¶</a></dt>
+<dd><p>We are visualizing results of a k-fold crossvalidation training.
+In &lt;whiskered_boxes_data&gt; we have data for whiskered box plots.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-Downloader">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-Downloader" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Downloader package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Downloader.PreprocessData.html">Downloader.PreprocessData package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Downloader.DataOperations">Downloader.DataOperations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Downloader.Defaults">Downloader.Defaults module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Downloader.DownloaderRunner">Downloader.DownloaderRunner module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Downloader.GenerateGIFAnimation">Downloader.GenerateGIFAnimation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Downloader.ImageHelpers">Downloader.ImageHelpers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Downloader.KerasPreparation">Downloader.KerasPreparation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#downloader-preprocessdataf-module">Downloader.PreprocessDataF module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#downloader-tester-module">Downloader.Tester module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#downloader-usedata-module">Downloader.UseData module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Downloader.VisualizeHistory">Downloader.VisualizeHistory module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Downloader">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ModelHandler.html">ModelHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="DatasetHandler.html" title="previous chapter">DatasetHandler package</a></li>
+      <li>Next: <a href="Downloader.PreprocessData.html" title="next chapter">Downloader.PreprocessData package</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/Downloader.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,553 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ModelHandler package &#8212; Estimating Bicycle Route Attractivity from Image Data 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ModelHandler.CreateModel package" href="ModelHandler.CreateModel.html" />
+    <link rel="prev" title="ExperimentRunner package" href="ExperimentRunner.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="modelhandler-package">
+<h1>ModelHandler package<a class="headerlink" href="#modelhandler-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ModelHandler.CreateModel.html">ModelHandler.CreateModel package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ModelHandler.CreateModel.html#subpackages">Subpackages</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ModelHandler.CreateModel.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ModelHandler.CreateModel.html#module-ModelHandler.CreateModel.KerasApplicationsModels">ModelHandler.CreateModel.KerasApplicationsModels module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ModelHandler.CreateModel.html#module-ModelHandler.CreateModel">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ModelHandler.KfoldTester">
+<span id="modelhandler-kfoldtester-module"></span><h2>ModelHandler.KfoldTester module<a class="headerlink" href="#module-ModelHandler.KfoldTester" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ModelHandler.KfoldTester.best_min">
+<code class="descclassname">ModelHandler.KfoldTester.</code><code class="descname">best_min</code><span class="sig-paren">(</span><em>arr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/KfoldTester.html#best_min"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.KfoldTester.best_min" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the smallest value</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.KfoldTester.chunks">
+<code class="descclassname">ModelHandler.KfoldTester.</code><code class="descname">chunks</code><span class="sig-paren">(</span><em>l</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/KfoldTester.html#chunks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.KfoldTester.chunks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Chunk data from list l into n fjords.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.KfoldTester.indices_to_data">
+<code class="descclassname">ModelHandler.KfoldTester.</code><code class="descname">indices_to_data</code><span class="sig-paren">(</span><em>any_indices</em>, <em>any_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/KfoldTester.html#indices_to_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.KfoldTester.indices_to_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.KfoldTester.k_fold_crossvalidation">
+<code class="descclassname">ModelHandler.KfoldTester.</code><code class="descname">k_fold_crossvalidation</code><span class="sig-paren">(</span><em>model</em>, <em>dataset</em>, <em>model_settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/KfoldTester.html#k_fold_crossvalidation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.KfoldTester.k_fold_crossvalidation" title="Permalink to this definition">¶</a></dt>
+<dd><p># K fold crossvalidation scheme
+# includes proper loading of models, testing and processing of the results.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.KfoldTester.kfold">
+<code class="descclassname">ModelHandler.KfoldTester.</code><code class="descname">kfold</code><span class="sig-paren">(</span><em>indices_in_fjords</em>, <em>selected</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/KfoldTester.html#kfold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.KfoldTester.kfold" title="Permalink to this definition">¶</a></dt>
+<dd><p>indices come like [] [] [] … [], we want to select the one in &lt;selected&gt; as validation and rest as tests</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.KfoldTester.select_data">
+<code class="descclassname">ModelHandler.KfoldTester.</code><code class="descname">select_data</code><span class="sig-paren">(</span><em>indices</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/KfoldTester.html#select_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.KfoldTester.select_data" title="Permalink to this definition">¶</a></dt>
+<dd><p># select from data, while considering that data can be either list of items to directly select from
+# or it can be a list of size two, where we select from both items and later join</p>
+</dd></dl>
+
+</div>
+<div class="section" id="modelhandler-mergemodelosmimg-module">
+<h2>ModelHandler.MergeModelOsmImg module<a class="headerlink" href="#modelhandler-mergemodelosmimg-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ModelHandler.ModelGenerator">
+<span id="modelhandler-modelgenerator-module"></span><h2>ModelHandler.ModelGenerator module<a class="headerlink" href="#module-ModelHandler.ModelGenerator" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ModelHandler.ModelGenerator.build_finetune_model">
+<code class="descclassname">ModelHandler.ModelGenerator.</code><code class="descname">build_finetune_model</code><span class="sig-paren">(</span><em>cnn</em>, <em>top</em>, <em>cut</em>, <em>input_shape</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelGenerator.html#build_finetune_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelGenerator.build_finetune_model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelGenerator.build_full_mixed_model">
+<code class="descclassname">ModelHandler.ModelGenerator.</code><code class="descname">build_full_mixed_model</code><span class="sig-paren">(</span><em>osm_shape</em>, <em>img_shape=&lt;tf.Tensor 'input_1:0' shape=(?</em>, <em>299</em>, <em>299</em>, <em>3) dtype=float32&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelGenerator.html#build_full_mixed_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelGenerator.build_full_mixed_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests with the mixed model without using features for cooking.
+:param osm_shape: shape of the osm data
+:param img_shape: shape of the imgs data
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelGenerator.build_img_only_top_model">
+<code class="descclassname">ModelHandler.ModelGenerator.</code><code class="descname">build_img_only_top_model</code><span class="sig-paren">(</span><em>input_shape</em>, <em>number_of_repeats</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelGenerator.html#build_img_only_top_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelGenerator.build_img_only_top_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds simple model of repeated FC blocks.
+:param input_shape: Keras needs to know the input shape.
+:param number_of_repeats: repeats of FC block additional to the first Flatten layer and the last sigmoid output layer.
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelGenerator.build_img_osm_mix_model">
+<code class="descclassname">ModelHandler.ModelGenerator.</code><code class="descname">build_img_osm_mix_model</code><span class="sig-paren">(</span><em>input_shape_img</em>, <em>input_shape_osm</em>, <em>number_of_repeats</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelGenerator.html#build_img_osm_mix_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelGenerator.build_img_osm_mix_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a combined model using both imgs and osm data.
+:param input_shape_img: Keras needs to know the input shapes for imgs.
+:param input_shape_osm: Keras needs to know the input shapes for osm vectors.
+:param number_of_repeats: repeats of FC block additional to the first Flatten layer and the last sigmoid output layer.
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelGenerator.build_img_osm_mix_model_custom_base_cnn_top">
+<code class="descclassname">ModelHandler.ModelGenerator.</code><code class="descname">build_img_osm_mix_model_custom_base_cnn_top</code><span class="sig-paren">(</span><em>input_shape_img</em>, <em>input_shape_osm</em>, <em>number_of_repeats</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelGenerator.html#build_img_osm_mix_model_custom_base_cnn_top"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelGenerator.build_img_osm_mix_model_custom_base_cnn_top" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelGenerator.build_osm_only_model">
+<code class="descclassname">ModelHandler.ModelGenerator.</code><code class="descname">build_osm_only_model</code><span class="sig-paren">(</span><em>input_shape</em>, <em>number_of_repeats</em>, <em>manual_width=256</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelGenerator.html#build_osm_only_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelGenerator.build_osm_only_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a simple model with just OSM vector as it’s input, couple of FC blocks and then sigmoid output of 1 score value
+:param input_shape: Keras needs to know the input shape.
+:param number_of_repeats: repeats of FC block additional to the first Flatten layer and the last sigmoid output layer.
+:param manual_width: manual width of the fc layers
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelGenerator.get_cnn_models">
+<code class="descclassname">ModelHandler.ModelGenerator.</code><code class="descname">get_cnn_models</code><span class="sig-paren">(</span><em>Settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelGenerator.html#get_cnn_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelGenerator.get_cnn_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the base CNN part of models
+:param Settings: settings used to get individual model settings
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelGenerator.get_top_models">
+<code class="descclassname">ModelHandler.ModelGenerator.</code><code class="descname">get_top_models</code><span class="sig-paren">(</span><em>models</em>, <em>datasets</em>, <em>Settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelGenerator.html#get_top_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelGenerator.get_top_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds the right top models, now with proper knowledge of shapes of feature files.
+:param models: list of models where we will add new ones
+:param datasets: using information about databases
+:param Settings: and using information from Settings
+:return: models are generated and returned</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelGenerator.join_two_models">
+<code class="descclassname">ModelHandler.ModelGenerator.</code><code class="descname">join_two_models</code><span class="sig-paren">(</span><em>one</em>, <em>two</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelGenerator.html#join_two_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelGenerator.join_two_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Join two models in a chain after each other
+:param one: first model
+:param two: second model
+:return:  joined model</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelGenerator.report_models">
+<code class="descclassname">ModelHandler.ModelGenerator.</code><code class="descname">report_models</code><span class="sig-paren">(</span><em>models</em>, <em>Settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelGenerator.html#report_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelGenerator.report_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Debug method - report all models
+:param models: list of models
+:param Settings: settings files to get the individual model settings
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelGenerator.split_model">
+<code class="descclassname">ModelHandler.ModelGenerator.</code><code class="descname">split_model</code><span class="sig-paren">(</span><em>model</em>, <em>start</em>, <em>end</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelGenerator.html#split_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelGenerator.split_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split model by the start and end flags - we get the subset of a model.
+# Thanks to <a class="reference external" href="https://github.com/fchollet/keras/issues/5074#issuecomment-274259404">https://github.com/fchollet/keras/issues/5074#issuecomment-274259404</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>model</strong> – model to be split</li>
+<li><strong>start</strong> – from layer</li>
+<li><strong>end</strong> – to layer</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">subset of the model</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ModelHandler.ModelOI">
+<span id="modelhandler-modeloi-module"></span><h2>ModelHandler.ModelOI module<a class="headerlink" href="#module-ModelHandler.ModelOI" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ModelHandler.ModelOI.do_we_need_to_cook">
+<code class="descclassname">ModelHandler.ModelOI.</code><code class="descname">do_we_need_to_cook</code><span class="sig-paren">(</span><em>filename_features_train</em>, <em>filename_features_test</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelOI.html#do_we_need_to_cook"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelOI.do_we_need_to_cook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks for the existence of cooked feature files.
+:param filename_features_train: path to training features
+:param filename_features_test: path to testing features
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelOI.generate_report_string">
+<code class="descclassname">ModelHandler.ModelOI.</code><code class="descname">generate_report_string</code><span class="sig-paren">(</span><em>Settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelOI.html#generate_report_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelOI.generate_report_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generation of text based report.
+:param Settings: main settings used for the experiment.
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelOI.getLogDirectory">
+<code class="descclassname">ModelHandler.ModelOI.</code><code class="descname">getLogDirectory</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelOI.html#getLogDirectory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelOI.getLogDirectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get established Log directories. Code will use the one of these paths which is available on the machine.
+:return: working path to Logs directory</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelOI.getSharedDirectory">
+<code class="descclassname">ModelHandler.ModelOI.</code><code class="descname">getSharedDirectory</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelOI.html#getSharedDirectory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelOI.getSharedDirectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get established Log directories. Code will use the one of these paths which is available on the machine.
+:return: working path to Logs/shared directory</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelOI.get_feature_file_names">
+<code class="descclassname">ModelHandler.ModelOI.</code><code class="descname">get_feature_file_names</code><span class="sig-paren">(</span><em>shared_folder</em>, <em>dataset_uid</em>, <em>model_name</em>, <em>cut=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelOI.html#get_feature_file_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelOI.get_feature_file_names" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>shared_folder</strong> – taken from getSharedDirectory()</li>
+<li><strong>dataset_uid</strong> – taken from dataset.unique_id</li>
+<li><strong>model_name</strong> – can be for example ‘resnet50’</li>
+<li><strong>cut</strong> – special case scenario, if we were cutting base CNN shorter</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelOI.graph_histories">
+<code class="descclassname">ModelHandler.ModelOI.</code><code class="descname">graph_histories</code><span class="sig-paren">(</span><em>histories</em>, <em>Settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelOI.html#graph_histories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelOI.graph_histories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Graphs histories according to Settings[“graph_histories”] ~ [‘all’,[]] #[‘all’,[],[0,2]]
+:param histories: histories to be graphed
+:param Settings: Main setting dict containing the path values
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelOI.load_dataset">
+<code class="descclassname">ModelHandler.ModelOI.</code><code class="descname">load_dataset</code><span class="sig-paren">(</span><em>Settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelOI.html#load_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelOI.load_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads datasets according to the Settings parameters “dataset_name”, “pixels”, “number_of_images”, “seed”.
+Also manages shuffling and other initial editations of the dataset.
+:param Settings:
+:return: dataset object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelOI.load_model">
+<code class="descclassname">ModelHandler.ModelOI.</code><code class="descname">load_model</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelOI.html#load_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelOI.load_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load Keras model from path.
+:param path:
+:return: the loaded model</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelOI.prepare_folders">
+<code class="descclassname">ModelHandler.ModelOI.</code><code class="descname">prepare_folders</code><span class="sig-paren">(</span><em>Settings</em>, <em>datasets</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelOI.html#prepare_folders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelOI.prepare_folders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Figures folder paths which will be used in experiment (local folder with history file, graphs, model file and also
+the shared folder where features are saved. Also the paths for filename_features_train, filename_features_test for
+for each model. Saves these paths into Settings.
+:param Settings: This is a travelling dictionary with all the settings, we will add folder settings there
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelOI.save_histories">
+<code class="descclassname">ModelHandler.ModelOI.</code><code class="descname">save_histories</code><span class="sig-paren">(</span><em>histories</em>, <em>Settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelOI.html#save_histories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelOI.save_histories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save histories into .npy files, which can be used to reproduce the results.
+:param histories: histories to be saved
+:param Settings: Main setting dict containing the path values
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelOI.save_metacentrum_report">
+<code class="descclassname">ModelHandler.ModelOI.</code><code class="descname">save_metacentrum_report</code><span class="sig-paren">(</span><em>Settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelOI.html#save_metacentrum_report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelOI.save_metacentrum_report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Downloads and saves the Metacentrum generated file, according to the unique id value in Settings.
+:param Settings:
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelOI.save_models">
+<code class="descclassname">ModelHandler.ModelOI.</code><code class="descname">save_models</code><span class="sig-paren">(</span><em>models</em>, <em>Settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelOI.html#save_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelOI.save_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the trained models alongside with the experiments settings.
+:param models: list of models, each can contain base cnn model or just the top model. We differentiate according
+according to the Settings of model_type.
+:param Settings:
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelOI.save_report">
+<code class="descclassname">ModelHandler.ModelOI.</code><code class="descname">save_report</code><span class="sig-paren">(</span><em>Settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelOI.html#save_report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelOI.save_report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves report of the most important settings.
+:param Settings:
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelOI.save_visualizations">
+<code class="descclassname">ModelHandler.ModelOI.</code><code class="descname">save_visualizations</code><span class="sig-paren">(</span><em>models</em>, <em>Settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelOI.html#save_visualizations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelOI.save_visualizations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save visualizations of the models, if we have set it in Settings
+:param models: list of models to be plotted
+:param Settings: the main Setting, used to access output paths
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelOI.send_mail_with_graph">
+<code class="descclassname">ModelHandler.ModelOI.</code><code class="descname">send_mail_with_graph</code><span class="sig-paren">(</span><em>Settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelOI.html#send_mail_with_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelOI.send_mail_with_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reporting method by sending mail with graph as an attachment.
+:param Settings:
+:return:</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ModelHandler.ModelTester">
+<span id="modelhandler-modeltester-module"></span><h2>ModelHandler.ModelTester module<a class="headerlink" href="#module-ModelHandler.ModelTester" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ModelHandler.ModelTester.RunMonitor">
+<em class="property">class </em><code class="descclassname">ModelHandler.ModelTester.</code><code class="descname">RunMonitor</code><span class="sig-paren">(</span><em>**opt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelTester.html#RunMonitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelTester.RunMonitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">keras.callbacks.Callback</span></code></p>
+<p># CUSTOM KERAS CALLBACK
+# inspired by Kerutils at <a class="reference external" href="https://github.com/samyzaf/kerutils">https://github.com/samyzaf/kerutils</a></p>
+<dl class="method">
+<dt id="ModelHandler.ModelTester.RunMonitor.on_epoch_begin">
+<code class="descname">on_epoch_begin</code><span class="sig-paren">(</span><em>epoch</em>, <em>logs={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelTester.html#RunMonitor.on_epoch_begin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelTester.RunMonitor.on_epoch_begin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ModelHandler.ModelTester.RunMonitor.on_epoch_end">
+<code class="descname">on_epoch_end</code><span class="sig-paren">(</span><em>epoch</em>, <em>logs={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelTester.html#RunMonitor.on_epoch_end"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelTester.RunMonitor.on_epoch_end" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ModelHandler.ModelTester.RunMonitor.on_train_begin">
+<code class="descname">on_train_begin</code><span class="sig-paren">(</span><em>logs={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelTester.html#RunMonitor.on_train_begin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelTester.RunMonitor.on_train_begin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ModelHandler.ModelTester.RunMonitor.on_train_end">
+<code class="descname">on_train_end</code><span class="sig-paren">(</span><em>logs={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelTester.html#RunMonitor.on_train_end"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelTester.RunMonitor.on_train_end" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ModelHandler.ModelTester.RunMonitor.print_params">
+<code class="descname">print_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelTester.html#RunMonitor.print_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelTester.RunMonitor.print_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelTester.cook_features">
+<code class="descclassname">ModelHandler.ModelTester.</code><code class="descname">cook_features</code><span class="sig-paren">(</span><em>models</em>, <em>datasets</em>, <em>Settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelTester.html#cook_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelTester.cook_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes sure that we have features available for the duo of model-dataset in our shared feature folder.
+If not, we will cook them.
+:param models: list of models (currently without their tops)
+:param datasets: list of dataset object
+:param Settings: settings
+:return: number of ready models</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelTester.format_time">
+<code class="descclassname">ModelHandler.ModelTester.</code><code class="descname">format_time</code><span class="sig-paren">(</span><em>seconds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelTester.html#format_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelTester.format_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelTester.load_feature_file">
+<code class="descclassname">ModelHandler.ModelTester.</code><code class="descname">load_feature_file</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelTester.html#load_feature_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelTester.load_feature_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Just loads the features stored in one file.
+:param path:
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelTester.load_features">
+<code class="descclassname">ModelHandler.ModelTester.</code><code class="descname">load_features</code><span class="sig-paren">(</span><em>filename_features_train</em>, <em>filename_features_test</em>, <em>y</em>, <em>y_val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelTester.html#load_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelTester.load_features" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelTester.predict_and_save_features">
+<code class="descclassname">ModelHandler.ModelTester.</code><code class="descname">predict_and_save_features</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>x_val</em>, <em>y_val</em>, <em>filename_features_train</em>, <em>filename_features_test</em>, <em>model</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelTester.html#predict_and_save_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelTester.predict_and_save_features" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelTester.predict_from_generators">
+<code class="descclassname">ModelHandler.ModelTester.</code><code class="descname">predict_from_generators</code><span class="sig-paren">(</span><em>test_generator</em>, <em>val_generator</em>, <em>number_in_test</em>, <em>number_in_val</em>, <em>filename_features_train</em>, <em>filename_features_test</em>, <em>model</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelTester.html#predict_from_generators"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelTester.predict_from_generators" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelTester.train_model">
+<code class="descclassname">ModelHandler.ModelTester.</code><code class="descname">train_model</code><span class="sig-paren">(</span><em>model</em>, <em>dataset</em>, <em>model_settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelTester.html#train_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelTester.train_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Train model on a dataset using these settings
+:param model: model to be trained
+:param dataset: dataset to be used
+:param model_settings: model setting to be read for specifics
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelTester.train_models">
+<code class="descclassname">ModelHandler.ModelTester.</code><code class="descname">train_models</code><span class="sig-paren">(</span><em>models</em>, <em>datasets</em>, <em>Settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelTester.html#train_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelTester.train_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Training on all models - dataset pairs from models.
+:param models: array of models to run
+:param dataset: datasets for the models
+:param Settings: settings which also describe which dataset belongs to which model
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ModelHandler.ModelTester.train_top_model">
+<code class="descclassname">ModelHandler.ModelTester.</code><code class="descname">train_top_model</code><span class="sig-paren">(</span><em>model</em>, <em>model_settings</em>, <em>train_data</em>, <em>train_labels</em>, <em>validation_data</em>, <em>validation_labels</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ModelHandler/ModelTester.html#train_top_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ModelHandler.ModelTester.train_top_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Train the whole model
+:param model: model with base and top
+:param model_settings:
+:param train_data: data for training
+:param train_labels:  labels for training
+:param validation_data:  data for validation (and validation error)
+:param validation_labels:  labels for validation (and validation error)
+:return:</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ModelHandler">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ModelHandler" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Estimating Bicycle Route Attractivity from Image Data</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="DatasetHandler.html">DatasetHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Downloader.html">Downloader package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Evaluator.html">Evaluator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ExperimentRunner.html">ExperimentRunner package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ModelHandler package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ModelHandler.CreateModel.html">ModelHandler.CreateModel package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-ModelHandler.KfoldTester">ModelHandler.KfoldTester module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#modelhandler-mergemodelosmimg-module">ModelHandler.MergeModelOsmImg module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-ModelHandler.ModelGenerator">ModelHandler.ModelGenerator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-ModelHandler.ModelOI">ModelHandler.ModelOI module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-ModelHandler.ModelTester">ModelHandler.ModelTester module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-ModelHandler">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="OSMHandler.html">OSMHandler package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Omnipresent.html">Omnipresent module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="ExperimentRunner.html" title="previous chapter">ExperimentRunner package</a></li>
+      <li>Next: <a href="ModelHandler.CreateModel.html" title="next chapter">ModelHandler.CreateModel package</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Vit Ruzicka.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/ModelHandler.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

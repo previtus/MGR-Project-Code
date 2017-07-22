@@ -1,0 +1,61 @@
+ModelHandler package
+====================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    ModelHandler.CreateModel
+
+Submodules
+----------
+
+ModelHandler\.KfoldTester module
+--------------------------------
+
+.. automodule:: ModelHandler.KfoldTester
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ModelHandler\.MergeModelOsmImg module
+-------------------------------------
+
+.. automodule:: ModelHandler.MergeModelOsmImg
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ModelHandler\.ModelGenerator module
+-----------------------------------
+
+.. automodule:: ModelHandler.ModelGenerator
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ModelHandler\.ModelOI module
+----------------------------
+
+.. automodule:: ModelHandler.ModelOI
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ModelHandler\.ModelTester module
+--------------------------------
+
+.. automodule:: ModelHandler.ModelTester
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: ModelHandler
+    :members:
+    :undoc-members:
+    :show-inheritance:

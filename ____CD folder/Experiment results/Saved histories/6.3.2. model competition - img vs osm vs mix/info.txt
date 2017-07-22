@@ -1,0 +1,11 @@
+dataset1 = 5556x_markable_640x640
+
+img, osm and mixed
+
+dataset2 = 5556x_minlen30_640px
+
+img, osm and mixed
+
+dataset3 = 5556x_minlen30_640px_2x_expanded
+
+img, osm and mixed

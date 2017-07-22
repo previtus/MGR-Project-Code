@@ -1,0 +1,16 @@
+/Source code
+Folder with python project.
+
+/Documentation
+Project documentation generated with Sphinx.
+
+/Thesis TEXsource
+Folder contains sources for this thesis. Can be compiled with pdfcsplain.
+
+/Experiment results
+Contains results of the experiments.
+- Evaluated GeoJSON files
+- Minimal dataset example
+- Saved histories
+- Segments objects
+- Selected models
