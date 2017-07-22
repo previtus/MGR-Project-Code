@@ -1,5 +1,5 @@
 def Setup(Settings,DefaultModel):
-    # osm_effect_of_diff_radius.py
+    # osm_effect_of_diff_radius_1200ds.py
 
     Settings["experiment_name"] = "Osm_only_models_radius_effect_1200x"
 

@@ -1,5 +1,6 @@
 def Setup(Settings, DefaultModel):
     # debug_setting.py
+    # debugs special info outputs during the run
 
     Settings["experiment_name"] = "debug"
 

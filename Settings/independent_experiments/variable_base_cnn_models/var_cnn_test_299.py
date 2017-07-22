@@ -1,5 +1,5 @@
 def Setup(Settings,DefaultModel):
-    # var_cnn_test___TEST.py
+    # var_cnn_test_299.py
     
     Settings["experiment_name"] = "baseCNN_specialTOP"
     Settings["graph_histories"] = ['together'] #['all','together',[],[1,0],[0,0,0],[]]
