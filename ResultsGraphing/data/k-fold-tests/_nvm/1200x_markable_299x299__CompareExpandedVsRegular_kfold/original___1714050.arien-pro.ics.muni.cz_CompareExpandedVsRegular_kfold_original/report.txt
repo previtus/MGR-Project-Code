@@ -1,8 +1,0 @@
-Experiment [CompareExpandedVsRegular_kfold_original] report: 
-With 1 models: 
-original 
-img_osm_mix 
-Trained for 1000 epochs with rmsprop optimizer and loss function mean_squared_error 
-Used dataset: 1200x_markable_299x299 with None images 
-Dump file used: SegmentsData_marked_R100_4Tables.dump 
-

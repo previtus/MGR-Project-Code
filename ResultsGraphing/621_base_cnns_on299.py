@@ -20,9 +20,9 @@ The idea:
     One graph to compare everything - maybe thats gonna also be legible.
 
 """
-SAVE = True
+SAVE = False
 path_folder = dir_folder + ''
-path_folder = '/home/ekmek/Desktop/__ad_thesis/FANCY_STUFFs/0_alt_diffCNNs_try_299set/'
+path_folder = '/data/k-fold-tests/6.2.1. different CNN/alt_diffCNNs_try_299set/'
 out_folder_1 = dir_folder + '/graphs/6.2.1._different_CNN_299/fig_average_valerr_299'
 out_folder_2 = dir_folder + '/graphs/6.2.1._different_CNN_299/fig_allerr_299'
 

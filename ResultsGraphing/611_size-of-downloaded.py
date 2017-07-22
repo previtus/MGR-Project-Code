@@ -28,27 +28,13 @@ path_folder = dir_folder + '/data/k-fold-tests/6.1.1. pixel size/'
 out_folder_1 = dir_folder + '/graphs/6.1.1._pixel_size/figLeft_boxplotcomp_val_' + model_txt
 out_folder_2 = dir_folder + '/graphs/6.1.1._pixel_size/figRight_graphcomp_evol_' + model_txt
 
-# ALTERNATIVES
-img_299_2 = '/home/ekmek/Documents/20-6-downs/06-22-recorded/_6.1.1. pixel size/1771008.arien-pro.ics.muni.cz_set4b_pixelSize_img_299_d7/history/5556x_mark_res_299x299_img_with_299_500.npy'
-mix_299_2 = '/home/ekmek/Documents/20-6-downs/06-22-recorded/_6.1.1. pixel size/1771009.arien-pro.ics.muni.cz_set4b_pixelSize_mix_299_d7/history/299_mixed_v2.npy'
-img_640_2 = '/home/ekmek/Vitek/Mgr project/MGR-Project-Code/ResultsGraphing/data/k-fold-tests/ModelsVersus__tests_of_individual_models/img 5556x_markable_640x640/1769355.arien-pro.ics.muni.cz_TypesOfModels_monoTest_IMG_kfold_d1/history/5556x_markable_640x640_imagemodel_500.npy'
-
 if model_txt == "mix":
     m299 = path_folder + "299_mixed_v1.npy"
     m640 = path_folder + "640_mixed_1760999.npy"
 
-    #m299 = mix_299_2
-    # actually mix_299_2 and m299 behave almost the same - stick with m299
-
 else:
     m299 = path_folder + "299_image_v1.npy"
     m640 = path_folder + "640_image_1769351.npy"
-
-    #m299 = img_299_2
-    # again behaves very similarly - which is good actually
-
-    #m640 = img_640_2
-    # again behavior is stable in both
 
 data_paths = [m299, m640]
 data_names = [
