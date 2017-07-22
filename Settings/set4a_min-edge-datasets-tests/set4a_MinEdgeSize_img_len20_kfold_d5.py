@@ -1,7 +1,7 @@
 def Setup(Settings, DefaultModel):
-    # set5-osm-model-variable-widths-depths/set5_w64_depth2_d1.py
+    # set4a_min-edge-datasets-tests/set4a_MinEdgeSize_img_len20_kfold_d5.py
 
-    Settings["experiment_name"] = "set5_w64_depth2_d1"
+    Settings["experiment_name"] = "set4a_MinEdgeSize_img_len20_kfold_d5"
 
     Settings["graph_histories"] = []  # ['all','together',[],[1,0],[0,0,0],[]]
     n = 0
@@ -14,29 +14,14 @@ def Setup(Settings, DefaultModel):
     #d5 5556x_minlen10_640px                  SegmentsData_marked_R100_4Tables.dump
     #d6 5556x_minlen20_640px                  SegmentsData_marked_R100_4Tables.dump
 
-    #d7 5556x_mark_res_299x299                SegmentsData_marked_R100_4Tables.dump
 
-    Settings["models"][n]["dataset_name"] = "5556x_markable_640x640"
+    Settings["models"][n]["dataset_name"] = "5556x_minlen20_640px"
     Settings["models"][n]["dump_file_override"] = 'SegmentsData_marked_R100_4Tables.dump'
     Settings["models"][n]["pixels"] = 640
-    Settings["models"][n]["model_type"] = 'osm_only' # osm_only simple_cnn_with_top img_osm_mix
-    Settings["models"][n]["unique_id"] = 'osm'
-    # Depth
+    Settings["models"][n]["model_type"] = 'simple_cnn_with_top' # osm_only img_only img_osm_mix
+    Settings["models"][n]["unique_id"] = 'img_with_min10'
     Settings["models"][n]["top_repeat_FC_block"] = 2
-    # try 1
-    # try 2 =def
-    # try 3
-    # try 4
-
-    # Width
-    Settings["models"][n]["osm_manual_width"] = 64
-    # try 32
-    # try 64
-    # try 128
-    # try 256 def
-    # dont try 512
-
-    Settings["models"][n]["epochs"] = 1000
+    Settings["models"][n]["epochs"] = 500
 
     Settings["models"][n]["k_fold_crossvalidation"] = True
     Settings["models"][n]["crossvalidation_k"] = 10

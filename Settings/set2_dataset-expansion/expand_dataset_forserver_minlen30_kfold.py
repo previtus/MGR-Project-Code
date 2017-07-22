@@ -1,8 +1,8 @@
 def Setup(Settings,DefaultModel):
-    # set2_dataset-expansion/builds_aggresive_expand_dataset_normalmarkable_kfold.py
-    # probably ANOTHER 6GB
+    # set2_dataset-expansion/expand_dataset_forserver_minlen30_kfold.py
 
-    Settings["experiment_name"] = "builds_aggresive_expand_dataset_normalmarkable_kfold"
+
+    Settings["experiment_name"] = "ExpandDataset_5556x_minlen30_640px_kfold10"
 
     Settings["graph_histories"] = ['together']
 
@@ -48,8 +48,8 @@ def Setup(Settings,DefaultModel):
 
     # Set these values:
     number_of_images_from_one = 2
-    source_dataset = "5556x_markable_640x640"
-    target_dataset = "5556x_markable_640x640_2x_agressive_expanded"
+    source_dataset = "5556x_minlen30_640px"
+    target_dataset = "5556x_minlen30_640px_2x_expanded"
     pixels = 640
     epochs = 500
     use_dump_file = 'SegmentsData_marked_R100_4Tables.dump' # -> * new XYZ_expanded.dump

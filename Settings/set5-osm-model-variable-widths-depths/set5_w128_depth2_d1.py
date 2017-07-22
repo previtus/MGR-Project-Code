@@ -1,7 +1,7 @@
 def Setup(Settings, DefaultModel):
-    # set5-osm-model-variable-widths-depths/set5_w64_depth2_d1.py
+    # set5-osm-model-variable-widths-depths/set5_w128_depth2_d1.py
 
-    Settings["experiment_name"] = "set5_w64_depth2_d1"
+    Settings["experiment_name"] = "set5_w128_depth2_d1"
 
     Settings["graph_histories"] = []  # ['all','together',[],[1,0],[0,0,0],[]]
     n = 0
@@ -29,7 +29,7 @@ def Setup(Settings, DefaultModel):
     # try 4
 
     # Width
-    Settings["models"][n]["osm_manual_width"] = 64
+    Settings["models"][n]["osm_manual_width"] = 128
     # try 32
     # try 64
     # try 128

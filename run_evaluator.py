@@ -8,15 +8,15 @@ folder_path = ABS_PATH_TO_PRJ + 'Data/ModelFiles/'
 
 # IMG
 IMG_model_file = folder_path + 'SelectedModels/1769353.arien-pro.ics.muni.cz_TypesOfModels_monoTest_IMG_kfold_d3/models/imagemodel_resnet50.h5_top.h5'
-IMG_settings_file = 'Settings/set3/type_of_model_img_kfold_d3.py'
+IMG_settings_file = 'Settings/set3_crossval-one-model-on-one-dataset/type_of_model_img_kfold_d3.py'
 
 # OSM Flagship Model !
 OSM_model_file = folder_path + 'SelectedModels/1771032.arien-pro.ics.muni.cz_set5_w64_depth2_d1/models/osm_resnet50.h5_osmtop.h5'
-OSM_settings_file = 'Settings/set5/set5_w64_depth2_d1.py'
+OSM_settings_file = 'Settings/set5-osm-model-variable-widths-depths/set5_w64_depth2_d1.py'
 
 # MIX Flagship Model !
 MIX_model_file = folder_path + 'SelectedModels/1788956.arien-pro.ics.muni.cz_builds_aggresive_expand_dataset_normalmarkable_kfold/models/expanded: 5556x_markable_640x640_2x_agressive_expanded_resnet50.h5_top.h5'
-MIX_settings_file = 'Settings/set7missing/builds_aggresive_expand_dataset_normalmarkable_kfold.py'
+MIX_settings_file = 'Settings/set7_dataset-aggressive-expansion/builds_aggresive_expand_dataset_normalmarkable_kfold.py'
 
 if len(sys.argv) > 2:
     model_file = (sys.argv[1])  # var1
