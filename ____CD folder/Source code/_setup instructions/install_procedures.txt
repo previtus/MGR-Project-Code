@@ -26,7 +26,10 @@ sudo -u postgres psql -c "CREATE EXTENSION postgis; CREATE EXTENSION postgis_top
 # get osm2pgsql from https://github.com/openstreetmap/osm2pgsql
 osm2pgsql --create --database gisdb DATAMAPFILE.osm.pbf -U example_user
 
-Y. Note that depending on the workstation settings, there will be additional requirements.
+Y. Note that depending on the workstation settings, there will be additional requirements. These might include:
+
+sudo pip install imageio
+sudo pip install psycopg2
 
 [Post setup]
 X. We will also need to fill in files with secret data, such as our Google Street View api code, mail login information (for mail reporting) and settings for the PostgreSQL database.
