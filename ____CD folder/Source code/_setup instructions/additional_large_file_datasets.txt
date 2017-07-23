@@ -1,0 +1,8 @@
+Folder MGR-Datasets:
+https://drive.google.com/drive/folders/0B4lZ1gyMRSQqb2RudkVwMGdXQUk?usp=sharing
+
+contains additional datasets which were too large to attach here:
+
+5556x_markable_640x640 - full dataset made of all 5556 edges of the initial dataset. Images of pixel size 640x640. No long edge splitting was used.
+5556x_minlen30_640px - full dataset. Pixel size 640x640. Long edges were split into smaller segments with minimal edge lenght limited at 30 meters.
+5556x_reslen20_299px - full dataset. Pixel size 299x299. Long edges were split into smaller segments with minimal edge lenght limited at 20 meters.
