@@ -411,6 +411,28 @@ class Dataset:
             dict[score_label].append(name)
         return dict
 
+    def DumpFilesIntoDirectory_keepNamesOnlyScored(self, target_directory = ''):
+        """
+        Copy those images which are loaded to this database and thus also have score into another folder.
+        This can be used to filter how much of the initial dataset is useful as labeled dataset.
+        :param target_directory: target folder, file names are kept the same
+        """
+
+        if not os.path.exists(target_directory):
+            os.makedirs(target_directory)
+
+        for i in range(0, self.num_of_images):
+            name = self.__list_of_images[i]
+            score = self.__labels[i]
+
+            #head, tail = os.path.split(name)
+
+            filename = target_directory + "/" + os.path.basename(name)
+
+            print name, score, filename
+
+            shutil.copy2(name, filename)
+
     def DumpFilesIntoDirectory_withScores(self, target_directory = ''):
         '''
         Simple way of visualizing which images are considered "attractive" (with high score) and which are not
