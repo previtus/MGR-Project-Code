@@ -433,6 +433,46 @@ class Dataset:
 
             shutil.copy2(name, filename)
 
+    def build_dictionary_instead_of_object(self, include_osms=False):
+        """
+        Output all the knowledge of labels of this dataset into dictionary which can give label from id, which is the
+        name of the file (0123_0<?>.jpg, keep in mind that further processing can add more into <?>).
+
+        File name goes as first 4 numbers 0123, underscore and more numbers. The first set corresponds to the id of
+        segment, thus one unique road. It has the same score for all variants which are created when rotating around
+        the spot and generating other images. However these can have variable osm data (as the "center" where we were
+        standing was differing).
+
+        USE LIKE THIS:
+        np.save('id_to_score.npy', dictionary)
+        dict_loaded = np.load('id_to_score.npy').item()
+
+        // if we have scores only, we can look at them like histogram like this:
+        list1 = d1.values()
+        flat_list = [item for sublist in list1 for item in sublist]
+        // ...
+
+        :param include_osms: Flag if we also keep osm data
+        :return:
+        """
+
+        dictionary_id_to_labels = {}
+
+        for i in range(0, self.num_of_images):
+        #for i in range(0, 5):
+            name = self.__list_of_images[i]
+            seq = name.split("/")
+            file_name_id = seq[-1][0:-4]
+            score = self.__labels[i]
+
+            if include_osms:
+                osm = self.__osm[i]
+                dictionary_id_to_labels[file_name_id] = [score, osm]
+            else:
+                dictionary_id_to_labels[file_name_id] = [score]
+
+        return dictionary_id_to_labels
+
     def DumpFilesIntoDirectory_withScores(self, target_directory = ''):
         '''
         Simple way of visualizing which images are considered "attractive" (with high score) and which are not
